@@ -1,0 +1,22 @@
+﻿Build started 07.01.2015 16:59:49.
+     1>Project "D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\GeneralTest\GeneralTest.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug /I..\..\..\..\Math_C++\eigen\unsupported /I..\..\..\..\Math_C++\eigen /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr /I"..\..\..\..\Math_C++\mpfrc++-3.5.9" /I"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\UnitTest\include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDLL /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /FC /errorReport:prompt XCannonTestUnit.cpp XFunctionTestUnit.cpp
+         XFunctionTestUnit.cpp
+     1>d:\my documents\bvp_2012\bvp_2012_07_17\bvp\generaltest\unittestaux.h(32): warning C4996: 'mbstowcs': This function or variable may be unsafe. Consider using mbstowcs_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\stdlib.h(515) : see declaration of 'mbstowcs'
+         XCannonTestUnit.cpp
+     1>d:\my documents\bvp_2012\bvp_2012_07_17\bvp\generaltest\unittestaux.h(32): warning C4996: 'mbstowcs': This function or variable may be unsafe. Consider using mbstowcs_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\stdlib.h(515) : see declaration of 'mbstowcs'
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\GeneralTest.dll" /INCREMENTAL:NO /NOLOGO /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Debug /LIBPATH:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\UnitTest\lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\GeneralTest.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\GeneralTest.lib" /MACHINE:X86 /DLL Debug\XCannonTestUnit.obj
+         Debug\XFunctionTestUnit.obj
+     1>XCannonTestUnit.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:LBR' specification
+            Creating library D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\GeneralTest.lib and object D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\GeneralTest.exp
+         GeneralTest.vcxproj -> D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\GeneralTest.dll
+     1>Done Building Project "D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\GeneralTest\GeneralTest.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.27

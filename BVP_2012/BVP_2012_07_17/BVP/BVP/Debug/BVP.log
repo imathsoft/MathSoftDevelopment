@@ -1,0 +1,15 @@
+﻿Build started 07.01.2015 16:59:49.
+     1>Project "D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\BVP\BVP.vcxproj" on node 3 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug /I..\..\..\..\Math_C++\eigen\unsupported /I..\..\..\..\Math_C++\eigen /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr /I"..\..\..\..\Math_C++\mpfrc++-3.5.9" /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /openmp /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp
+         Main.cpp
+     1>Main.cpp(15): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\time.inl(112) : see declaration of 'localtime'
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\BVP.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Debug mpfr.lib mpir.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\BVP.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\BVP.lib" /MACHINE:X86 /SAFESEH Debug\Main.obj
+         BVP.vcxproj -> D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\Win32\Debug\BVP.exe
+     1>Done Building Project "D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\BVP\BVP.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.93

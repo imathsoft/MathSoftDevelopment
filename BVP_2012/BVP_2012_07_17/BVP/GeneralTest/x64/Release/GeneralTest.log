@@ -1,0 +1,17 @@
+﻿Build started 03.01.2015 9:01:41.
+     1>Project "D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\GeneralTest\GeneralTest.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release /I..\..\..\..\Math_C++\eigen\unsupported /I..\..\..\..\Math_C++\eigen /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr /I"..\..\..\..\Math_C++\mpfrc++-3.5.9" /I"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\UnitTest\include" /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc110.pdb" /Gd /TP /FC /errorReport:prompt XCannonTestUnit.cpp
+         XCannonTestUnit.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.dll" /INCREMENTAL:NO /NOLOGO /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release /LIBPATH:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\UnitTest\lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.lib" /MACHINE:X64 /DLL x64\Release\XCannonTestUnit.obj
+         x64\Release\XFunctionTestUnit.obj
+            Creating library D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.lib and object D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.exp
+         Generating code
+         Finished generating code
+         GeneralTest.vcxproj -> D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.dll
+     1>Done Building Project "D:\My Documents\BVP_2012\BVP_2012_07_17\BVP\GeneralTest\GeneralTest.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.57
