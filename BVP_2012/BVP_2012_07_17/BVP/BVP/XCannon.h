@@ -24,6 +24,7 @@ protected:
 
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) = 0;
 
+	///A method to save function values to the specified file
 	void SaveFunctionToFile(ofstream& saveFile, bool invertMapping)
 	{
 		if (invertMapping)
