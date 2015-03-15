@@ -1,5 +1,19 @@
-﻿Build started 14.03.2015 17:56:45.
+﻿Build started 14.03.2015 18:07:09.
+     1>Project "F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\GeneralTest\GeneralTest.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release /I..\..\..\..\Math_C++\eigen\unsupported /I..\..\..\..\Math_C++\eigen /I..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr /I"..\..\..\..\Math_C++\mpfrc++-3.5.9" /I"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\UnitTest\include" /Zi /nologo /W3 /WX- /O2 /Oi /GL /D x64 /D NDEBUG /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /FC /errorReport:prompt XCannonTestUnit.cpp
+         XCannonTestUnit.cpp
+     1>f:\githubrepo\mathsoftdevelopment\bvp_2012\bvp_2012_07_17\bvp\generaltest\unittestaux.h(32): warning C4996: 'mbstowcs': This function or variable may be unsafe. Consider using mbstowcs_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\stdlib.h(515) : see declaration of 'mbstowcs'
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.dll" /INCREMENTAL:NO /NOLOGO /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release /LIBPATH:..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release /LIBPATH:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\UnitTest\lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.lib" /MACHINE:X64 /DLL Release\XCannonTestUnit.obj
+         Release\XFunctionTestUnit.obj
+            Creating library F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.lib and object F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.exp
+         Generating code
+         Finished generating code
+         GeneralTest.vcxproj -> F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\x64\Release\GeneralTest.dll
+     1>Done Building Project "F:\GitHubRepo\MathSoftDevelopment\BVP_2012\BVP_2012_07_17\BVP\GeneralTest\GeneralTest.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.01
+Time Elapsed 00:00:03.01

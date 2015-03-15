@@ -96,7 +96,7 @@ namespace GeneralTest
 			 Assert::IsTrue(abs(( knots[knots.size() - 1].Derivative - "148.4062956832580325")/knots[knots.size() - 1].Derivative) < 10*h*h);
 			 Assert::IsTrue(abs( knots[knots.size() - 1].Argument - "1.0") < thc.GetPrecision());
 			 Assert::IsTrue(abs( knots[knots.size() - 1].Value - "1.0") < thc.GetPrecision());
-			 thc.SaveToFile("d:\\HybridBisection.txt");
+			 thc.SaveToFile("f:\\HybridBisection.txt");
 		}
 
 		TEST_METHOD(XCanonHybridBisectionDoubleTestMethod)
@@ -114,7 +114,7 @@ namespace GeneralTest
 			 Assert::IsTrue(abs(( knots[knots.size() - 1].Derivative - 148.4062956832580325)/knots[knots.size() - 1].Derivative) < 10*h*h);
 			 Assert::IsTrue(abs( knots[knots.size() - 1].Argument - 1.0) < thc.GetPrecision());
 			 Assert::IsTrue(abs( knots[knots.size() - 1].Value - 1.0) < thc.GetPrecision());
-			 thc.SaveToFile("d:\\HybridBisectionDouble.txt");			
+			 thc.SaveToFile("f:\\HybridBisectionDouble.txt");			
 		}
 	};
 }
