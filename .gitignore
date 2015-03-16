@@ -17,8 +17,8 @@ x86/
 !Math_C++/mpfr_mpir_x86_x64_msvc2010/mpir/dll/**/*
 !Math_C++/mpfr_mpir_x86_x64_msvc2010/mpfr/dll/**/*
 #Preserve mpir/mpfr pre-compiled dlls
-!BVP_2012/BVP_2012_07_17/BVP/x64/Debug/mpfr.dll
-!BVP_2012/BVP_2012_07_17/BVP/x64/Debug/mpir.dll
+!BVP_2012/BVP_2012_07_17/BVP/x64/**/*
+!BVP_2012/BVP_2012_07_17/BVP/x64/**/mpir.dll
 !BVP_2012/BVP_2012_07_17/BVP/x64/Release/mpfr.dll
 !BVP_2012/BVP_2012_07_17/BVP/x64/Release/mpir.dll
 !BVP_2012/BVP_2012_07_17/BVP/Win32/Debug/mpfr.dll
