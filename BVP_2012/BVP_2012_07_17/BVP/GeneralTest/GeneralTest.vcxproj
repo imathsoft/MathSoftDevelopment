@@ -91,14 +91,14 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Debug;$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,14 +106,14 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Debug;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>x64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Debug;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Debug;$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,7 +134,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Release;$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,7 +155,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release;$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

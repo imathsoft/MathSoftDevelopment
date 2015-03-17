@@ -104,7 +104,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
     </ClCompile>
@@ -113,11 +113,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Debug\mpfr.dll"  "..\Win32\Debug\mpfr.dll"
-copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug\mpir.dll"  "..\Win32\Debug\mpir.dll"</Command>
+      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Release\mpfr.dll"  "..\Win32\Debug\mpfr.dll"
+copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release\mpir.dll"  "..\Win32\Debug\mpir.dll"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -130,7 +130,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug\mp
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
     </ClCompile>
@@ -138,11 +138,11 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug\mp
       <AdditionalDependencies>mpfr.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Debug;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Debug\mpfr.dll"  "..\x64\Debug\mpfr.dll"
-copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Debug\mpir.dll"  "..\x64\Debug\mpir.dll"</Command>
+      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release\mpfr.dll"  "..\x64\Debug\mpfr.dll"
+copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mpir.dll"  "..\x64\Debug\mpir.dll"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -153,7 +153,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Debug\mpir
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
@@ -180,7 +180,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release\
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Debug;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\eigen\unsupported;..\..\..\..\Math_C++\eigen;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
