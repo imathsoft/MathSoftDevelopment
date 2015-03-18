@@ -24,8 +24,9 @@ protected:
 
 public:
 	///Constructor
-	TroeschHybridCannon(T (*N)(const T&), T (*dN)(const T&), const T defaultStepSize, 
-		T (*hFunc)(const int, const int), bool (*checkFunc)(InitCondition<T>&), double precision) : 
+	TroeschHybridCannon(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
+		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, 
+		double precision) : 
 		XCannonAbstract(N, dN, defaultStepSize, 
 		hFunc, checkFunc, precision)
 	{

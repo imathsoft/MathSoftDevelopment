@@ -1,7 +1,7 @@
 #include "CppUnitTest.h"
 
 #include "..\BVP\XCannon.h"
-#include "..\BVP\TroeschProblem.h"
+#include "..\BVP\Problems\Troesch.h"
 #include "..\BVP\BisectionComponent.h"
 #include "..\BVP\TroeschHybridCannon.h"
 #include "UnitTestAux.h"

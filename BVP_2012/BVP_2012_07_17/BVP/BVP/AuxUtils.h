@@ -63,7 +63,6 @@ namespace auxutils
 		mpfr::mpreal imv = value;
 		WriteToStream(stream, imv);
 	}
-
 }
 
 #endif

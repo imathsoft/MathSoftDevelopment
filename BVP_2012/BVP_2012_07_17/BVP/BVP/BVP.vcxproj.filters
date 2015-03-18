@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Header Files\Problems">
+      <UniqueIdentifier>{65a58a94-d612-4f01-91a6-f9d641d8fbf9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -26,9 +29,6 @@
     <ClInclude Include="X_Function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TroeschProblem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="XCannon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -40,6 +40,15 @@
     </ClInclude>
     <ClInclude Include="AuxUtils.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\TroeschProblem.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\ProblemAbstract.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\Troesch.h">
+      <Filter>Header Files\Problems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

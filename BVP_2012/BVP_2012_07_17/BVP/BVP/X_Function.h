@@ -95,7 +95,6 @@ inline int EstimateIterationsDouble(const T& numerator, const T& precision)
 		t = t*numerator/((i+1)*(i+2));
 		i=i+2;
 	};
-	cout << "iter =" << i/2 << endl;
 	return i/2;
 };
 

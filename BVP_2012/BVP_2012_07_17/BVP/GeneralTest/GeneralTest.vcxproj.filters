@@ -21,9 +21,6 @@
     <ClInclude Include="..\BVP\X_Function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\BVP\TroeschProblem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="UnitTestAux.h">
       <Filter>Header Files</Filter>
     </ClInclude>

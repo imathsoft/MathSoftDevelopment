@@ -205,8 +205,10 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="AuxUtils.h" />
     <ClInclude Include="BisectionComponent.h" />
     <ClInclude Include="BVP_PC_T.h" />
+    <ClInclude Include="Problems\ProblemAbstract.h" />
+    <ClInclude Include="Problems\Troesch.h" />
+    <ClInclude Include="Problems\TroeschProblem.h" />
     <ClInclude Include="TroeschHybridCannon.h" />
-    <ClInclude Include="TroeschProblem.h" />
     <ClInclude Include="XCannon.h" />
     <ClInclude Include="X_Function.h" />
   </ItemGroup>

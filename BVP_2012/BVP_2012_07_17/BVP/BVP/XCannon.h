@@ -15,10 +15,10 @@ protected:
 	typedef list<InitCondition<T>> ICLIST;
 	ICLIST _listIC;
 	typename ICLIST::iterator iLst;
-	T (*_N)(const T&); 
-	T (*_dN)(const T&);
-	T (*_hFunc)(const int, const int);
-	bool (*_checkFunc)(InitCondition<T>&);
+	std::function<T(const T&)> _N;
+	std::function<T(const T&)> _dN;
+	std::function<T(const int, const int)> _hFunc;
+	std::function<bool(InitCondition<T>&)> _checkFunc;
 	T _h; // default step size
 	double _precision;
 
@@ -77,8 +77,8 @@ protected:
 	};
 
 public:	
-	XCannonAbstract(T (*N)(const T&), T (*dN)(const T&), const T defaultStepSize, 
-		T (*hFunc)(const int, const int), bool (*checkFunc)(InitCondition<T>&), double precision)
+	XCannonAbstract(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
+		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, double precision)
 	{
 		_h = defaultStepSize;
 		_N = N;
@@ -140,8 +140,9 @@ protected:
 	}
 
 public:	
-	XCannon(T (*N)(const T&), T (*dN)(const T&), const T defaultStepSize, 
-		T (*hFunc)(const int, const int), bool (*checkFunc)(InitCondition<T>&), double precision) : 
+	XCannon(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
+		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, 
+		double precision) : 
 		XCannonAbstract(N, dN, defaultStepSize, 
 		hFunc, checkFunc, precision)
 	{
@@ -183,8 +184,9 @@ protected:
 	}
 
 public:	
-	XCannonInverse(T (*N)(const T&), T (*dN)(const T&), const T defaultStepSize, 
-		T (*hFunc)(const int, const int), bool (*checkFunc)(InitCondition<T>&), double precision) : 
+	XCannonInverse(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
+		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc,
+		double precision) : 
 		XCannonAbstract(N, dN, defaultStepSize, 
 		hFunc, checkFunc, precision)
 	{
