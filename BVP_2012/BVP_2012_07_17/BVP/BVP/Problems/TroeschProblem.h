@@ -1,7 +1,7 @@
 #ifndef GUARD_TROESCH_PROBLEM
 #define GUARD_TROESCH_PROBLEM
 
-#include "../AuxUtils.h"
+#include "..\Utils\AuxUtils.h"
 #include "ProblemAbstract.h"
 
 template <class T>

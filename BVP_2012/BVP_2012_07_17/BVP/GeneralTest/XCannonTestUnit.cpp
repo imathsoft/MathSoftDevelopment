@@ -1,9 +1,10 @@
 #include "CppUnitTest.h"
 
-#include "..\BVP\XCannon.h"
+#include <mpreal.h>
+#include "..\BVP\Cannon\XCannon.h"
 #include "..\BVP\Problems\Troesch.h"
-#include "..\BVP\BisectionComponent.h"
-#include "..\BVP\TroeschHybridCannon.h"
+#include "..\BVP\ShootingSimple\BisectionComponent.h"
+#include "..\BVP\Cannon\TroeschHybridCannon.h"
 #include "UnitTestAux.h"
 
 using namespace mpfr;

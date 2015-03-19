@@ -1,8 +1,8 @@
 #ifndef GUARD_X_CANNON
 #define GUARD_X_CANNON
 
-#include "X_Function.h"
-#include "AuxUtils.h"
+#include "..\FunctionApproximation\X_Function.h"
+#include "..\Utils\AuxUtils.h"
 #include <vector>
 
 template <class T>
@@ -24,7 +24,12 @@ protected:
 
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) = 0;
 
-	///A method to save function values to the specified file
+	/// <summary>
+	/// Saves the function to file.
+	/// </summary>
+	/// <param name="saveFile">The save file.</param>
+	/// <param name="invertMapping">if set to <c>true</c> [invert mapping].</param>
+	/// A method to save function values to the specified file
 	void SaveFunctionToFile(ofstream& saveFile, bool invertMapping)
 	{
 		if (invertMapping)
@@ -49,6 +54,11 @@ protected:
 		}
 	}
 
+	/// <summary>
+	/// Saves the function to file.
+	/// </summary>
+	/// <param name="fileName">Name of the file.</param>
+	/// <param name="invertMapping">if set to <c>true</c> [invert mapping].</param>
 	void SaveFunctionToFile(const char* fileName, bool invertMapping)
 	{
 		ofstream saveFile;
@@ -58,7 +68,16 @@ protected:
 		saveFile.close();
 	}
 
-    virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& funcTarget, const T& dFuncStart)
+	/// <summary>
+	/// Shoots the specified argument start.
+	/// </summary>
+	/// <param name="argStart">The argument start.</param>
+	/// <param name="argFinish">The argument finish.</param>
+	/// <param name="funcStart">The function start.</param>
+	/// <param name="funcTarget">The function target.</param>
+	/// <param name="dFuncStart">The d function start.</param>
+	/// <returns></returns>
+	virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& funcTarget, const T& dFuncStart)
 	{
 		_listIC.clear();
 		InitCondition<T> ic;
@@ -77,6 +96,15 @@ protected:
 	};
 
 public:	
+	/// <summary>
+	/// Initializes a new instance of the <see cref="XCannonAbstract{T}"/> class.
+	/// </summary>
+	/// <param name="N">The n.</param>
+	/// <param name="dN">The d n.</param>
+	/// <param name="defaultStepSize">Default size of the step.</param>
+	/// <param name="hFunc">The h function.</param>
+	/// <param name="checkFunc">The check function.</param>
+	/// <param name="precision">The precision.</param>
 	XCannonAbstract(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
 		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, double precision)
 	{
@@ -88,23 +116,42 @@ public:
 		_precision = precision;
 	}
 
+	/// <summary>
+	/// Gets the precision.
+	/// </summary>
+	/// <returns></returns>
 	double GetPrecision()
 	{
 		return _precision;
 	}
 
 	//Returns vector of knots
+	/// <summary>
+	/// Gets the knot vector.
+	/// </summary>
+	/// <returns></returns>
 	virtual std::vector<InitCondition<T>> GetKnotVector()
 	{
 		std::vector<InitCondition<T>> result(std::begin(_listIC), std::end(_listIC));
 		return result;
 	};
 
-    virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& dFuncStart)
+	/// <summary>
+	/// Shoots the specified argument start.
+	/// </summary>
+	/// <param name="argStart">The argument start.</param>
+	/// <param name="argFinish">The argument finish.</param>
+	/// <param name="funcStart">The function start.</param>
+	/// <param name="dFuncStart">The d function start.</param>
+	/// <returns></returns>
+	virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& dFuncStart)
 	{
 		return Shoot(argStart, argFinish, funcStart, 0 /*does not matter*/, dFuncStart);
 	}
 
+	/// <summary>
+	/// Finalizes an instance of the <see cref="XCannonAbstract{T}"/> class.
+	/// </summary>
 	virtual ~XCannonAbstract()
 	{
 		_listIC.clear();
@@ -112,7 +159,7 @@ public:
 
 	virtual void SaveToFile(const char* fileName) = 0;
 
-	virtual void SaveToFile(ofstream& saveFile) = 0;
+	virtual void SaveToFile(ofstream& saveFileStream) = 0;
 
 	friend class BisectionComponent<T>;
 };
@@ -122,6 +169,12 @@ class XCannon : public XCannonAbstract<T>
 {
 protected:
 
+	/// <summary>
+	/// Gets the next knot.
+	/// </summary>
+	/// <param name="prevKnot">The previous knot.</param>
+	/// <param name="argFinish">The argument finish.</param>
+	/// <returns></returns>
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) override
 	{
 		T A = _dN(prevKnot.Value)*prevKnot.Derivative;
@@ -140,6 +193,15 @@ protected:
 	}
 
 public:	
+	/// <summary>
+	/// Initializes a new instance of the <see cref="XCannon{T}"/> class.
+	/// </summary>
+	/// <param name="N">The n.</param>
+	/// <param name="dN">The d n.</param>
+	/// <param name="defaultStepSize">Default size of the step.</param>
+	/// <param name="hFunc">The h function.</param>
+	/// <param name="checkFunc">The check function.</param>
+	/// <param name="precision">The precision.</param>
 	XCannon(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
 		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, 
 		double precision) : 
@@ -148,14 +210,22 @@ public:
 	{
 	}
 
+	/// <summary>
+	/// Saves to file.
+	/// </summary>
+	/// <param name="fileName">Name of the file.</param>
 	virtual void SaveToFile(const char* fileName) override
 	{
 		SaveFunctionToFile(fileName, false /*invertMapping*/);
 	}
 
-	virtual void SaveToFile(ofstream& saveFile) override
+	/// <summary>
+	/// Saves to file.
+	/// </summary>
+	/// <param name="saveFileStream">The save file stream.</param>
+	virtual void SaveToFile(ofstream& saveFileStream) override
 	{
-		SaveFunctionToFile(saveFile, false /*invertMapping*/);
+		SaveFunctionToFile(saveFileStream, false /*invertMapping*/);
 	}
 };
 
@@ -163,7 +233,12 @@ template <class T>
 class XCannonInverse : public XCannonAbstract<T>
 {
 protected:
-
+	/// <summary>
+	/// Gets the next knot.
+	/// </summary>
+	/// <param name="prevKnot">The previous knot.</param>
+	/// <param name="argFinish">The argument finish.</param>
+	/// <returns></returns>
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) override
 	{
 		T F = _N(prevKnot.Argument);
@@ -184,6 +259,15 @@ protected:
 	}
 
 public:	
+	/// <summary>
+	/// Initializes a new instance of the <see cref="XCannonInverse{T}"/> class.
+	/// </summary>
+	/// <param name="N">The n.</param>
+	/// <param name="dN">The d n.</param>
+	/// <param name="defaultStepSize">Default size of the step.</param>
+	/// <param name="hFunc">The h function.</param>
+	/// <param name="checkFunc">The check function.</param>
+	/// <param name="precision">The precision.</param>
 	XCannonInverse(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
 		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc,
 		double precision) : 
@@ -192,14 +276,22 @@ public:
 	{
 	}
 
+	/// <summary>
+	/// Saves to file.
+	/// </summary>
+	/// <param name="fileName">Name of the file.</param>
 	virtual void SaveToFile(const char* fileName) override
 	{
 		SaveFunctionToFile(fileName, true /*invertMapping*/);
 	}
 
-	virtual void SaveToFile(ofstream& saveFile) override
+	/// <summary>
+	/// Saves to file.
+	/// </summary>
+	/// <param name="saveFileStream">The save file stream.</param>
+	virtual void SaveToFile(ofstream& saveFileStream) override
 	{
-		SaveFunctionToFile(saveFile, true /*invertMapping*/);
+		SaveFunctionToFile(saveFileStream, true /*invertMapping*/);
 	}
 };
 

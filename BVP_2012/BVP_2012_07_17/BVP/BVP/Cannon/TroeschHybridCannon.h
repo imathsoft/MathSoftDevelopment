@@ -53,6 +53,10 @@ public:
 		return result;
 	}
 
+	/// <summary>
+	/// Saves to file.
+	/// </summary>
+	/// <param name="fileName">Name of the file.</param>
 	virtual void SaveToFile(const char* fileName) override
 	{
 		ofstream saveFile;

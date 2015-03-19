@@ -1,8 +1,6 @@
-#include "BVP_PC_T.h"
-#include "XCannon.h"
-#include "..\BVP\TroeschHybridCannon.h"
-#include "..\BVP\BisectionComponent.h"
-#include "..\BVP\Problems\TroeschProblem.h"
+#include "Cannon\TroeschHybridCannon.h"
+#include "ShootingSimple\BisectionComponent.h"
+#include "Problems\TroeschProblem.h"
 #include <time.h>
 #include <omp.h>
 
@@ -40,7 +38,7 @@ int main(){
 		TroeschHybridCannon<mpreal> thc(tpf.GetNonLin(), 
 			tpf.GetDerivNonLin(), h, 
 			tpf.GetStepFunc(), tpf.GetCheckFunc(), 
-			(1e-3*h*h).toDouble());
+			1e-16);
 
 		std::function<int(const InitCondition<mpreal>&)> evalFunc = 
 					 [](const InitCondition<mpreal>& ic) { return sgn(ic.Value - ic.Argument); };

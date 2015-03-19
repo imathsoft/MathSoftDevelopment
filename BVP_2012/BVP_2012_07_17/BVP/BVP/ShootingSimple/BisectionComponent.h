@@ -1,7 +1,7 @@
 #ifndef GUARD_BISECTION_COMPONENT
 #define GUARD_BISECTION_COMPONENT
 
-#include "XCannon.h"
+#include "..\Cannon\XCannon.h"
 
 template <class T>
 class BisectionComponent

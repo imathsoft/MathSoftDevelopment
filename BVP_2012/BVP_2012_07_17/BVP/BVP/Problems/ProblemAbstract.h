@@ -1,7 +1,7 @@
 #ifndef GUARD_TROESCH_PROBLEM_ABSTRACT
 #define GUARD_TROESCH_PROBLEM_ABSTRACT
 
-#include "../X_Function.h"
+#include "..\FunctionApproximation\X_Function.h"
 
 ///Abstract class to represent problems with different nonlinearities
 template <class T>

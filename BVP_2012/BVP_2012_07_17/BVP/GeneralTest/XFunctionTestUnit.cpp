@@ -1,6 +1,7 @@
 
+#include <mpreal.h>
 #include "CppUnitTest.h"
-#include "..\BVP\X_Function.h"
+#include "..\BVP\FunctionApproximation\X_Function.h"
 #include "UnitTestAux.h"
 
 using namespace mpfr;

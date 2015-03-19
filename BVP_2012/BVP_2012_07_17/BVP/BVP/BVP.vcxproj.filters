@@ -16,6 +16,21 @@
     <Filter Include="Header Files\Problems">
       <UniqueIdentifier>{65a58a94-d612-4f01-91a6-f9d641d8fbf9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Cannon">
+      <UniqueIdentifier>{e4f6c6d0-d079-4eea-9fbd-2c13e27bc699}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\FunctionApproximation">
+      <UniqueIdentifier>{2581d821-1d55-484e-ad40-052fd2aff542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{e9fb1812-b363-48b4-91b2-da0f863ff640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ShootingSimple">
+      <UniqueIdentifier>{c471f303-6d32-485f-9b36-c73f5d533350}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Misc">
+      <UniqueIdentifier>{167e3b63-62df-4a94-9327-2919183107f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -23,24 +38,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BVP_PC_T.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="X_Function.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XCannon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BisectionComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TroeschHybridCannon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AuxUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Problems\TroeschProblem.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
@@ -49,6 +46,24 @@
     </ClInclude>
     <ClInclude Include="Problems\Troesch.h">
       <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="XCannon.h">
+      <Filter>Header Files\Cannon</Filter>
+    </ClInclude>
+    <ClInclude Include="TroeschHybridCannon.h">
+      <Filter>Header Files\Cannon</Filter>
+    </ClInclude>
+    <ClInclude Include="X_Function.h">
+      <Filter>Header Files\FunctionApproximation</Filter>
+    </ClInclude>
+    <ClInclude Include="AuxUtils.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BisectionComponent.h">
+      <Filter>Header Files\ShootingSimple</Filter>
+    </ClInclude>
+    <ClInclude Include="BVP_PC_T.h">
+      <Filter>Header Files\Misc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

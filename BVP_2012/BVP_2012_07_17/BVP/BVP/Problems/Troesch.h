@@ -1,8 +1,8 @@
 #ifndef GUARD_TROESCH
 #define GUARD_TROESCH
 
-#include "../AuxUtils.h"
-#include "../X_function.h"
+#include "..\Utils\AuxUtils.h"
+#include "..\FunctionApproximation\X_function.h"
 
 /// Class that represents Troesch problem (template version)
 /// TO-DO: get rid of this class
