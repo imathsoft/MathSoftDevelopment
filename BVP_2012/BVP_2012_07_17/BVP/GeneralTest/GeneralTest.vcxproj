@@ -159,7 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\BVP\X_Function.h" />
+    <ClInclude Include="..\BVP\FunctionApproximation\X_Function.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UnitTestAux.h" />
   </ItemGroup>

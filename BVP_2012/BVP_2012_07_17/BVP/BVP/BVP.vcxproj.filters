@@ -47,23 +47,23 @@
     <ClInclude Include="Problems\Troesch.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
-    <ClInclude Include="XCannon.h">
+    <ClInclude Include="Cannon\TroeschHybridCannon.h">
       <Filter>Header Files\Cannon</Filter>
     </ClInclude>
-    <ClInclude Include="TroeschHybridCannon.h">
+    <ClInclude Include="Cannon\XCannon.h">
       <Filter>Header Files\Cannon</Filter>
     </ClInclude>
-    <ClInclude Include="X_Function.h">
+    <ClInclude Include="FunctionApproximation\X_Function.h">
       <Filter>Header Files\FunctionApproximation</Filter>
     </ClInclude>
-    <ClInclude Include="AuxUtils.h">
-      <Filter>Header Files\Utils</Filter>
+    <ClInclude Include="Misc\BVP_PC_T.h">
+      <Filter>Header Files\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="BisectionComponent.h">
+    <ClInclude Include="ShootingSimple\BisectionComponent.h">
       <Filter>Header Files\ShootingSimple</Filter>
     </ClInclude>
-    <ClInclude Include="BVP_PC_T.h">
-      <Filter>Header Files\Misc</Filter>
+    <ClInclude Include="Utils\AuxUtils.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

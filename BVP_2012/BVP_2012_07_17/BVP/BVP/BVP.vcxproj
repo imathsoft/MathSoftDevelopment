@@ -202,15 +202,15 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AuxUtils.h" />
-    <ClInclude Include="BisectionComponent.h" />
-    <ClInclude Include="BVP_PC_T.h" />
+    <ClInclude Include="Cannon\TroeschHybridCannon.h" />
+    <ClInclude Include="Cannon\XCannon.h" />
+    <ClInclude Include="FunctionApproximation\X_Function.h" />
+    <ClInclude Include="Misc\BVP_PC_T.h" />
     <ClInclude Include="Problems\ProblemAbstract.h" />
     <ClInclude Include="Problems\Troesch.h" />
     <ClInclude Include="Problems\TroeschProblem.h" />
-    <ClInclude Include="TroeschHybridCannon.h" />
-    <ClInclude Include="XCannon.h" />
-    <ClInclude Include="X_Function.h" />
+    <ClInclude Include="ShootingSimple\BisectionComponent.h" />
+    <ClInclude Include="Utils\AuxUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
