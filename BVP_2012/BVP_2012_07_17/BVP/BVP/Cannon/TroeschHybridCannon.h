@@ -66,10 +66,21 @@ public:
 		saveFile.close();
 	}
 
+	/// <summary>
+	/// Saves to file.
+	/// </summary>
+	/// <param name="saveFile">Output file stream.</param>
 	virtual void SaveToFile(ofstream& saveFile) override
 	{
-		_straightCannon->SaveToFile(saveFile);
-		_inverseCannon->SaveToFile(saveFile);
+		auto knots = GetKnotVector();
+
+		for each (auto knot in knots)
+			{
+				auxutils::WriteToStream(saveFile, knot.Argument);
+				auxutils::WriteToStream(saveFile, knot.Value);
+				auxutils::WriteToStream(saveFile, knot.Derivative);
+				saveFile <<  endl;
+			}
 	}
 
 	//Returns vector of knots
@@ -77,7 +88,7 @@ public:
 	{
 		std::vector<InitCondition<T>> result = _straightCannon->GetKnotVector();
 		std::vector<InitCondition<T>> resultInv = _inverseCannon->GetKnotVector();
-		std::transform(resultInv.begin(), resultInv.end(), resultInv.begin(), [](InitCondition<T> ic) ->
+		std::transform(++resultInv.begin(), resultInv.end(), ++resultInv.begin(), [](InitCondition<T> ic) ->
 			InitCondition<T>{ 
 				InitCondition<T> result;
 				result.Value = ic.Argument;
@@ -85,7 +96,7 @@ public:
 				result.Derivative = 1/ic.Derivative;
 				return result;
 		});
-		result.insert(result.end(), resultInv.begin(), resultInv.end());
+		result.insert(result.end(), ++resultInv.begin(), resultInv.end());
 		return result;
 	};
 };
