@@ -31,10 +31,22 @@
     <Filter Include="Header Files\Misc">
       <UniqueIdentifier>{167e3b63-62df-4a94-9327-2919183107f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Misc">
+      <UniqueIdentifier>{789f8d1f-e8df-4d9f-b6b6-f3b189f4691f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{1a53e921-c859-4834-a6a5-f16f1ef4e85d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Misc\BVP_PC_T.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\AuxUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -42,9 +54,6 @@
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
     <ClInclude Include="Problems\ProblemAbstract.h">
-      <Filter>Header Files\Problems</Filter>
-    </ClInclude>
-    <ClInclude Include="Problems\Troesch.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
     <ClInclude Include="Cannon\TroeschHybridCannon.h">
@@ -64,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="Utils\AuxUtils.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\TroeschProblemStatic.h">
+      <Filter>Header Files\Problems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

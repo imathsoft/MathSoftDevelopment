@@ -20,7 +20,7 @@ public:
 	T inline Nonlin(const T& u){
 	
 		T old_sh, sh, t, slu;
-		if (abs(l*u)<0.1){
+		if (abs(u)<0.1){
 			int i=1;
 			slu=auxutils::sqr(l*u);
 			sh=1;
@@ -40,7 +40,7 @@ public:
 	}
 
 	///A method to return std:function wrapper of local method
-	std::function<T(const T&)> GetNonLin()
+	virtual std::function<T(const T&)> GetNonLin() override 
 	{
 		return [=](const T& u){ return Nonlin(u); };
 	}
@@ -49,7 +49,7 @@ public:
 	T inline dNonlin(const T& u){
 	
 		T old_sh, sh, t, slu;
-		if (abs(l*u)<0.1){
+		if (abs(u)<0.1){
 			int i=1;
    			slu=auxutils::sqr(l*u);
 			sh=1; sh=sh/3;
@@ -61,7 +61,6 @@ public:
 			sh=sh+t;
 			i++;
 			}
-			auto lsqr = l*l;
 			sh=u*sh*auxutils::sqr(auxutils::sqr(l));
 		} else {
 			sh=l*(l*cosh(l*u)/u-sinh(l*u)/auxutils::sqr(u));
@@ -70,9 +69,41 @@ public:
 	}
 
 	///A method to return std:function wrapper of derivative
-	virtual std::function<T(const T&)> GetDerivNonLin()
+	virtual std::function<T(const T&)> GetDerivNonLin() override
 	{
 		return [=](const T& u){ return dNonlin(u); };
+	}
+
+	///Derivative of nonlinearity
+	T inline ddNonlin(const T& u){
+	
+		T old_sh, sh, t, slu;
+		if (abs(u)<0.1)
+		{
+			int i=1;
+   			slu=auxutils::sqr(l*u);
+			sh = 1; sh = sh/3;
+			old_sh = 0;
+			t=sh;
+			while (old_sh != sh) 
+			{
+				t = (2*i + 1)*t*slu/((2*i + 3)*2*i*(2*i - 1));
+			    old_sh=sh;
+			    sh=sh+t;
+			    i++;
+			}
+			sh = sh*auxutils::sqr(auxutils::sqr(l));
+		} else {
+			sh=l*(sinh(l*u)*(auxutils::sqr(l) + 2/auxutils::sqr(u)) - 
+				2*l*cosh(l*u)/u )/u;
+		}
+		return sh;
+	}
+
+	///A method to return std:function wrapper of the second derivative
+	virtual std::function<T(const T&)> GetSecondDerivNonLin() override
+	{
+		return [=](const T& u){ return ddNonlin(u); };
 	}
 
 	///Mesh step function
@@ -81,7 +112,7 @@ public:
 	}
 	
 	///A method to return std:function wrapper of step function
-	virtual std::function<T(const int, const int)> GetStepFunc()
+	virtual std::function<T(const int, const int)> GetStepFunc() override
 	{
 		return [=](const int stepIndex, const int stepNumber){ return StepFunc(stepIndex, stepNumber); };
 	}
@@ -92,7 +123,7 @@ public:
 	}
 
 	///A method to return std:function wrapper of step function
-	virtual std::function<bool(InitCondition<T>&)> GetCheckFunc()
+	virtual std::function<bool(InitCondition<T>&)> GetCheckFunc() override
 	{
 		return [=](InitCondition<T>& ic){ return CheckFunc(ic); };
 	}

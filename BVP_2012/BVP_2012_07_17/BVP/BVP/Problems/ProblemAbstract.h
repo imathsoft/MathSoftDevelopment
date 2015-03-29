@@ -14,6 +14,9 @@ class ProblemAbstract
 	///A method to return std:function wrapper of derivative
 	virtual std::function<T(const T&)> GetDerivNonLin() = 0;
 
+	///A method to return std:function wrapper of the second derivative
+	virtual std::function<T(const T&)> GetSecondDerivNonLin() = 0;
+
 	///A method to return std:function wrapper of step function
 	virtual std::function<T(const int, const int)> GetStepFunc() = 0;
 

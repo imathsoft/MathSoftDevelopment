@@ -1,10 +1,6 @@
 #ifndef GUARD_UNITTESTAUX
 #define GUARD_UNITTESTAUX
 
-//#include <string>
-
-//using namespace std;
-
 #ifdef _DEBUG
 	#ifdef WIN32
 		#pragma comment(lib, "../../../../Math_C++/mpfr_mpir_x86_x64_msvc2010/mpir/dll/Win32/Release/mpir.lib")

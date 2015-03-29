@@ -13,15 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{1114144f-8851-4f38-8c27-2b5822c4eda6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UnitTestAux.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BVP\FunctionApproximation\X_Function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -31,6 +31,12 @@
     </ClCompile>
     <ClCompile Include="XCannonTestUnit.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TroeschProblemTestUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BVP\Utils\AuxUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
