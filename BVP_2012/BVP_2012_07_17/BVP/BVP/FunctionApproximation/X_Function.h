@@ -38,6 +38,12 @@ template<class U, int Size>
 friend inline GradientVector<U, Size>  operator*(const GradientVector<U, Size>& gv1, const GradientVector<U, Size>& gv2);
 
 template<class U, int Size>
+friend inline GradientVector<U, Size>  operator+(const GradientVector<U, Size>& gv1, const GradientVector<U, Size>& gv2);
+
+template<class U, int Size>
+friend inline GradientVector<U, Size>  operator/(const GradientVector<U, Size>& gv, const double d);
+
+template<class U, int Size>
 friend inline std::ostream& operator << (std::ostream& out, const GradientVector<U, Size>& gv);
 
 template<class U, int Size>
@@ -53,6 +59,23 @@ inline GradientVector<U, Size>  operator*(const GradientVector<U, Size>& gv1, co
 		result[0,i] = gv1[0,0]*gv2[0,i] + gv1[0,i]*gv2[0,0];
 	return result;
 };
+
+template<class U, int Size>
+inline GradientVector<U, Size>  operator+(const GradientVector<U, Size>& gv1, const GradientVector<U, Size>& gv2)
+{
+	GradientVector<U, Size> result;
+	result = ((GradientVector<U, Size>::super)gv1) + 
+		((GradientVector<U, Size>::super)gv2); 
+	return result;
+}
+
+template<class U, int Size>
+inline GradientVector<U, Size>  operator/(const GradientVector<U, Size>& gv, const double d)
+{
+	GradientVector<U, Size> result;
+	result = ((GradientVector<U, Size>::super)gv)/d; 
+	return result;
+}
 
 template<class U, int Size>
 inline std::ostream& operator << (std::ostream& out, const GradientVector<U, Size>& gv)
@@ -215,8 +238,7 @@ inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const
 
 	result.Value =  mas[3 * n + 1] * h;
     for (int i = 3 * n; i > 0; i--) {
-		result.Value = result.Value + mas[i];
-		result.Value = result.Value * h;
+		result.Value = (result.Value + mas[i]) * h;
     }
 	result.Value += D;
 

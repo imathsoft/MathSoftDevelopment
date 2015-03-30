@@ -19,6 +19,8 @@
 	#endif
 #endif
 
+#include <string>
+
 namespace UnitTestAux
 {
 	static wchar_t* Message(const char* text)
@@ -27,6 +29,11 @@ namespace UnitTestAux
 		wchar_t* wa = new wchar_t[size];
 		mbstowcs(wa,text,size);
 		return wa;
+	}
+
+	static wchar_t* Message(const std::string text)
+	{
+		return Message(text.c_str());
 	}
 };
 
