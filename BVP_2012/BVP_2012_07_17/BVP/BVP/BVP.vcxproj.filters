@@ -77,5 +77,8 @@
     <ClInclude Include="Problems\TroeschProblemStatic.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
+    <ClInclude Include="FunctionApproximation\GradientVector.h">
+      <Filter>Header Files\FunctionApproximation</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
