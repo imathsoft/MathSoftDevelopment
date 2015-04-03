@@ -80,5 +80,11 @@
     <ClInclude Include="FunctionApproximation\GradientVector.h">
       <Filter>Header Files\FunctionApproximation</Filter>
     </ClInclude>
+    <ClInclude Include="Cannon\XCannonAbstract.h">
+      <Filter>Header Files\Cannon</Filter>
+    </ClInclude>
+    <ClInclude Include="Cannon\XCannonInverse.h">
+      <Filter>Header Files\Cannon</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

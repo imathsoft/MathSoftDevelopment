@@ -100,17 +100,6 @@ public :
 
 		return *this;
 	}
-
-	/*
-	inline const InitCondition<T>&  operator=(const InitCondition<T>& ic)
-	{
-		Value = ic.Value;
-		Derivative = ic.Derivative;
-		X = ic.X;
-
-		return *this;
-	}
-	*/
 };
 
 template<class U>

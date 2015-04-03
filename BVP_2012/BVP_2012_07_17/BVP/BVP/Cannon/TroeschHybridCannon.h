@@ -1,6 +1,7 @@
 #ifndef GUARD_TROESCH_HYBRID_CANNON
 #define GUARD_TROESCH_HYBRID_CANNON
 
+#include "XCannonInverse.h"
 #include "XCannon.h"
 
 template <class T>

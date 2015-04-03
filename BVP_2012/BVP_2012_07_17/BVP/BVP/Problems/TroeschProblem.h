@@ -17,23 +17,26 @@ public:
 	}
 
 	///Nonlineariti for the Troesch problem
-	T inline Nonlin(const T& u){
-	
+	T inline Nonlin(const T& u)
+	{
 		T old_sh, sh, t, slu;
-		if (abs(u)<0.1){
+		if (abs(u)<0.1)
+		{
 			int i=1;
 			slu=auxutils::sqr(l*u);
 			sh=1;
 			old_sh=0;
 			t=1;
 			while (old_sh!=sh) 
-			{t=t*slu/(2*i*(2*i+1));
-			old_sh=sh;
-			sh=sh+t;
-			i++;
+			{
+				t=t*slu/(2*i*(2*i+1));
+			    old_sh=sh;
+			    sh=sh+t;
+			    i++;
 			}
 			sh=sh*auxutils::sqr(l);
-		} else {
+		} else 
+		{
 			sh=l*sinh(l*u)/u;
 		}
 		return sh;
@@ -46,23 +49,26 @@ public:
 	}
 
 	///Derivative of nonlinearity
-	T inline dNonlin(const T& u){
-	
+	T inline dNonlin(const T& u)
+	{
 		T old_sh, sh, t, slu;
-		if (abs(u)<0.1){
+		if (abs(u)<0.1)
+		{
 			int i=1;
    			slu=auxutils::sqr(l*u);
 			sh=1; sh=sh/3;
 			old_sh=0;
 			t=sh;
 			while (old_sh!=sh) 
-			{t=t*slu/(2*i*(2*i+3));
-			old_sh=sh;
-			sh=sh+t;
-			i++;
+			{
+				t=t*slu/(2*i*(2*i+3));
+			    old_sh=sh;
+			    sh=sh+t;
+			    i++;
 			}
 			sh=u*sh*auxutils::sqr(auxutils::sqr(l));
-		} else {
+		} else 
+		{
 			sh=l*(l*cosh(l*u)/u-sinh(l*u)/auxutils::sqr(u));
 		}
 		return sh;
@@ -75,8 +81,8 @@ public:
 	}
 
 	///Derivative of nonlinearity
-	T inline ddNonlin(const T& u){
-	
+	T inline ddNonlin(const T& u)
+	{
 		T old_sh, sh, t, slu;
 		if (abs(u)<0.1)
 		{
@@ -93,7 +99,8 @@ public:
 			    i++;
 			}
 			sh = sh*auxutils::sqr(auxutils::sqr(l));
-		} else {
+		} else 
+		{
 			sh=l*(sinh(l*u)*(auxutils::sqr(l) + 2/auxutils::sqr(u)) - 
 				2*l*cosh(l*u)/u )/u;
 		}

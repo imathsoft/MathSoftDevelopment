@@ -1,13 +1,12 @@
-#ifndef GUARD_X_CANNON
-#define GUARD_X_CANNON
+#ifndef GUARD_XCANNON_INVERSE
+#define GUARD_XCANNON_INVERSE
 
 #include "XCannonAbstract.h"
 
 template <class T>
-class XCannon : public XCannonAbstract<T>
+class XCannonInverse : public XCannonAbstract<T>
 {
 protected:
-
 	/// <summary>
 	/// Gets the next knot.
 	/// </summary>
@@ -16,16 +15,18 @@ protected:
 	/// <returns></returns>
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) override
 	{
-		T A = _dN(prevKnot.Value)*prevKnot.Derivative;
-		T B = _N(prevKnot.Value);
+		T F = _N(prevKnot.Argument);
+		T derivSquared = auxutils::sqr(prevKnot.Derivative);
+		T A = - (_dN(prevKnot.Argument)*prevKnot.Argument + F - 2*auxutils::sqr(F*prevKnot.Argument)*derivSquared)*derivSquared;
+		T B = - F*prevKnot.Argument*derivSquared;
 		T C = prevKnot.Derivative;
 		T D = prevKnot.Value;
 
-		T hOpt = (abs(A) > 1) ? 1/auxutils::RoughSqrt(abs(A)) : abs(_h);
+		T hOpt = (abs(A) > 0) ? 1/abs(A) : abs(_h);
 
 		T H = sgn(_h) * min(min(hOpt, abs(_h)), abs(argFinish - prevKnot.Argument));
 
-		InitCondition<T> knot = X3_Func(A, B, C, D, H, _precision);
+		InitCondition<T> knot = XI_Func(A, B, C, D, H, _precision);
 		knot.Argument = prevKnot.Argument + H;
 
 		return knot;
@@ -33,7 +34,7 @@ protected:
 
 public:	
 	/// <summary>
-	/// Initializes a new instance of the <see cref="XCannon{T}"/> class.
+	/// Initializes a new instance of the <see cref="XCannonInverse{T}"/> class.
 	/// </summary>
 	/// <param name="N">The n.</param>
 	/// <param name="dN">The d n.</param>
@@ -41,8 +42,8 @@ public:
 	/// <param name="hFunc">The h function.</param>
 	/// <param name="checkFunc">The check function.</param>
 	/// <param name="precision">The precision.</param>
-	XCannon(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
-		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, 
+	XCannonInverse(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
+		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc,
 		double precision) : 
 		XCannonAbstract(N, dN, defaultStepSize, 
 		hFunc, checkFunc, precision)
@@ -55,7 +56,7 @@ public:
 	/// <param name="fileName">Name of the file.</param>
 	virtual void SaveToFile(const char* fileName) override
 	{
-		SaveFunctionToFile(fileName, false /*invertMapping*/);
+		SaveFunctionToFile(fileName, true /*invertMapping*/);
 	}
 
 	/// <summary>
@@ -64,7 +65,7 @@ public:
 	/// <param name="saveFileStream">The save file stream.</param>
 	virtual void SaveToFile(ofstream& saveFileStream) override
 	{
-		SaveFunctionToFile(saveFileStream, false /*invertMapping*/);
+		SaveFunctionToFile(saveFileStream, true /*invertMapping*/);
 	}
 };
 
