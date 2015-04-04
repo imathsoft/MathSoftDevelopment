@@ -15,11 +15,9 @@ protected:
 	/// <returns></returns>
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) override
 	{
-		T F = _N(prevKnot.Argument);
-		T derivSquared = auxutils::sqr(prevKnot.Derivative);
-		T A = - (_dN(prevKnot.Argument)*prevKnot.Argument + F - 2*auxutils::sqr(F*prevKnot.Argument)*derivSquared)*derivSquared;
-		T B = - F*prevKnot.Argument*derivSquared;
-		T C = prevKnot.Derivative;
+		T A = _aCoeff(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
+		T B = _bCoeff(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
+    	T C = prevKnot.Derivative;
 		T D = prevKnot.Value;
 
 		T hOpt = (abs(A) > 0) ? 1/abs(A) : abs(_h);
@@ -42,12 +40,13 @@ public:
 	/// <param name="hFunc">The h function.</param>
 	/// <param name="checkFunc">The check function.</param>
 	/// <param name="precision">The precision.</param>
-	XCannonInverse(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
-		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc,
-		double precision) : 
-		XCannonAbstract(N, dN, defaultStepSize, 
-		hFunc, checkFunc, precision)
+	XCannonInverse(ProblemAbstract<T>& problem, const T defaultStepSize, double precision, 
+		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
+		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
+		XCannonAbstract(problem, defaultStepSize, precision, checkFunc, hFunc)
 	{
+		_aCoeff = _problem->GetACoeffInverse();
+		_bCoeff = _problem->GetBCoeffInverse();
 	}
 
 	/// <summary>

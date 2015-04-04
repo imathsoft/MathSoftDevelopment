@@ -2,6 +2,7 @@
 #define GUARD_XCANNON_ABSTRACT
 
 #include "..\FunctionApproximation\X_Function.h"
+#include "..\Problems\ProblemAbstract.h"
 #include <vector>
 
 template <class T>
@@ -14,8 +15,9 @@ protected:
 	typedef list<InitCondition<T>> ICLIST;
 	ICLIST _listIC;
 	typename ICLIST::iterator iLst;
-	std::function<T(const T&)> _N;
-	std::function<T(const T&)> _dN;
+	ProblemAbstract<T>* _problem;
+	std::function<T(const T&, const T&, const T&)> _aCoeff;
+	std::function<T(const T&, const T&, const T&)> _bCoeff;
 	std::function<T(const int, const int)> _hFunc;
 	std::function<bool(InitCondition<T>&)> _checkFunc;
 	T _h; // default step size
@@ -104,12 +106,12 @@ public:
 	/// <param name="hFunc">The h function.</param>
 	/// <param name="checkFunc">The check function.</param>
 	/// <param name="precision">The precision.</param>
-	XCannonAbstract(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
-		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, double precision)
+	XCannonAbstract(ProblemAbstract<T>& problem, const T defaultStepSize, double precision, 
+		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
+		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; })
 	{
+		_problem = &problem;
 		_h = defaultStepSize;
-		_N = N;
-		_dN = dN;
 		_hFunc = hFunc;
 		_checkFunc = checkFunc;
 		_precision = precision;

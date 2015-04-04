@@ -35,10 +35,7 @@ int main(){
 		cout <<"h= " << h<< endl;
 
 		TroeschProblem<mpreal> tpf(l);
-		TroeschHybridCannon<mpreal> thc(tpf.GetNonLin(), 
-			tpf.GetDerivNonLin(), h, 
-			tpf.GetStepFunc(), tpf.GetCheckFunc(), 
-			1e-16);
+		TroeschHybridCannon<mpreal> thc(tpf, h, 1e-16);
 
 		std::function<int(const InitCondition<mpreal>&)> evalFunc = 
 					 [](const InitCondition<mpreal>& ic) { return sgn(ic.Value - ic.Argument); };

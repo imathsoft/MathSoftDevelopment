@@ -5,7 +5,7 @@
 #include "ProblemAbstract.h"
 
 template <class T>
-class TroeschProblem : ProblemAbstract<T>
+class TroeschProblem : public ProblemAbstract<T>
 {
 private:
 	T l;
@@ -113,26 +113,38 @@ public:
 		return [=](const T& u){ return ddNonlin(u); };
 	}
 
-	///Mesh step function
-	T inline StepFunc(const int stepIndex, const int stepNumber){// This is a function which can define a non-uniform mesh for the FD-method
-		return 1;
-	}
-	
-	///A method to return std:function wrapper of step function
-	virtual std::function<T(const int, const int)> GetStepFunc() override
+	///A method to return std:function wrapper of the A coefficient
+	virtual std::function<T(const T&, const T&, const T&)> GetACoeff() override
 	{
-		return [=](const int stepIndex, const int stepNumber){ return StepFunc(stepIndex, stepNumber); };
+		return [=](const T& derivative, const T& value, const T& argument ) 
+		{ return dNonlin(value)*derivative; };
 	}
 
-	bool CheckFunc(InitCondition<T>& ic)
+	///A method to return std:function wrapper of the B coefficient
+	virtual std::function<T(const T&, const T&, const T&)> GetBCoeff() override
 	{
-		return true; /// Just return true for now
+		return [=](const T& derivative, const T& value, const T& argument ) 
+		{ return Nonlin(value); };
 	}
 
-	///A method to return std:function wrapper of step function
-	virtual std::function<bool(InitCondition<T>&)> GetCheckFunc() override
+	///A method to return std:function wrapper of the A coefficient for inverse problem
+	virtual std::function<T(const T&, const T&, const T&)> GetACoeffInverse()
 	{
-		return [=](InitCondition<T>& ic){ return CheckFunc(ic); };
+		return [=](const T& derivative, const T& value, const T& argument ) 
+		{
+			T F = Nonlin(argument);
+			T derivSquared = auxutils::sqr(derivative);
+			return - (dNonlin(argument)*argument + F - 2*auxutils::sqr(F*argument)*derivSquared)*derivSquared;
+		};
+	}
+
+	///A method to return std:function wrapper of the B coefficient for inverse problem
+	virtual std::function<T(const T&, const T&, const T&)> GetBCoeffInverse()
+	{
+		return [=](const T& derivative, const T& value, const T& argument )			
+		{
+		    return - Nonlin(argument)*argument*auxutils::sqr(derivative);
+		};
 	}
 };
 #endif 

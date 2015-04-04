@@ -23,7 +23,7 @@ namespace GeneralTest
 			 mpreal::set_default_prec(128);
 			 const int l = 1;
 			 TroeschProblem<mpreal> tpf(l);
-			 XCannon<mpreal> xc(tpf.GetNonLin(), tpf.GetDerivNonLin(), "0.01", tpf.GetStepFunc(), tpf.GetCheckFunc(), 1e-40);
+			 XCannon<mpreal> xc(tpf, "0.01", 1e-40);
 
 			 auto shootingResult = xc.Shoot("0", "1", "0", "0.1");		
 		
@@ -38,7 +38,7 @@ namespace GeneralTest
 			 mpreal::set_default_prec(128);
 			 const int l = 1;
 			 TroeschProblem<mpreal> tpf(l);
-			 XCannon<mpreal> xc(tpf.GetNonLin(), tpf.GetDerivNonLin(), "0.1", tpf.GetStepFunc(), tpf.GetCheckFunc(), 1e-38);
+			 XCannon<mpreal> xc(tpf, "0.1", 1e-38);
 			 BisectionComponent<mpreal> bc(xc);
 			 Assert::IsTrue(bc.DerivativeBisection("0.0", "1.0", "0.0", "1.0", "0.0", "1.0"));
 			 auto knots = xc.GetKnotVector();
@@ -52,16 +52,16 @@ namespace GeneralTest
 			 const int l = 3;
 			 mpreal h = "0.001";
 			 TroeschProblem<mpreal> tpf(l);
-			 XCannon<mpreal> xcs(tpf.GetNonLin(), tpf.GetDerivNonLin(), h, tpf.GetStepFunc(), tpf.GetCheckFunc(), 1e-40);
+			 XCannon<mpreal> xcs(tpf, h, 1e-40);
 			 auto shootingResults = xcs.Shoot("0", "1", "0", "0.2");
 
-			 XCannonInverse<mpreal> xc(tpf.GetNonLin(), tpf.GetDerivNonLin(), h, tpf.GetStepFunc(), tpf.GetCheckFunc(), 1e-38);
+			 XCannonInverse<mpreal> xc(tpf, h, 1e-38);
 			 auto shootingResultInverse = xc.Shoot("0.0", shootingResults.Value, "0.0", "5.0");	
 
 			 Assert::IsTrue(abs(shootingResultInverse.Value - "1.0") < 10*h*h);
 			 Assert::IsTrue(abs(shootingResultInverse.Derivative - 1/shootingResults.Derivative) < 10*h*h);
 
-			 XCannonInverse<mpreal> xcb(tpf.GetNonLin(), tpf.GetDerivNonLin(), -h, tpf.GetStepFunc(), tpf.GetCheckFunc(), 1e-38);
+			 XCannonInverse<mpreal> xcb(tpf, -h, 1e-38);
 			 auto shootingResultInverseBack = xcb.Shoot(shootingResults.Value, "0.0", shootingResults.Argument, 1/shootingResults.Derivative);	
 
 			 Assert::IsTrue(abs(shootingResultInverseBack.Value) < 100*h*h);
@@ -74,8 +74,7 @@ namespace GeneralTest
 			 const int l = 10;
 			 TroeschProblem<mpreal> tpf(l);
 			 mpreal h = "0.01";
-			 TroeschHybridCannon<mpreal> thc(tpf.GetNonLin(), tpf.GetDerivNonLin(), h, 
-				 tpf.GetStepFunc(), tpf.GetCheckFunc(), 1e-15);
+			 TroeschHybridCannon<mpreal> thc(tpf, h, 1e-15);
 
 			 std::function<int(const InitCondition<mpreal>&)> evalFunc = 
 				 [](const InitCondition<mpreal>& ic) { return sgn(ic.Value - ic.Argument); };
@@ -92,8 +91,7 @@ namespace GeneralTest
 			 const int l = 10;
 			 double h = 0.01;
 			 TroeschProblem<double> tpf(l);
-			 TroeschHybridCannon<double> thc(tpf.GetNonLin(), tpf.GetDerivNonLin(), h, 
-				 tpf.GetStepFunc(), tpf.GetCheckFunc(), 1e-15);
+			 TroeschHybridCannon<double> thc(tpf, h, 1e-15);
 
 			 std::function<int(const InitCondition<double>&)> evalFunc = 
 				 [](const InitCondition<double>& ic) { return sgn(ic.Value - ic.Argument); };

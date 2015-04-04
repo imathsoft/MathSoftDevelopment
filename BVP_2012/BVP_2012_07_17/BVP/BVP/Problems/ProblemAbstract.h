@@ -17,10 +17,16 @@ class ProblemAbstract
 	///A method to return std:function wrapper of the second derivative
 	virtual std::function<T(const T&)> GetSecondDerivNonLin() = 0;
 
-	///A method to return std:function wrapper of step function
-	virtual std::function<T(const int, const int)> GetStepFunc() = 0;
+	///A method to return std:function wrapper of the A coefficient
+	virtual std::function<T(const T&, const T&, const T&)> GetACoeff() = 0;
 
-	///A method to return std:function wrapper of step function
-	virtual std::function<bool(InitCondition<T>&)> GetCheckFunc() = 0;
+	///A method to return std:function wrapper of the B coefficient
+	virtual std::function<T(const T&, const T&, const T&)> GetBCoeff() = 0;
+
+	///A method to return std:function wrapper of the A coefficient for inverse problem
+	virtual std::function<T(const T&, const T&, const T&)> GetACoeffInverse() = 0;
+
+	///A method to return std:function wrapper of the B coefficient for inverse problem
+	virtual std::function<T(const T&, const T&, const T&)> GetBCoeffInverse() = 0;
 };
 #endif 

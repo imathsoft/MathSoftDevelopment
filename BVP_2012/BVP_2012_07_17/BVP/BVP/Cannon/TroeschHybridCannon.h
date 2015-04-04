@@ -25,14 +25,15 @@ protected:
 
 public:
 	///Constructor
-	TroeschHybridCannon(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
-		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, 
-		double precision) : 
-		XCannonAbstract(N, dN, defaultStepSize, 
-		hFunc, checkFunc, precision)
+	TroeschHybridCannon(ProblemAbstract<T>& problem, const T defaultStepSize, 
+		double precision, 
+		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
+		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
+		XCannonAbstract(problem, defaultStepSize, precision, checkFunc, 
+		hFunc)
 	{
-		_straightCannon = new XCannon<T>(N, dN, defaultStepSize, hFunc, TroeschHybridCannon<T>::StraightCannonCheckFunc, precision);
-		_inverseCannon = new XCannonInverse<T>(N, dN, defaultStepSize, hFunc, checkFunc, precision);
+		_straightCannon = new XCannon<T>(problem, defaultStepSize, precision, TroeschHybridCannon<T>::StraightCannonCheckFunc);
+		_inverseCannon = new XCannonInverse<T>(problem, defaultStepSize, precision);
 	}
 
 	~TroeschHybridCannon()

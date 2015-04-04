@@ -16,8 +16,8 @@ protected:
 	/// <returns></returns>
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) override
 	{
-		T A = _dN(prevKnot.Value)*prevKnot.Derivative;
-		T B = _N(prevKnot.Value);
+		T A = _aCoeff(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
+		T B = _bCoeff(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
 		T C = prevKnot.Derivative;
 		T D = prevKnot.Value;
 
@@ -41,12 +41,13 @@ public:
 	/// <param name="hFunc">The h function.</param>
 	/// <param name="checkFunc">The check function.</param>
 	/// <param name="precision">The precision.</param>
-	XCannon(std::function<T(const T&)> N, std::function<T(const T&)> dN, const T defaultStepSize, 
-		std::function<T(const int, const int)> hFunc, std::function<bool(InitCondition<T>&)> checkFunc, 
-		double precision) : 
-		XCannonAbstract(N, dN, defaultStepSize, 
-		hFunc, checkFunc, precision)
+	XCannon(ProblemAbstract<T>& problem, const T defaultStepSize, double precision, 
+		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
+		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
+		XCannonAbstract(problem, defaultStepSize, precision, checkFunc, hFunc)
 	{
+		_aCoeff = _problem->GetACoeff();
+		_bCoeff = _problem->GetBCoeff();
 	}
 
 	/// <summary>
