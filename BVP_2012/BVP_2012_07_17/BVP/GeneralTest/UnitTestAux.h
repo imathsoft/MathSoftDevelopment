@@ -26,8 +26,9 @@ namespace UnitTestAux
 	static wchar_t* Message(const char* text)
 	{
 		size_t size = strlen(text) + 1;
+		size_t convertedSize;
 		wchar_t* wa = new wchar_t[size];
-		mbstowcs(wa,text,size);
+		mbstowcs_s(&convertedSize, wa, size, text, _TRUNCATE);
 		return wa;
 	}
 

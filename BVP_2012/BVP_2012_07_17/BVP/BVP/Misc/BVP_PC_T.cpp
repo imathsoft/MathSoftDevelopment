@@ -205,7 +205,7 @@ return 0;
 			  cout<<"Target="<<target<<endl;
 			  cout<<"Press Enter to make one more shot"<<endl;
 			  cout<<"or press any other key to proceed to the Multiple Shooting Procedure."<<endl;
-              decision=getch();
+              decision = _getch();
 		  }
 	  } else {
 		  cout<<"Invalid interval"<<endl;
