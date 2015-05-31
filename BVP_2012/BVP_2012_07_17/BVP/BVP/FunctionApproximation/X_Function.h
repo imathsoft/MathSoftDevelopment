@@ -87,6 +87,7 @@ public :
 
 	T Value;
 	T Derivative;
+	T SecDerivative;
 	T Argument;
 
 	template<class U>
@@ -143,6 +144,7 @@ inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const
     }
 
 	result.Derivative = (result.Derivative + mas[0] * B) * h + C;
+	result.SecDerivative = (A * h + B) * result.Value;
 
 	delete [] mas;
     return result;
@@ -173,6 +175,7 @@ inline InitCondition<T> XI(const T& A, const T& B, const T& C, const T& D, const
     }
 	result.Derivative = result.Derivative + C;
 	result.Value = (result.Value  + C) * h + D;
+	result.SecDerivative = (A * h + B) * result.Derivative;
 
 	delete [] mas;
     return result;

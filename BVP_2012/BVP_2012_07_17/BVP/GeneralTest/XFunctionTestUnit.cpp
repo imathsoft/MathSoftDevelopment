@@ -44,51 +44,59 @@ namespace GeneralTest
 			GVTypes<mpreal>::FullGradientVector C; C << -30, 0, 0, 0, 1, 0;
 			GVTypes<mpreal>::FullGradientVector D; D << 14, 0, 0, 0, 0, 1;
 
-			auto invertFunc = X3_Func<GVTypes<mpreal>::FullGradientVector>(A, B, C, D, X, 1e-38);
+			auto straightFunc = X3_Func<GVTypes<mpreal>::FullGradientVector>(A, B, C, D, X, 1e-38);
 
-			Assert::IsTrue(abs("10.8909754439566991648766952391617047763" - invertFunc.Value[0, 0]) < 
+			Assert::IsTrue(abs("10.8909754439566991648766952391617047763" - straightFunc.Value[0, 0]) < 
 				1e-38, Message("Value Mismatch : " + 
-				("10.8909754439566991648766952391617047763" - invertFunc.Value[0, 0]).toString()));
+				("10.8909754439566991648766952391617047763" - straightFunc.Value[0, 0]).toString()));
 
-			Assert::IsTrue(abs("-31.8951120053082607741366329621769480352" - invertFunc.Value[0, 1]) < 
+			Assert::IsTrue(abs("-31.8951120053082607741366329621769480352" - straightFunc.Value[0, 1]) < 
 				1e-38, Message("Derivative Mismatch : " + 
-				("-31.8951120053082607741366329621769480352" - invertFunc.Value[0, 1]).toString()));
+				("-31.8951120053082607741366329621769480352" - straightFunc.Value[0, 1]).toString()));
 
-			Assert::IsTrue(abs("0.00207594273574432631847956266999583199" - invertFunc.Value[0, 2]) < 
+			Assert::IsTrue(abs("0.00207594273574432631847956266999583199" - straightFunc.Value[0, 2]) < 
 				1e-38, Message("dA Mismatch : " + 
-				("0.00207594273574432631847956266999583199" - invertFunc.Value[0, 2]).toString()));
+				("0.00207594273574432631847956266999583199" - straightFunc.Value[0, 2]).toString()));
 
-			Assert::IsTrue(abs("0.06482097233719439617574302934815502327" - invertFunc.Value[0, 3]) < 
+			Assert::IsTrue(abs("0.06482097233719439617574302934815502327" - straightFunc.Value[0, 3]) < 
 				1e-38, Message("dB Mismatch : " + 
-				("0.06482097233719439617574302934815502327" - invertFunc.Value[0, 3]).toString()));
+				("0.06482097233719439617574302934815502327" - straightFunc.Value[0, 3]).toString()));
 
-			Assert::IsTrue(abs("0.0997501864418126094088359352974983223384" - invertFunc.Value[0, 4]) < 
+			Assert::IsTrue(abs("0.0997501864418126094088359352974983223384" - straightFunc.Value[0, 4]) < 
 				1e-38, Message("dC Mismatch : " + 
-				("0.0997501864418126094088359352974983223384" - invertFunc.Value[0, 4]).toString()));
+				("0.0997501864418126094088359352974983223384" - straightFunc.Value[0, 4]).toString()));
 
-			Assert::IsTrue(abs("0.991677216943648389081555235577618174747" - invertFunc.Value[0, 5]) < 
+			Assert::IsTrue(abs("0.991677216943648389081555235577618174747" - straightFunc.Value[0, 5]) < 
 				1e-38, Message("dD Mismatch : " + 
-				("0.991677216943648389081555235577618174747" - invertFunc.Value[0, 5]).toString()));
+				("0.991677216943648389081555235577618174747" - straightFunc.Value[0, 5]).toString()));
 
-			Assert::IsTrue(abs("-10.8909754439566991648766952391617047763" - invertFunc.Derivative[0, 1]) < 
+			Assert::IsTrue(abs(straightFunc.Value[0, 1] - straightFunc.Derivative[0, 0]) < 
+				1e-38, Message("dX Mismatch : " + 
+				(straightFunc.Value[0, 1] - straightFunc.Derivative[0, 0]).toString()));
+
+			Assert::IsTrue(abs("-10.8909754439566991648766952391617047763" - straightFunc.Derivative[0, 1]) < 
 				1e-37, Message("ddX Mismatch : " + 
-				("-10.8909754439566991648766952391617047763" - invertFunc.Derivative[0, 1]).toString()));
+				("-10.8909754439566991648766952391617047763" - straightFunc.Derivative[0, 1]).toString()));
 
-			Assert::IsTrue(abs("0.059648736118014891805556428787273815261" - invertFunc.Derivative[0, 2]) < 
+			Assert::IsTrue(abs("0.059648736118014891805556428787273815261" - straightFunc.Derivative[0, 2]) < 
 				1e-38, Message("dXdA Mismatch : " + 
-				("0.059648736118014891805556428787273815261" - invertFunc.Derivative[0, 2]).toString()));
+				("0.059648736118014891805556428787273815261" - straightFunc.Derivative[0, 2]).toString()));
 
-			Assert::IsTrue(abs("1.24335752123318609230345690920365851415" - invertFunc.Derivative[0, 3]) < 
+			Assert::IsTrue(abs("1.24335752123318609230345690920365851415" - straightFunc.Derivative[0, 3]) < 
 				1e-37, Message("dXdB Mismatch : " + 
-				("1.24335752123318609230345690920365851415" - invertFunc.Derivative[0, 3]).toString()));
+				("1.24335752123318609230345690920365851415" - straightFunc.Derivative[0, 3]).toString()));
 
-			Assert::IsTrue(abs("0.993341384943721102519238923763223297139" - invertFunc.Derivative[0, 4]) < 
+			Assert::IsTrue(abs("0.993341384943721102519238923763223297139" - straightFunc.Derivative[0, 4]) < 
 				1e-38, Message("dXdC Mismatch : " + 
-				("0.993341384943721102519238923763223297139" - invertFunc.Derivative[0, 4]).toString()));
+				("0.993341384943721102519238923763223297139" - straightFunc.Derivative[0, 4]).toString()));
 
-			Assert::IsTrue(abs("-0.149633604071187692754247517805732080072" - invertFunc.Derivative[0, 5]) < 
+			Assert::IsTrue(abs("-0.149633604071187692754247517805732080072" - straightFunc.Derivative[0, 5]) < 
 				1e-38, Message("dXdD Mismatch : " + 
-				("-0.149633604071187692754247517805732080072" - invertFunc.Derivative[0, 5]).toString()));
+				("-0.149633604071187692754247517805732080072" - straightFunc.Derivative[0, 5]).toString()));
+
+			Assert::IsTrue(abs(straightFunc.SecDerivative[0, 0] - straightFunc.Derivative[0, 1]) < 
+				1e-37, Message("dXdX Mismatch : " + 
+				(straightFunc.SecDerivative[0, 0] - straightFunc.Derivative[0, 1]).toString()));
 		}
 
 		TEST_METHOD(InverseXFunctionDerivativesTestMethod)
@@ -126,6 +134,10 @@ namespace GeneralTest
 				1e-38, Message("dD Mismatch : " + 
 				("1.0" - invertFunc.Value[0, 5]).toString()));
 
+			Assert::IsTrue(abs(invertFunc.Value[0, 1] - invertFunc.Derivative[0, 0]) < 
+				1e-38, Message("dX Mismatch : " + 
+				(invertFunc.Value[0, 1] - invertFunc.Derivative[0, 0]).toString()));
+
 			Assert::IsTrue(abs("25.8212392927517342168710129362992410056" - invertFunc.Derivative[0, 1]) < 
 				1e-37, Message("ddX Mismatch : " + 
 				("25.8212392927517342168710129362992410056" - invertFunc.Derivative[0, 1]).toString()));
@@ -145,6 +157,10 @@ namespace GeneralTest
 			Assert::IsTrue(abs("0.0" - invertFunc.Derivative[0, 5]) < 
 				1e-38, Message("dXdD Mismatch : " + 
 				("0.0" - invertFunc.Derivative[0, 5]).toString()));
+
+			Assert::IsTrue(abs(invertFunc.SecDerivative[0, 0] - invertFunc.Derivative[0, 1]) < 
+				1e-38, Message("dXdX Mismatch : " + 
+				(invertFunc.SecDerivative[0, 0] - invertFunc.Derivative[0, 1]).toString()));
 		}
 
 	};
