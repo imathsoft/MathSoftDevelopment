@@ -3,6 +3,7 @@
 
 #include "..\Utils\AuxUtils.h"
 #include "ProblemAbstract.h"
+#include "..\Utils\Exceptions.h"
 
 template <class T>
 class TroeschProblem : public ProblemAbstract<T>
@@ -120,6 +121,19 @@ public:
 		{ return dNonlin(value)*derivative; };
 	}
 
+	///A method to return std:function wrapper of the gradient of A coefficient
+	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetACoeffGradient()
+	{
+		return [=](const T& derivative, const T& value, const T& argument ) 
+		{
+			array<T, 3> result;
+			result[0] = dNonlin(value);
+			result[1] = ddNonlin(value)*derivative;
+			result[2] = 0; 
+			return result; 
+		};
+	}
+
 	///A method to return std:function wrapper of the B coefficient
 	virtual std::function<T(const T&, const T&, const T&)> GetBCoeff() override
 	{
@@ -127,14 +141,53 @@ public:
 		{ return Nonlin(value); };
 	}
 
+	///A method to return std:function wrapper of the gradient of B coefficient
+	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetBCoeffGradient()
+	{
+		return [=](const T& derivative, const T& value, const T& argument ) 
+		{
+			array<T, 3> result;
+			result[0] = 0;
+			result[1] = dNonlin(value);
+			result[2] = 0; 
+			return result; 
+		};
+	}
+
 	///A method to return std:function wrapper of the A coefficient for inverse problem
 	virtual std::function<T(const T&, const T&, const T&)> GetACoeffInverse()
 	{
 		return [=](const T& derivative, const T& value, const T& argument ) 
 		{
-			T F = Nonlin(argument);
+			T N = Nonlin(argument);
+			T dN = dNonlin(argument);
 			T derivSquared = auxutils::sqr(derivative);
-			return - (dNonlin(argument)*argument + F - 2*auxutils::sqr(F*argument)*derivSquared)*derivSquared;
+
+			/// A_{i} = - (N^{'}(u_{i})*u_{i} + N(u_{i}) - 2(N(u_{i})u_{i})^{2}(x_{i}^{'})^{2})(x_{i}^{'})^{2}
+			return - (dN * argument + N - 2*auxutils::sqr(N*argument)*derivSquared)*derivSquared;
+		};
+	}
+
+	///A method to return std:function wrapper of the gradient of A coefficient for inverse problem
+	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetACoeffInverseGradient()
+	{
+		return [=](const T& derivative, const T& value, const T& argument ) 
+		{
+			array<T, 3> result;
+			T N  = Nonlin(argument);
+			T dN  = dNonlin(argument);
+			T ddN = ddNonlin(argument);
+			T dM = dN * argument + N;
+			T derivSquared = auxutils::sqr(derivative);
+
+			/// \frac{\partial A_{i}}{\partial x_{i}^{'}} = -2(N^{'}(u_{i})u_{i} + N(u_{i}))x_{i}^{'} + 
+			/// 8(N(u_{i})u_{i})^{2}(x_{i}^{'})^{3}
+			result[0] = - 2 * dM * derivative + 8 * N * argument * derivSquared * derivative;
+			result[1] = 0;
+			/// \frac{\partial A_{i}}{\partial u_{i}} = - (N^{''}(u_{i})u_{i}+2N^{'}(u_{i})) + 
+			/// 4(N^{'}(u_{i})u_{i}+N(u_{i}))N(u_{i})u_{i}(x_{i}^{'})^{4}
+			result[2] = - (ddN * argument + 2 * dN) * derivSquared + 4 * dM * N * argument * auxutils::sqr(derivSquared); 
+			return result; 
 		};
 	}
 
@@ -143,7 +196,27 @@ public:
 	{
 		return [=](const T& derivative, const T& value, const T& argument )			
 		{
+			///B_{i} = - N(u_{i})u_{i}(x_{i}^{'})^{2}
 		    return - Nonlin(argument)*argument*auxutils::sqr(derivative);
+		};
+	}
+
+	///A method to return std:function wrapper of the gradient of B coefficient for inverse problem
+	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetBCoeffInverseGradient()
+	{
+		return [=](const T& derivative, const T& value, const T& argument ) 
+		{
+			array<T, 3> result;
+			T N  = Nonlin(argument);
+			T dN  = dNonlin(argument);
+
+			///\frac{\partial B_{i}}{\partial x_{i}^{'}} = -2N(u_{i})u_{i}x_{i}^{'}
+			result[0] = - 2 * N * argument * derivative;
+			result[1] = 0;
+			///\frac{\partial B_{i}}{\partial u_{i}} = -(N^{'}(u_{i})u_{i} + N(u_{i}))(x_{i}^{'})^{2}
+			result[2] = - (dN*argument + N) * auxutils::sqr(derivative); 
+
+			return result;
 		};
 	}
 };

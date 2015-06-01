@@ -37,6 +37,9 @@
     <Filter Include="Source Files\Utils">
       <UniqueIdentifier>{1a53e921-c859-4834-a6a5-f16f1ef4e85d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MultipleShooting">
+      <UniqueIdentifier>{ae49b016-630a-4bce-adcb-a8d29bfe490d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="Utils\AuxUtils.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h">
+      <Filter>Header Files\MultipleShooting</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +91,15 @@
     </ClInclude>
     <ClInclude Include="Cannon\XCannonInverse.h">
       <Filter>Header Files\Cannon</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Exceptions.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionApproximation\InitialCondition.h">
+      <Filter>Header Files\FunctionApproximation</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionApproximation\PointSimple.h">
+      <Filter>Header Files\FunctionApproximation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

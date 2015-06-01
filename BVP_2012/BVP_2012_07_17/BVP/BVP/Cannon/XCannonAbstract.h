@@ -3,6 +3,7 @@
 
 #include "..\FunctionApproximation\X_Function.h"
 #include "..\Problems\ProblemAbstract.h"
+#include "..\FunctionApproximation\InitialCondition.h"
 #include <vector>
 
 template <class T>

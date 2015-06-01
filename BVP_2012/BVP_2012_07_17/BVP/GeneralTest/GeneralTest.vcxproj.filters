@@ -38,5 +38,8 @@
     <ClCompile Include="..\BVP\Utils\AuxUtils.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="MultipleShootingHybridTestUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

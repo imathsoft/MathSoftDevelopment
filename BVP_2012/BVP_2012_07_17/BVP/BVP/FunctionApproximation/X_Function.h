@@ -8,6 +8,7 @@
 #include <array>
 #include <list>
 #include "GradientVector.h"
+#include "InitialCondition.h"
 
 using namespace std;
 
@@ -79,38 +80,6 @@ inline T X(const T& A, const T& B, const T& C, const T& D, const T& h, int n){
 	delete [] mas;
     return result;
 }
-
-template <class T>
-struct InitCondition
-{
-public :
-
-	T Value;
-	T Derivative;
-	T SecDerivative;
-	T Argument;
-
-	template<class U>
-	friend inline std::ostream& operator << (std::ostream& out, const InitCondition<U>& ic);
-
-	inline const InitCondition<T>&  operator=(const typename GVTypes<T>::SmallGradientVector& gv)
-	{
-		Value = gv[0];
-		Derivative = gv[1];
-		Argument = "0";
-
-		return *this;
-	}
-};
-
-template<class U>
-inline std::ostream& operator << (std::ostream& out, const InitCondition<U>& ic)
-{
-	out << "Val = " << ic.Value << endl;
-	out << "Der = " << ic.Derivative << endl;
-	out << "Argument = " << ic.Argument << endl;
-	return out;
-};
 
 template <class T>
 inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const T& h, int n){

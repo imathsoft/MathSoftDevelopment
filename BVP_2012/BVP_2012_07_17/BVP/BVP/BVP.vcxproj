@@ -201,6 +201,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Misc\BVP_PC_T.cpp" />
+    <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h" />
     <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -209,6 +210,8 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="Cannon\XCannonAbstract.h" />
     <ClInclude Include="Cannon\XCannonInverse.h" />
     <ClInclude Include="FunctionApproximation\GradientVector.h" />
+    <ClInclude Include="FunctionApproximation\InitialCondition.h" />
+    <ClInclude Include="FunctionApproximation\PointSimple.h" />
     <ClInclude Include="FunctionApproximation\X_Function.h" />
     <ClInclude Include="Misc\BVP_PC_T.h" />
     <ClInclude Include="Problems\ProblemAbstract.h" />
@@ -216,6 +219,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="Problems\TroeschProblem.h" />
     <ClInclude Include="ShootingSimple\BisectionComponent.h" />
     <ClInclude Include="Utils\AuxUtils.h" />
+    <ClInclude Include="Utils\Exceptions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
