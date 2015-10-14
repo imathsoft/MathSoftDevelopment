@@ -17,18 +17,18 @@ namespace GeneralTest
 		
 		TEST_METHOD(MultipleShootingHybridTest)
 		{
-			TroeschProblem<mpreal> tp(3);
+			TroeschProblem<double> tp(3);
 			try
 			{
-				PointSimple<mpreal> ptLeft;
+				PointSimple<double> ptLeft;
 				ptLeft.Argument  = 0;
 				ptLeft.Value  = 0;
 
-				PointSimple<mpreal> ptRight;
+				PointSimple<double> ptRight;
 				ptRight.Argument  = 1;
 				ptRight.Value  = 1;
 
-				HybridMultipleShootingComponent<mpreal> HMSComp(tp, ptLeft, ptRight);
+				HybridMultipleShootingComponent<double> HMSComp(tp, ptLeft, ptRight, 1e-12);
 			}
 			catch (exception e)
 			{

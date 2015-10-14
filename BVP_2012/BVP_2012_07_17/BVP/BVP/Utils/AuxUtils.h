@@ -4,6 +4,9 @@
 #include <mpreal.h>
 #include <fstream>
 
+#include <Eigen/Sparse>
+#include <Eigen/MPRealSupport>
+
 namespace auxutils
 {
 	inline double sqr(double d)
@@ -52,6 +55,16 @@ namespace auxutils
 	void WriteToStream(std::ofstream& stream, float value );
 
 	void WriteToStream(std::ofstream& stream, double value );
+
+	///Method to write sparse matrix into a text file
+	template <class T>
+	void SaveToFile(Eigen::SparseMatrix<T> matrix, char* filename)
+	{
+		 ofstream file;
+		 file.open (filename);
+         file << matrix;
+         file.close();
+	}
 }
 
 #endif

@@ -168,4 +168,69 @@ inline InitCondition<T> XI_Func(const T& A, const T& B, const T& C, const T& D, 
 	return XI(A, B, C, D, h, EstimateIterationsSingle((abs(A)*abs(h)+abs(B))*abs(h),precision/(abs(C))));
 }
 
+template <class T>
+class X_Func_Gradient 
+{
+public :
+	T X;
+	T dA;
+	T dB;
+	T dC;
+	T dD;
+	T dh;
+	T dhdh;
+	T dhdA;
+	T dhdB;
+	T dhdC;
+	T dhdD;
+
+	///Overloaded assignment operator
+	inline X_Func_Gradient<T>& operator=(const InitCondition<typename GVTypes<T>::FullGradientVector>& fullGradient)
+	{
+		X = fullGradient.Value[0];
+		dA = fullGradient.Value[2];
+		dB = fullGradient.Value[3];
+		dC = fullGradient.Value[4];
+		dD = fullGradient.Value[5];
+
+		dh = fullGradient.Derivative[0];
+		dhdA = fullGradient.Derivative[2];
+		dhdB = fullGradient.Derivative[3];
+		dhdC = fullGradient.Derivative[4];
+		dhdD = fullGradient.Derivative[5];
+
+		dhdh = fullGradient.SecDerivative[0];
+
+		return *this;
+	}
+
+    ///Returns gradient of X3_Func(...)
+	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision)
+	{
+		GVTypes<T>::FullGradientVector EH; EH << h, 1, 0, 0, 0, 0;
+		GVTypes<T>::FullGradientVector EA; EA << A, 0, 1, 0, 0, 0;
+		GVTypes<T>::FullGradientVector EB; EB << B, 0, 0, 1, 0, 0;
+		GVTypes<T>::FullGradientVector EC; EC << C, 0, 0, 0, 1, 0;
+		GVTypes<T>::FullGradientVector ED; ED << D, 0, 0, 0, 0, 1;
+
+		X_Func_Gradient<T> result;
+
+		return result = X3_Func<typename GVTypes<T>::FullGradientVector>(EA, EB, EC, ED, EH, precision);
+	}
+
+	///Returns gradient of XI_Func_Gradient
+	static inline typename X_Func_Gradient<T> XI_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision)
+	{
+		GVTypes<T>::FullGradientVector EH; EH << h, 1, 0, 0, 0, 0;
+		GVTypes<T>::FullGradientVector EA; EA << A, 0, 1, 0, 0, 0;
+		GVTypes<T>::FullGradientVector EB; EB << B, 0, 0, 1, 0, 0;
+		GVTypes<T>::FullGradientVector EC; EC << C, 0, 0, 0, 1, 0;
+		GVTypes<T>::FullGradientVector ED; ED << D, 0, 0, 0, 0, 1;
+
+		X_Func_Gradient<T> result;
+
+		return result = XI_Func<GVTypes<T>::FullGradientVector>(EA, EB, EC, ED, EH, precision);
+	}
+};
+
 #endif

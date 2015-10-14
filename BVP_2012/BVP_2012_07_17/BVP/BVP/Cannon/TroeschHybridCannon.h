@@ -3,6 +3,7 @@
 
 #include "XCannonInverse.h"
 #include "XCannon.h"
+#include "../Utils/AuxUtils.h"
 
 template <class T>
 class TroeschHybridCannon : public XCannonAbstract<T>
@@ -19,7 +20,7 @@ private:
 protected:
 	inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish)
 	{
-		InitCondition<T> result;
+		InitCondition<T> result = {0,0,0,0};
 		return result;
 	}
 
@@ -96,6 +97,7 @@ public:
 				result.Value = ic.Argument;
 				result.Argument = ic.Value;
 				result.Derivative = 1/ic.Derivative;
+				result.SecDerivative = - ic.SecDerivative/(auxutils::sqr(ic.Derivative) * ic.Derivative);
 				return result;
 		});
 		result.insert(result.end(), ++resultInv.begin(), resultInv.end());
