@@ -9,6 +9,7 @@
 #include "..\ShootingSimple\BisectionComponent.h"
 
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include <Eigen/MPRealSupport>
 
 #include "..\Utils\Exceptions.h"
@@ -31,7 +32,7 @@ private:
 	{
 		auto dim = 2 * (meshData.size()-1);
 		Eigen::SparseMatrix<T> JM((int)dim, (int)dim);
-
+		Eigen::Matrix<T, Eigen::Dynamic,1> F((int)dim);
 
 		auto A = _problem->GetACoeff();
 		auto B = _problem->GetBCoeff();
@@ -43,54 +44,66 @@ private:
 		auto AI_grad = _problem->GetACoeffInverseGradient();
 		auto BI_grad = _problem->GetBCoeffInverseGradient();
 
-		InitCondition<T> firstKnot = meshData[0];
+		InitCondition<T> curKnot;
+		InitCondition<T> prevKnot;
+		InitCondition<T> nextKnot;
 
+		array<T, 3> A_grad_value;
+		array<T, 3> B_grad_value;
+
+		curKnot = meshData[0];
+		nextKnot = meshData[1];
 		typename X_Func_Gradient<T> dX;
-		if (abs(firstKnot.Derivative) <= 1.0)
+		if (abs(curKnot.Derivative) <= 1.0)
 		{
 			dX = X_Func_Gradient<T>::X3_Func_Gradient(
-				A(firstKnot.Derivative, firstKnot.Value, firstKnot.Argument),
-				B(firstKnot.Derivative, firstKnot.Value, firstKnot.Argument), 
-				firstKnot.Derivative, 
-				firstKnot.Value, 
-				meshData[1].Argument - firstKnot.Argument, _precision);
+				A(curKnot.Derivative, curKnot.Value, curKnot.Argument),
+				B(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
+				curKnot.Derivative, 
+				curKnot.Value, 
+				nextKnot.Argument - curKnot.Argument, _precision);
 			
-			auto A_grad_value = A_grad(firstKnot.Derivative, firstKnot.Value, firstKnot.Argument);
-			auto B_gard_value = B_grad(firstKnot.Derivative, firstKnot.Value, firstKnot.Argument);
+			A_grad_value = A_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+			B_grad_value = B_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
 
-			JM.coeffRef(0,0) = dX.dA * A_grad_value[0] +
-				               dX.dB * B_gard_value[0] +
-				               dX.dC;
+			F(0) = dX.X - nextKnot.Value;
 
-			JM.coeffRef(1,0) = dX.dhdA * A_grad_value[0] +
-							   dX.dhdB * B_gard_value[0] +
-				               dX.dhdC;
 		} else
 		{
 			dX = X_Func_Gradient<T>::XI_Func_Gradient(
-				AI(1/firstKnot.Derivative, firstKnot.Argument, firstKnot.Value),
-				BI(1/firstKnot.Derivative, firstKnot.Argument, firstKnot.Value), 
-				1/firstKnot.Derivative, 
-				firstKnot.Argument, 
-				meshData[1].Value - firstKnot.Value, _precision);
+				AI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
+				BI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
+				1/curKnot.Derivative, 
+				curKnot.Argument, 
+				nextKnot.Value - curKnot.Value, _precision);
 
-			auto AI_grad_value = AI_grad(firstKnot.Derivative, firstKnot.Value, firstKnot.Argument);
-			auto BI_grad_value = BI_grad(firstKnot.Derivative, firstKnot.Value, firstKnot.Argument);
+			A_grad_value = AI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+			B_grad_value = BI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
 
-			JM.coeffRef(0,0) = dX.dA * AI_grad_value[0] +
-				               dX.dB * BI_grad_value[0] +
-				               dX.dC;
-
-			JM.coeffRef(1,0) = dX.dhdA * AI_grad_value[0] +
-				               dX.dhdB * BI_grad_value[0] +
-				               dX.dhdC;
+			F(0) = dX.X - nextKnot.Argument;
 		}
 
-		//auxutils::SaveToFile(JM, "f:\\matr.txt");
+		JM.coeffRef(0,0) = dX.dA * A_grad_value[0] +
+				            dX.dB * B_grad_value[0] +
+				            dX.dC;
 
-		for(std::vector<InitCondition<T>>::size_type i = 1; i != meshData.size() - 1; i++)
+		JM.coeffRef(1,0) = dX.dhdA * A_grad_value[0] +
+				            dX.dhdB * B_grad_value[0] +
+				            dX.dhdC;
+
+		if ((abs(nextKnot.Derivative) <= 1.0) ^ (abs(curKnot.Derivative) <= 1.0))
+			F(1) = dX.dh - 1/nextKnot.Derivative;
+		else
+			F(1) = dX.dh - nextKnot.Derivative;
+
+		for(std::vector<InitCondition<T>>::size_type i = 1; i < meshData.size() - 1; i++)
 		{
-			InitCondition<T> curKnot = meshData[i];
+			curKnot = meshData[i];
+			prevKnot = meshData[i - 1];
+			nextKnot = meshData[i + 1];
+
+			int currRow = 2 * (int)i;
+			int currCol = 2 * (int)i - 1;
 
 			if (abs(curKnot.Derivative) <= 1.0)
 			{
@@ -99,7 +112,11 @@ private:
 					B(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
 					curKnot.Derivative, 
 					curKnot.Value, 
-					meshData[i + 1].Argument - curKnot.Argument, _precision);
+					nextKnot.Argument - curKnot.Argument, _precision);
+
+				A_grad_value = A_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+				B_grad_value = B_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+
 			} else
 			{
 				dX = X_Func_Gradient<T>::XI_Func_Gradient(
@@ -107,10 +124,60 @@ private:
 					BI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
 					1/curKnot.Derivative, 
 					curKnot.Argument, 
-					meshData[i + 1].Value - curKnot.Value, _precision);
+					nextKnot.Value - curKnot.Value, _precision);
+
+				A_grad_value = AI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+				B_grad_value = BI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+
+			}
+
+			JM.coeffRef(currRow, currCol)         = dX.dA * A_grad_value[0] +
+						                            dX.dB * B_grad_value[0] +
+						                            dX.dC;
+
+			JM.coeffRef(currRow + 1, currCol)     = dX.dhdA * A_grad_value[0] +
+						                            dX.dhdB * B_grad_value[0] + 
+													dX.dhdC;
+
+			JM.coeffRef(currRow - 2, currCol + 1) = 1.0;
+
+			if ((abs(prevKnot.Derivative) <= 1.0) ^ (abs(curKnot.Derivative) <= 1.0))
+			{
+				JM.coeffRef(currRow - 1, currCol)     = - 1.0 / auxutils::sqr(curKnot.Derivative);
+
+				JM.coeffRef(currRow, currCol + 1)     = dX.dA * A_grad_value[2] +
+						                                dX.dB * B_grad_value[2] - 
+														dX.dh;
+
+				JM.coeffRef(currRow + 1, currCol + 1) = dX.dhdA * A_grad_value[2] +
+						                                dX.dhdB * B_grad_value[2] - 
+														dX.dhdh;
+			}
+			else
+			{
+				JM.coeffRef(currRow - 1, currCol)     = 1.0;
+
+				JM.coeffRef(currRow, currCol + 1)     = dX.dA * A_grad_value[1] +
+						                                dX.dB * B_grad_value[1] + 
+						                                dX.dD;
+
+				JM.coeffRef(currRow + 1, currCol + 1) = dX.dhdA * A_grad_value[1] +
+						                                dX.dhdB * B_grad_value[1] + 
+														dX.dhdD;
 			}
 		}
 		
+		InitCondition<T> penultKnot = meshData[meshData.size() - 2];
+		InitCondition<T> lastKnot = meshData[meshData.size() - 1];
+
+		if ((abs(penultKnot.Derivative) <= 1) ^ (abs(lastKnot.Derivative) <= 1))
+			JM.coeffRef((int)dim - 1, (int)dim - 1) = - 1.0 / auxutils::sqr(lastKnot.Derivative);
+		else
+			JM.coeffRef((int)dim - 1, (int)dim - 1) = 1.0;
+
+		//auxutils::SaveToFile(JM, "f:\\matr.txt");
+		//auxutils::SaveToFile(F, "f:\\F.txt");
+
 		return JM;
 	}
 public:

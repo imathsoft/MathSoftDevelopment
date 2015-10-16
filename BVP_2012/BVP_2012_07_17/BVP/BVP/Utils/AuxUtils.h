@@ -65,6 +65,16 @@ namespace auxutils
          file << matrix;
          file.close();
 	}
+
+	///Method to write sparse matrix into a text file
+	template <class T>
+	void SaveToFile(Eigen::Matrix<T, Eigen::Dynamic, 1> matrix, char* filename)
+	{
+		 ofstream file;
+		 file.open (filename);
+         file << matrix;
+         file.close();
+	}
 }
 
 #endif
