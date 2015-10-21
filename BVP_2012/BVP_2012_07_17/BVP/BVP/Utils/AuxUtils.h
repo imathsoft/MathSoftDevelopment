@@ -75,6 +75,21 @@ namespace auxutils
          file << matrix;
          file.close();
 	}
+
+	///Method to write sparse matrix into a text file
+	template <class T>
+	void SaveToFile(std::vector<T> mesh, char* filename, std::streamsize pecision = 15)
+	{
+		 ofstream file;
+		 file.precision(pecision);
+		 file.open (filename);
+		 for (std::vector<T>::iterator m = mesh.begin(); m != mesh.end(); ++m)
+		 {
+			 file << (*m);
+			 file << endl;
+		 }
+         file.close();
+	}
 }
 
 #endif

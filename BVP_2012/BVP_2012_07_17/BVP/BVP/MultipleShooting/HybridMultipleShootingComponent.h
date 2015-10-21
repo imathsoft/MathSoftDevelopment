@@ -124,7 +124,7 @@ private:
 	};
 
 	///Generates Jacobi matrix from the given meth data vector
-	NewtonData GenerateNewtonData(vector<InitCondition<T>> meshData)
+	void GenerateNewtonData(vector<InitCondition<T>> meshData, NewtonData& result)
 	{
 		auto dim = 2 * (meshData.size()-1);
 		Matrix JM((int)dim, (int)dim);
@@ -235,7 +235,7 @@ private:
 						                            dX.dhdB * B_grad_value[0] + 
 													dX.dhdC;
 
-			JM.coeffRef(currRow - 2, currCol + 1) = - 1.0;
+			JM.coeffRef(currRow - 2, currCol + 1) = - 1;
 
 			if ((abs(prevKnot.Derivative) <= 1.0) ^ (abs(curKnot.Derivative) <= 1.0))
 			{
@@ -252,7 +252,7 @@ private:
 			}
 			else
 			{
-				JM.coeffRef(currRow - 1, currCol)     = - 1.0;
+				JM.coeffRef(currRow - 1, currCol)     = - 1;
 
 				JM.coeffRef(currRow, currCol + 1)     = dX.dA * A_grad_value[1] +
 						                                dX.dB * B_grad_value[1] + 
@@ -270,19 +270,19 @@ private:
 		if ((abs(penultKnot.Derivative) <= 1.0) ^ (abs(lastKnot.Derivative) <= 1.0))
 		{
 			auto derivative = abs(lastKnot.Derivative) <= 1.0 ? lastKnot.Derivative : 1/lastKnot.Derivative;
-			JM.coeffRef((int)dim - 1, (int)dim - 1) = 1.0 / auxutils::sqr(derivative); 
+			JM.coeffRef((int)dim - 1, (int)dim - 1) = 1 / auxutils::sqr(derivative); 
 		}
 		else
-			JM.coeffRef((int)dim - 1, (int)dim - 1) = - 1.0;
+			JM.coeffRef((int)dim - 1, (int)dim - 1) = - 1;
 
 
-		NewtonData result = {JM, F, MeshDataToVector(meshData)};
+		result.matrix = JM;
+		result.F = F;
+		result.U = MeshDataToVector(meshData);
 
-		auxutils::SaveToFile(result.matrix, "F:\\matr.txt");
-		auxutils::SaveToFile(result.F, "F:\\F.txt");
-		auxutils::SaveToFile(result.U, "F:\\V.txt");
-
-		return result;
+		//auxutils::SaveToFile(result.matrix, "F:\\matr.txt");
+		//auxutils::SaveToFile(result.F, "F:\\F.txt");
+		//auxutils::SaveToFile(result.U, "F:\\V.txt");
 	}
 public:
 	///Constructor
@@ -295,39 +295,52 @@ public:
 		_ptRight = ptRight;
 		_precision = precision;
 
-		T h = 0.1;
-		TroeschHybridCannon<T> thc((*_problem), h, 0.01);
+		T h = 0.01;
+		TroeschHybridCannon<T> thc((*_problem), h, 0.001);
 
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
 		BisectionComponent<T> bc(thc);
-		bc.DerivativeBisectionGen(0.0, 1.0, 0.0, 1.0, 0.0, 1.0, evalFunc);
+		bc.DerivativeBisectionGen(0, 1, 0, 1, 0, 1, evalFunc);
 		_meshData = thc.GetKnotVector();
+
+		//auxutils::SaveToFile(_meshData, "f:\\ExactSolution.txt");
+
+		_meshData[_meshData.size() - 1].Value = 1;;
+		_meshData[_meshData.size() - 1].Argument = 1;;
 
 		NewtonData ND;
 		vector<InitCondition<T>> MD(std::begin(_meshData), std::end(_meshData));
 
-        for (int i = 0 ; i < 20; i++)
+		Vector newVect;
+		T norm = 1;
+		for (int i = 0 ; i < 10 && norm > _precision; i++)
 		{
-			ND = GenerateNewtonData(MD);
+			GenerateNewtonData(MD, ND);
 
 			Eigen::BiCGSTAB<Matrix> solver; // Our BiCGStab solver;
 			solver.setMaxIterations(100000);
 
 			solver.compute(ND.matrix);// Initialization of the solver
-			Vector newVect = ND.U - solver.solve(ND.F);
+			Vector correction = solver.solve(ND.F);
 
-			auxutils::SaveToFile(newVect, "f:\\Sol.txt");
+			T norm1;
+			if (newVect.rows() == ND.U.rows())
+			    norm1 = (newVect - ND.U).norm();
+
+			newVect = ND.U - correction;
+
+			//auxutils::SaveToFile(newVect, "f:\\Sol.txt");
+			//auxutils::SaveToFile(correction, "f:\\correction.txt");
 
 		    MD = VectorToMeshData(MD, newVect);
 
-			T norm = (ND.U - newVect).norm();
+			norm = correction.norm();
 		}
 
-		auto vect = MeshDataToVector(_meshData);
-		auto newMeshData = VectorToMeshData(_meshData, vect);
+		//auxutils::SaveToFile(MD, "f:\\NewtonExactSolution.txt");
 
-		bool sanityCheck = MeshDatasAreEqual(_meshData, newMeshData);
+		//bool sanityCheck = MeshDatasAreEqual(_meshData, newMeshData);
 	}
 };
 

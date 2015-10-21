@@ -91,16 +91,19 @@ public:
 	{
 		std::vector<InitCondition<T>> result = _straightCannon->GetKnotVector();
 		std::vector<InitCondition<T>> resultInv = _inverseCannon->GetKnotVector();
-		std::transform(++resultInv.begin(), resultInv.end(), ++resultInv.begin(), [](InitCondition<T> ic) ->
-			InitCondition<T>{ 
-				InitCondition<T> result;
-				result.Value = ic.Argument;
-				result.Argument = ic.Value;
-				result.Derivative = 1/ic.Derivative;
-				result.SecDerivative = - ic.SecDerivative/(auxutils::sqr(ic.Derivative) * ic.Derivative);
-				return result;
-		});
-		result.insert(result.end(), ++resultInv.begin(), resultInv.end());
+		if (resultInv.size() > 0)
+		{
+			std::transform(++resultInv.begin(), resultInv.end(), ++resultInv.begin(), [](InitCondition<T> ic) ->
+				InitCondition<T>{ 
+					InitCondition<T> result;
+					result.Value = ic.Argument;
+					result.Argument = ic.Value;
+					result.Derivative = 1/ic.Derivative;
+					result.SecDerivative = - ic.SecDerivative/(auxutils::sqr(ic.Derivative) * ic.Derivative);
+					return result;
+			});
+			result.insert(result.end(), ++resultInv.begin(), resultInv.end());
+		}
 		return result;
 	};
 };

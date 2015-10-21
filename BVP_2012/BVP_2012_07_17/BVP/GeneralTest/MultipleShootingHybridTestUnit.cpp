@@ -17,9 +17,11 @@ namespace GeneralTest
 		
 		TEST_METHOD(MultipleShootingHybridTest)
 		{
-			TroeschProblem<double> tp(3);
+			TroeschProblem<double> tp(30);
 			try
 			{
+				mpfr::mpreal::set_default_prec(128);
+
 				PointSimple<double> ptLeft;
 				ptLeft.Argument  = 0;
 				ptLeft.Value  = 0;
@@ -28,7 +30,7 @@ namespace GeneralTest
 				ptRight.Argument  = 1;
 				ptRight.Value  = 1;
 
-				HybridMultipleShootingComponent<double> HMSComp(tp, ptLeft, ptRight, 1e-12);
+				HybridMultipleShootingComponent<double> HMSComp(tp, ptLeft, ptRight, 1e-14);
 			}
 			catch (exception e)
 			{

@@ -182,7 +182,7 @@ public:
 
 			/// \frac{\partial A_{i}}{\partial x_{i}^{'}} = -2(N^{'}(u_{i})u_{i} + N(u_{i}))x_{i}^{'} + 
 			/// 8(N(u_{i})u_{i})^{2}(x_{i}^{'})^{3}
-			result[0] = - 2 * dM * derivative + 8 * N * argument * derivSquared * derivative;
+			result[0] = - 2 * dM * derivative + 8 * auxutils::sqr(N * argument) * derivSquared * derivative;
 			result[1] = 0;
 			/// \frac{\partial A_{i}}{\partial u_{i}} = - (N^{''}(u_{i})u_{i}+2N^{'}(u_{i})) + 
 			/// 4(N^{'}(u_{i})u_{i}+N(u_{i}))N(u_{i})u_{i}(x_{i}^{'})^{4}
