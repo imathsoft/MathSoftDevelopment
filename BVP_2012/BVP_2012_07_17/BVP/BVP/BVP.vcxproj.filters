@@ -101,5 +101,8 @@
     <ClInclude Include="FunctionApproximation\PointSimple.h">
       <Filter>Header Files\FunctionApproximation</Filter>
     </ClInclude>
+    <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h">
+      <Filter>Header Files\MultipleShooting</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -17,7 +17,7 @@ namespace GeneralTest
 		
 		TEST_METHOD(MultipleShootingHybridTest)
 		{
-			TroeschProblem<double> tp(30);
+			TroeschProblem<double> tp(2);
 			try
 			{
 				mpfr::mpreal::set_default_prec(128);

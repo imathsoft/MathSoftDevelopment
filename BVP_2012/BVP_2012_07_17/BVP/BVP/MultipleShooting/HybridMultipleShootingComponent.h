@@ -15,6 +15,7 @@
 #include "..\Utils\Exceptions.h"
 #include "..\FunctionApproximation\X_Function.h"
 #include <vector>
+#include "FourDiagonalSweepMethodStruct.h"
 
 /// A component that implements hybrid multiple shooting algorithm
 template <class T>
@@ -30,14 +31,15 @@ private:
 	typedef Eigen::SparseMatrix<T> Matrix;
 
 	//Method that converts mesh data to vector
-	Vector MeshDataToVector(vector<InitCondition<T>> meshData)
+	vector<T> MeshDataToStdVector(vector<InitCondition<T>> meshData)
 	{
 		auto dim = 2 * (meshData.size() - 1);
-		Vector result(dim);
+		vector<T> result;
+		result.resize(dim);
 		InitCondition<T> curKnot = meshData[0];
 		InitCondition<T> prevKnot;
 
-		result(0) = abs(curKnot.Derivative) <= 1.0 ? meshData[0].Derivative : 
+		result[0] = abs(curKnot.Derivative) <= 1.0 ? meshData[0].Derivative : 
 			1/meshData[0].Derivative;
 
 		for (std::vector<InitCondition<T>>::size_type i = 1; i < meshData.size() - 1; i++)
@@ -47,17 +49,64 @@ private:
 
 			int curRow = 2 * (int)i - 1;
 
-			result(curRow) = abs(curKnot.Derivative) <= 1.0 ? 
+			result[curRow + 1] = abs(curKnot.Derivative) <= 1.0 ? 
 				curKnot.Derivative : 1/curKnot.Derivative;
 
-			result(curRow + 1) = abs(prevKnot.Derivative) <= 1.0 ? 
+			result[curRow] = abs(prevKnot.Derivative) <= 1.0 ? 
 				curKnot.Value : curKnot.Argument;
 		}
 
 		curKnot = meshData[meshData.size() - 1];
 
-		result(dim - 1) = abs(curKnot.Derivative) <= 1.0 ? 
+		result[dim - 1] = abs(curKnot.Derivative) <= 1.0 ? 
 				curKnot.Derivative : 1/curKnot.Derivative;
+
+		return result;
+	}
+
+	//Method that converts mesh data to vector
+	Vector MeshDataToVector(vector<InitCondition<T>> meshData)
+	{
+		auto dim = 2 * (meshData.size() - 1);
+		Vector result(dim);
+
+		auto stdVector = MeshDataToStdVector(meshData);
+
+		for (int i = 0; i < dim; i++)
+			result(i) = stdVector[i];
+
+		return result;
+	}
+
+
+	///Returns mesh data obtained from the previous mesh data and the given vector
+	vector<InitCondition<T>> VectorToMeshData(vector<InitCondition<T>> baseMeshData, vector<T> vect)
+	{
+		vector<InitCondition<T>> result(std::begin(baseMeshData), std::end(baseMeshData));
+
+		auto dim = baseMeshData.size();
+		auto vectDim = 2 * (baseMeshData.size() - 1);
+
+		if (vect.size() != vectDim)
+			throw exception("Nuexpected vector size");
+
+        result[0].Derivative = abs(baseMeshData[0].Derivative) <= 1.0 ? vect[0] : 1/vect[0];
+
+		for (std::vector<InitCondition<T>>::size_type i = 1; i < result.size() - 1; i++)
+		{
+			int curRow = 2 * (int)i - 1;
+
+            result[i].Derivative = abs(baseMeshData[i].Derivative) <= 1.0 ? 
+				vect[curRow + 1] : 1/vect[curRow + 1];
+
+			if (abs(baseMeshData[i - 1].Derivative) <= 1.0)
+				result[i].Value = vect[curRow];
+			else
+				result[i].Argument = vect[curRow];
+		}
+
+            result[dim - 1].Derivative = abs(baseMeshData[dim - 1].Derivative) <= 1.0 ? 
+				vect[vectDim - 1] : 1/vect[vectDim - 1];
 
 		return result;
 	}
@@ -65,53 +114,34 @@ private:
 	///Returns mesh data obtained from the previous mesh data and the given vector
 	vector<InitCondition<T>> VectorToMeshData(vector<InitCondition<T>> baseMeshData, Vector vect)
 	{
-		vector<InitCondition<T>> result(std::begin(baseMeshData), std::end(baseMeshData));
+		vector<T> vec;
+		vec.resize(vect.rows());
+		for (int i = 0; i < vect.rows(); i++)
+			vec[i] = vect[i];
 
-		auto dim = baseMeshData.size();
-		auto vectDim = 2 * (baseMeshData.size() - 1);
-
-		if (vect.rows() != vectDim)
-			throw exception("Nuexpected vector size");
-
-        result[0].Derivative = abs(baseMeshData[0].Derivative) <= 1.0 ? vect(0) : 1/vect(0);
-
-		for (std::vector<InitCondition<T>>::size_type i = 1; i < result.size() - 1; i++)
-		{
-			int curRow = 2 * (int)i - 1;
-
-            result[i].Derivative = abs(baseMeshData[i].Derivative) <= 1.0 ? 
-				vect(curRow) : 1/vect(curRow);
-
-			if (abs(baseMeshData[i - 1].Derivative) <= 1.0)
-				result[i].Value = vect(curRow + 1);
-			else
-				result[i].Argument = vect(curRow + 1);
-		}
-
-            result[dim - 1].Derivative = abs(baseMeshData[dim - 1].Derivative) <= 1.0 ? 
-				vect(vectDim - 1) : 1/vect(vectDim - 1);
-
-		return result;
+		return VectorToMeshData(baseMeshData, vec);
 	}
 
 	///Method to compare two mesh data
-	bool MeshDatasAreEqual(vector<InitCondition<T>> meshData1, vector<InitCondition<T>> meshData2)
+	T DiffMeshDatas(vector<InitCondition<T>> meshData1, vector<InitCondition<T>> meshData2)
 	{
 		if (meshData1.size() != meshData2.size())
-			return false;
+			return 100;
+
+		T diff = 0;
 
 		for (std::vector<InitCondition<T>>::size_type i = 0; i < meshData1.size(); i++)
 		{
 			InitCondition<T> ic1 = meshData1[i];
 			InitCondition<T> ic2 = meshData2[i];
 
-			if (ic1.Derivative != ic2.Derivative || 
-				ic1.Value != ic2.Value || 
-				ic1.Argument != ic2.Argument)
-				return false;
+			diff = max(diff, abs(ic1.Derivative - ic2.Derivative));
+			diff = max(diff, abs(ic1.Value - ic2.Value));
+			diff = max(diff, abs(ic1.Argument - ic2.Argument));
+			diff = max(diff, abs(ic1.SecDerivative - ic2.SecDerivative));
 		}
 
-		return true;
+		return diff;
 	}
 
 	///A struct that contains data for a Newton method'd iteration 
@@ -122,6 +152,239 @@ private:
 		Vector F;
 		Vector U;
 	};
+
+	///Method to run sweep method
+	vector<T> RunSweepMethod(FourDiagonalSweepMethodStruct<T> fDSMS, T& absCorrection)
+	{
+		vector<T> result;
+		result.resize(fDSMS.RowCount());
+
+		for (int i = 0; i < fDSMS.RowCount(); i++)
+		{
+			T denominator = fDSMS[i][2];
+			if (denominator != 0)
+			{
+				fDSMS[i][0] /= denominator;
+				fDSMS[i][1] /= denominator;
+				fDSMS[i][2] = 1;
+				fDSMS[i][3] /= denominator;
+			}
+		}
+
+		int dim = fDSMS.RowCount() / 2;
+		for (int  i = 1; i < dim; i++)
+		{
+			int curRow = 2*i;
+			for (int j = curRow; j < curRow + 2; j++)
+			{
+				fDSMS[j][3] -= fDSMS[j][0]*fDSMS[curRow - 2][3] + fDSMS[j][1]*fDSMS[curRow - 1][3];
+				fDSMS[j][0] = -(fDSMS[j][0]*fDSMS[curRow - 2][0] + fDSMS[j][1]*fDSMS[curRow - 1][0]);
+			}
+		}
+
+		int preLastRow = fDSMS.RowCount() - 2;
+
+		T det = fDSMS[preLastRow][0]*fDSMS[preLastRow + 1][2] - fDSMS[preLastRow][2]*fDSMS[preLastRow + 1][0];
+
+		if (det == 0)
+			throw exception("Invalid determinant");
+
+		T C0 = (fDSMS[preLastRow][3]*fDSMS[preLastRow + 1][2] - fDSMS[preLastRow][2]*fDSMS[preLastRow + 1][3])/det;
+		result[result.size() - 1] = 
+			(fDSMS[preLastRow][0]*fDSMS[preLastRow + 1][3] - fDSMS[preLastRow][3]*fDSMS[preLastRow + 1][0])/det;
+
+		result[0] = C0;
+
+		absCorrection = max(abs(C0), abs(result[result.size() - 1]));
+
+		for (int i = 0; i < fDSMS.RowCount() - 2; i++)
+		{
+			result[i + 1] =  - fDSMS[i][0]*C0 + fDSMS[i][3];
+			absCorrection = max(absCorrection, abs(result[i + 1]));
+		}
+
+		for (int i = 0; i < fDSMS.RowCount(); i++)
+			result[i] = fDSMS[i][4] - result[i];
+
+		return result;
+	}
+
+	///Method to run Newton iterations
+	vector<InitCondition<T>> RunNewtonIterations(vector<InitCondition<T>> meshData)
+	{
+		vector<InitCondition<T>> MD(std::begin(meshData), std::end(meshData));
+
+		T absCorrection = 1;
+
+		for (int i = 0; i < 10 && absCorrection > _precision; i++)
+		{
+			FourDiagonalSweepMethodStruct<T> fDSMS = GenerateSweepMethodStruct(MD);
+
+			vector<T> newVector = RunSweepMethod(fDSMS, absCorrection);
+
+			MD = VectorToMeshData(MD, newVector);
+		}
+		return MD;
+	}
+
+	///Method to generate sweep method struct
+	FourDiagonalSweepMethodStruct<T> GenerateSweepMethodStruct(vector<InitCondition<T>>& meshData)
+	{
+		auto dim = 2 * (meshData.size()-1);
+		FourDiagonalSweepMethodStruct<T> result((int)dim);
+
+		auto A = _problem->GetACoeff();
+		auto B = _problem->GetBCoeff();
+		auto A_grad = _problem->GetACoeffGradient();
+		auto B_grad = _problem->GetBCoeffGradient();
+
+		auto AI = _problem->GetACoeffInverse();
+		auto BI = _problem->GetBCoeffInverse();
+		auto AI_grad = _problem->GetACoeffInverseGradient();
+		auto BI_grad = _problem->GetBCoeffInverseGradient();
+
+		InitCondition<T> curKnot;
+		InitCondition<T> prevKnot;
+		InitCondition<T> nextKnot;
+
+		array<T, 3> A_grad_value;
+		array<T, 3> B_grad_value;
+
+		curKnot = meshData[0];
+		nextKnot = meshData[1];
+		typename X_Func_Gradient<T> dX;
+		if (abs(curKnot.Derivative) <= 1.0)
+		{
+			dX = X_Func_Gradient<T>::X3_Func_Gradient(
+				A(curKnot.Derivative, curKnot.Value, curKnot.Argument),
+				B(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
+				curKnot.Derivative, 
+				curKnot.Value, 
+				nextKnot.Argument - curKnot.Argument, _precision);
+			
+			A_grad_value = A_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+			B_grad_value = B_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+
+			result[0][3] = dX.X - nextKnot.Value;
+			result[1][3] = dX.dh - nextKnot.Derivative;
+		} else
+		{
+			dX = X_Func_Gradient<T>::XI_Func_Gradient(
+				AI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
+				BI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
+				1/curKnot.Derivative, 
+				curKnot.Argument, 
+				nextKnot.Value - curKnot.Value, _precision);
+
+			A_grad_value = AI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+			B_grad_value = BI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+
+			result[0][3] = dX.X - nextKnot.Argument;
+			result[1][3] = dX.dh - 1/nextKnot.Derivative;
+		}
+
+		result[0][0] = dX.dA * A_grad_value[0] +
+				            dX.dB * B_grad_value[0] +
+				            dX.dC;
+
+		result[1][0] = dX.dhdA * A_grad_value[0] +
+				            dX.dhdB * B_grad_value[0] +
+				            dX.dhdC;
+
+		for(std::vector<InitCondition<T>>::size_type i = 1; i < meshData.size() - 1; i++)
+		{
+			curKnot = meshData[i];
+			prevKnot = meshData[i - 1];
+			nextKnot = meshData[i + 1];
+
+			int currRow = 2 * (int)i;
+			int currCol = 2 * (int)i - 1;
+
+			if (abs(curKnot.Derivative) <= 1.0)
+			{
+				dX = X_Func_Gradient<T>::X3_Func_Gradient(
+					A(curKnot.Derivative, curKnot.Value, curKnot.Argument),
+					B(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
+					curKnot.Derivative, 
+					curKnot.Value, 
+					nextKnot.Argument - curKnot.Argument, _precision);
+
+				A_grad_value = A_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+				B_grad_value = B_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+
+				result[currRow][3] = dX.X - nextKnot.Value;
+				result[currRow + 1][3] = dX.dh - nextKnot.Derivative;
+			} else
+			{
+				dX = X_Func_Gradient<T>::XI_Func_Gradient(
+					AI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
+					BI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
+					1/curKnot.Derivative, 
+					curKnot.Argument, 
+					nextKnot.Value - curKnot.Value, _precision);
+
+				A_grad_value = AI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+				B_grad_value = BI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+
+				result[currRow][3] = dX.X - nextKnot.Argument;
+				result[currRow + 1][3] = dX.dh - 1/nextKnot.Derivative;
+			}
+
+			result[currRow][1]         = dX.dA * A_grad_value[0] +
+						                            dX.dB * B_grad_value[0] +
+						                            dX.dC;
+
+			result[currRow + 1][1]     = dX.dhdA * A_grad_value[0] +
+						                            dX.dhdB * B_grad_value[0] + 
+													dX.dhdC;
+
+			result[currRow - 2][2] = - 1;
+
+			if ((abs(prevKnot.Derivative) <= 1.0) ^ (abs(curKnot.Derivative) <= 1.0))
+			{
+				auto derivative = abs(curKnot.Derivative) <= 1.0 ? curKnot.Derivative : 1/curKnot.Derivative;
+				result[currRow - 1][2]     = 1.0 / auxutils::sqr(derivative);
+
+				result[currRow][0]     = dX.dA * A_grad_value[2] +
+						                                dX.dB * B_grad_value[2] - 
+														dX.dh;
+
+				result[currRow + 1][0] = dX.dhdA * A_grad_value[2] +
+						                                dX.dhdB * B_grad_value[2] - 
+														dX.dhdh;
+			}
+			else
+			{
+				result[currRow - 1][2]     = - 1;
+
+				result[currRow][0]     = dX.dA * A_grad_value[1] +
+						                                dX.dB * B_grad_value[1] + 
+						                                dX.dD;
+
+				result[currRow + 1][0] = dX.dhdA * A_grad_value[1] +
+						                                dX.dhdB * B_grad_value[1] + 
+														dX.dhdD;
+			}
+		}
+		
+		InitCondition<T> penultKnot = meshData[meshData.size() - 2];
+		InitCondition<T> lastKnot = meshData[meshData.size() - 1];
+
+		if ((abs(penultKnot.Derivative) <= 1.0) ^ (abs(lastKnot.Derivative) <= 1.0))
+		{
+			auto derivative = abs(lastKnot.Derivative) <= 1.0 ? lastKnot.Derivative : 1/lastKnot.Derivative;
+			result[(int)dim - 1][2] = 1 / auxutils::sqr(derivative); 
+		}
+		else
+			result[(int)dim - 1][2] = - 1;
+
+		auto uVector = MeshDataToStdVector(meshData);
+
+		for (int i = 0; i < uVector.size(); i++)
+			result[i][4] = uVector[i];
+
+		return result;
+	}
 
 	///Generates Jacobi matrix from the given meth data vector
 	void GenerateNewtonData(vector<InitCondition<T>> meshData, NewtonData& result)
@@ -227,38 +490,38 @@ private:
 				F(currRow + 1) = dX.dh - 1/nextKnot.Derivative;
 			}
 
-			JM.coeffRef(currRow, currCol)         = dX.dA * A_grad_value[0] +
+			JM.coeffRef(currRow, currCol + 1)         = dX.dA * A_grad_value[0] +
 						                            dX.dB * B_grad_value[0] +
 						                            dX.dC;
 
-			JM.coeffRef(currRow + 1, currCol)     = dX.dhdA * A_grad_value[0] +
+			JM.coeffRef(currRow + 1, currCol + 1)     = dX.dhdA * A_grad_value[0] +
 						                            dX.dhdB * B_grad_value[0] + 
 													dX.dhdC;
 
-			JM.coeffRef(currRow - 2, currCol + 1) = - 1;
+			JM.coeffRef(currRow - 2, currCol) = - 1;
 
 			if ((abs(prevKnot.Derivative) <= 1.0) ^ (abs(curKnot.Derivative) <= 1.0))
 			{
 				auto derivative = abs(curKnot.Derivative) <= 1.0 ? curKnot.Derivative : 1/curKnot.Derivative;
-				JM.coeffRef(currRow - 1, currCol)     = 1.0 / auxutils::sqr(derivative);
+				JM.coeffRef(currRow - 1, currCol + 1)     = 1.0 / auxutils::sqr(derivative);
 
-				JM.coeffRef(currRow, currCol + 1)     = dX.dA * A_grad_value[2] +
+				JM.coeffRef(currRow, currCol)     = dX.dA * A_grad_value[2] +
 						                                dX.dB * B_grad_value[2] - 
 														dX.dh;
 
-				JM.coeffRef(currRow + 1, currCol + 1) = dX.dhdA * A_grad_value[2] +
+				JM.coeffRef(currRow + 1, currCol) = dX.dhdA * A_grad_value[2] +
 						                                dX.dhdB * B_grad_value[2] - 
 														dX.dhdh;
 			}
 			else
 			{
-				JM.coeffRef(currRow - 1, currCol)     = - 1;
+				JM.coeffRef(currRow - 1, currCol + 1)     = - 1;
 
-				JM.coeffRef(currRow, currCol + 1)     = dX.dA * A_grad_value[1] +
+				JM.coeffRef(currRow, currCol)     = dX.dA * A_grad_value[1] +
 						                                dX.dB * B_grad_value[1] + 
 						                                dX.dD;
 
-				JM.coeffRef(currRow + 1, currCol + 1) = dX.dhdA * A_grad_value[1] +
+				JM.coeffRef(currRow + 1, currCol) = dX.dhdA * A_grad_value[1] +
 						                                dX.dhdB * B_grad_value[1] + 
 														dX.dhdD;
 			}
@@ -295,9 +558,8 @@ public:
 		_ptRight = ptRight;
 		_precision = precision;
 
-		T h = 0.01;
-		TroeschHybridCannon<T> thc((*_problem), h, 0.001);
-
+		T h = 0.1;
+		TroeschHybridCannon<T> thc((*_problem), h, 0.01);
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
 		BisectionComponent<T> bc(thc);
@@ -318,11 +580,15 @@ public:
 		{
 			GenerateNewtonData(MD, ND);
 
-			Eigen::BiCGSTAB<Matrix> solver; // Our BiCGStab solver;
-			solver.setMaxIterations(100000);
+			Eigen::SparseLU<Matrix> solver; // Our BiCGStab solver;
+			//solver.setMaxIterations(1000);
 
-			solver.compute(ND.matrix);// Initialization of the solver
+			solver.analyzePattern(ND.matrix);// Initialization of the solver
+			solver.factorize(ND.matrix);
 			Vector correction = solver.solve(ND.F);
+
+			T det = solver.absDeterminant();
+			string error = solver.lastErrorMessage();
 
 			T norm1;
 			if (newVect.rows() == ND.U.rows())
@@ -337,10 +603,14 @@ public:
 
 			norm = correction.norm();
 		}
-
+		
 		//auxutils::SaveToFile(MD, "f:\\NewtonExactSolution.txt");
+		
+		auto vec = RunNewtonIterations(_meshData);
+		//auxutils::SaveToFile(vec, "f:\\NewtonExactSolutionSweep.txt");
 
-		//bool sanityCheck = MeshDatasAreEqual(_meshData, newMeshData);
+
+		T diff = DiffMeshDatas(MD, vec);
 	}
 };
 

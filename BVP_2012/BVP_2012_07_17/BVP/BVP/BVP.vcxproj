@@ -200,7 +200,12 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Misc\BVP_PC_T.cpp" />
+    <ClCompile Include="Misc\BVP_PC_T.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h" />
     <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
@@ -213,7 +218,13 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="FunctionApproximation\InitialCondition.h" />
     <ClInclude Include="FunctionApproximation\PointSimple.h" />
     <ClInclude Include="FunctionApproximation\X_Function.h" />
-    <ClInclude Include="Misc\BVP_PC_T.h" />
+    <ClInclude Include="Misc\BVP_PC_T.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h" />
     <ClInclude Include="Problems\ProblemAbstract.h" />
     <ClInclude Include="Problems\TroeschProblemStatic.h" />
     <ClInclude Include="Problems\TroeschProblem.h" />
