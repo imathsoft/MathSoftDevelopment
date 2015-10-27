@@ -38,11 +38,11 @@ namespace GeneralTest
 		TEST_METHOD(StraightXFunctionDerivativesTestMethod)
 		{
 			mpreal::set_default_prec(128);
-			GVTypes<mpreal>::FullGradientVector X; X << "0.1", 1, 0, 0, 0, 0;
-			GVTypes<mpreal>::FullGradientVector A; A << 10, 0, 1, 0, 0, 0;
-			GVTypes<mpreal>::FullGradientVector B; B << -2, 0, 0, 1, 0, 0;
-			GVTypes<mpreal>::FullGradientVector C; C << -30, 0, 0, 0, 1, 0;
-			GVTypes<mpreal>::FullGradientVector D; D << 14, 0, 0, 0, 0, 1;
+			GVTypes<mpreal>::FullGradientVector X; X << "0.1" << 1 << 0 << 0 << 0 << 0;
+			GVTypes<mpreal>::FullGradientVector A; A << 10 << 0 << 1 << 0 << 0 << 0;
+			GVTypes<mpreal>::FullGradientVector B; B << -2 << 0 << 0 << 1 << 0 << 0;
+			GVTypes<mpreal>::FullGradientVector C; C << -30 << 0 << 0 << 0 << 1 << 0;
+			GVTypes<mpreal>::FullGradientVector D; D << 14 << 0 << 0 << 0 << 0 << 1;
 
 			auto straightFunc = X3_Func<GVTypes<mpreal>::FullGradientVector>(A, B, C, D, X, 1e-38);
 
@@ -102,11 +102,11 @@ namespace GeneralTest
 		TEST_METHOD(InverseXFunctionDerivativesTestMethod)
 		{
 			mpreal::set_default_prec(128);
-			GVTypes<mpreal>::FullGradientVector X; X << "0.1", 1, 0, 0, 0, 0;
-			GVTypes<mpreal>::FullGradientVector A; A << 10, 0, 1, 0, 0, 0;
-			GVTypes<mpreal>::FullGradientVector B; B << -2, 0, 0, 1, 0, 0;
-			GVTypes<mpreal>::FullGradientVector C; C << -30, 0, 0, 0, 1, 0;
-			GVTypes<mpreal>::FullGradientVector D; D << 14, 0, 0, 0, 0, 1;
+			GVTypes<mpreal>::FullGradientVector X; X << "0.1" << 1 << 0 << 0 << 0 << 0;
+			GVTypes<mpreal>::FullGradientVector A; A << 10 << 0 << 1 << 0 << 0 << 0;
+			GVTypes<mpreal>::FullGradientVector B; B << -2 << 0 << 0 << 1 << 0 << 0;
+			GVTypes<mpreal>::FullGradientVector C; C << -30 << 0 << 0 << 0 << 1 << 0;
+			GVTypes<mpreal>::FullGradientVector D; D << 14 << 0 << 0 << 0 << 0 << 1;
 
 			auto invertFunc = XI_Func<GVTypes<mpreal>::FullGradientVector>(A, B, C, D, X, 1e-38);
 
