@@ -18,4 +18,9 @@ namespace auxutils
 		mpfr::mpreal imv = value;
 		WriteToStream(stream, imv);
 	}
+
+	void WriteToStream(std::ofstream& stream, float_50_noet value )
+	{
+		stream << value << " ";
+	}
 }

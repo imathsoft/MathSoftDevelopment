@@ -571,6 +571,7 @@ public:
 		_meshData[_meshData.size() - 1].Value = 1;;
 		_meshData[_meshData.size() - 1].Argument = 1;;
 
+		/*
 		NewtonData ND;
 		vector<InitCondition<T>> MD(std::begin(_meshData), std::end(_meshData));
 
@@ -603,14 +604,14 @@ public:
 
 			norm = correction.norm();
 		}
-		
+		*/
 		//auxutils::SaveToFile(MD, "f:\\NewtonExactSolution.txt");
 		
 		auto vec = RunNewtonIterations(_meshData);
 		//auxutils::SaveToFile(vec, "f:\\NewtonExactSolutionSweep.txt");
 
 
-		T diff = DiffMeshDatas(MD, vec);
+		//T diff = DiffMeshDatas(MD, vec);
 	}
 };
 
