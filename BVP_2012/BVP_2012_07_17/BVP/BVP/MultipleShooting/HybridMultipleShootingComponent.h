@@ -30,6 +30,46 @@ private:
 	typedef Eigen::Matrix<T, Eigen::Dynamic,1> Vector;
 	typedef Eigen::SparseMatrix<T> Matrix;
 
+	///Method to refine mesh according to the given step
+	vector<InitCondition<T>> RefineMesh(vector<InitCondition<T>> meshData, T step)
+	{
+		vector<InitCondition<T>> result; 
+
+		if (meshData.size() == 0 || step <= 0)
+			return result;
+
+		InitCondition<T> nextKnot = meshData[0];
+		result.push_back(nextKnot);
+		InitCondition<T> prevKnot;
+
+		T maxSquaredDist = 2 * step * step;
+
+		for (std::vector<InitCondition<T>>::size_type i = 1; i < meshData.size(); i++)
+		{
+			prevKnot = nextKnot;
+			nextKnot = meshData[i];
+
+			InitCondition<T> vect = nextKnot - prevKnot;
+
+			if (vect.NormSquaredNaive() >= maxSquaredDist)
+			{
+				T naiveNorm = auxutils::Sqrt(vect.NormSquaredNaive());
+				vect = vect / naiveNorm;
+				T tau = step;
+
+				while (tau < naiveNorm)
+				{
+					InitCondition<T> newKnot = prevKnot + vect * tau;
+					result.push_back(newKnot);
+					tau += step;
+				}
+			}
+        	result.push_back(nextKnot);
+		}
+
+		return result;
+	}
+
 	//Method that converts mesh data to vector
 	vector<T> MeshDataToStdVector(vector<InitCondition<T>> meshData)
 	{
@@ -558,15 +598,15 @@ public:
 		_ptRight = ptRight;
 		_precision = precision;
 
-		T h = 0.1;
-		TroeschHybridCannon<T> thc((*_problem), h, 0.01);
+		T h = 0.0001;
+		TroeschHybridCannon<T> thc((*_problem), h, 0.0001);
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
 		BisectionComponent<T> bc(thc);
 		bc.DerivativeBisectionGen(0, 1, 0, 1, 0, 1, evalFunc);
 		_meshData = thc.GetKnotVector();
 
-		//auxutils::SaveToFile(_meshData, "f:\\ExactSolution.txt");
+		auxutils::SaveToFile(_meshData, "f:\\ExactSolution.txt");
 
 		_meshData[_meshData.size() - 1].Value = 1;;
 		_meshData[_meshData.size() - 1].Argument = 1;;
@@ -607,8 +647,8 @@ public:
 		*/
 		//auxutils::SaveToFile(MD, "f:\\NewtonExactSolution.txt");
 		
-		auto vec = RunNewtonIterations(_meshData);
-		//auxutils::SaveToFile(vec, "f:\\NewtonExactSolutionSweep.txt");
+		auto vec = RunNewtonIterations(RefineMesh(_meshData, h));
+		auxutils::SaveToFile(vec, "f:\\NewtonExactSolutionSweep.txt");
 
 
 		//T diff = DiffMeshDatas(MD, vec);

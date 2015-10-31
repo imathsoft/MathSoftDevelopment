@@ -14,6 +14,21 @@ typedef boost::multiprecision::number<boost::multiprecision::cpp_dec_float<30>, 
 
 namespace auxutils
 {
+	inline double Sqrt(double d)
+	{
+		return sqrt((double)d);
+	}
+
+	inline mpfr::mpreal Sqrt(mpfr::mpreal mpr)
+	{
+		return mpfr::sqrt(mpr);
+	}
+
+	inline float_50_noet Sqrt(float_50_noet mpr)
+	{
+		return boost::multiprecision::sqrt(mpr);
+	}
+
 	inline double sqr(double d)
 	{
 		return d*d;

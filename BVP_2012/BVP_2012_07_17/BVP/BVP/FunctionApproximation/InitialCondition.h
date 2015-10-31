@@ -14,6 +14,75 @@ public :
 	T SecDerivative;
 	T Argument;
 
+	//Assignment operator
+	inline InitCondition<T>& operator=(const InitCondition<T>& val)
+	{
+		Value = val.Value;
+		Derivative = val.Derivative;
+		SecDerivative = val.SecDerivative;
+		Argument = val.Argument;
+		return *this;
+	}
+
+	inline InitCondition<T> operator+(const InitCondition<T>& val) const
+	{
+		InitCondition<T> result;
+
+		result.Value = Value + val.Value;
+		result.Derivative = Derivative + val.Derivative;
+		result.SecDerivative = SecDerivative + val.SecDerivative;
+		result.Argument = Argument + val.Argument;
+
+		return result;
+	}
+
+	inline InitCondition<T> operator-(const InitCondition<T>& val) const
+	{
+		InitCondition<T> result;
+
+		result.Value = Value - val.Value;
+		result.Derivative = Derivative - val.Derivative;
+		result.SecDerivative = SecDerivative - val.SecDerivative;
+		result.Argument = Argument - val.Argument;
+
+		return result;
+	}
+
+	inline InitCondition<T> operator*(const T val) const
+	{
+		InitCondition<T> result;
+
+		result.Value = Value*val;
+		result.Derivative = Derivative*val;
+		result.SecDerivative = SecDerivative*val;
+		result.Argument = Argument*val;
+
+		return result;
+	}
+
+	inline InitCondition<T> operator/(const T val) const
+	{
+		InitCondition<T> result;
+
+		result.Value = Value/val;
+		result.Derivative = Derivative/val;
+		result.SecDerivative = SecDerivative/val;
+		result.Argument = Argument/val;
+
+		return result;
+	}
+
+	inline T NormSquared()
+	{
+		return Value * Value + Derivative * Derivative +
+			SecDerivative * SecDerivative + Argument * Argument;
+	}
+
+	inline T NormSquaredNaive()
+	{
+		return Value * Value + Argument * Argument;
+	}
+
 	template<class U>
 	friend inline std::ostream& operator << (std::ostream& out, const InitCondition<U>& ic);
 
