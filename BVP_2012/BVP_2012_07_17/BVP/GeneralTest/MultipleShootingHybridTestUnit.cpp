@@ -6,6 +6,7 @@
 #include "..\BVP\MultipleShooting\HybridMultipleShootingComponent.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include "../BVP/Utils/AuxUtils.h"
+#include "../BVP/FunctionApproximation/InitialCondition.h"
 
 using namespace auxutils;
 
@@ -13,8 +14,8 @@ using namespace mpfr;
 using namespace UnitTestAux;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-typedef float_50_noet numType;
-//typedef double numType;
+//typedef float_50_noet numType;
+typedef double numType;
 
 namespace GeneralTest
 {
@@ -37,7 +38,12 @@ namespace GeneralTest
 				ptRight.Argument  = 1;
 				ptRight.Value  = 1;
 
-				HybridMultipleShootingComponent<numType> HMSComp(tp, ptLeft, ptRight, 1e-20);
+				HybridMultipleShootingComponent<numType> HMSComp(tp);
+
+				std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, 0.0001);
+
+				Assert::IsTrue(abs(solution[0].Derivative - 1.64877364654916e-008) <= 1e-21, 
+					Message("du(0) is different"));
 			}
 			catch (exception e)
 			{

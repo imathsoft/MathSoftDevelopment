@@ -2,6 +2,7 @@
 #define GUARD_BISECTION_COMPONENT
 
 #include "..\Cannon\XCannon.h"
+#include "..\FunctionApproximation\PointSimple.h"
 
 template <class T>
 class BisectionComponent
@@ -27,6 +28,13 @@ public:
 		std::function<int(const InitCondition<T>&)> evalFunc = [&](const InitCondition<T>& ic) { return sgn(ic.Value - uTarget); };
 
 		return DerivativeBisectionGen(argStart, argFinish, uStart, uTarget, duLeft, duRight, evalFunc);
+	}
+
+	bool DerivativeBisectionGen(const PointSimple<T>& ptStart, const PointSimple<T>& ptFinish, const T& duLeft, const T& duRight,
+		std::function<int(const InitCondition<T>&)>& evaluateResultFunc)
+	{
+		return DerivativeBisectionGen(ptStart.Argument, ptFinish.Argument, ptStart.Value, ptFinish.Value, 
+		duLeft, duRight, evaluateResultFunc);
 	}
 
 	bool DerivativeBisectionGen(const T& argStart, const T& argFinish, const T& uStart, const T& uTarget, 

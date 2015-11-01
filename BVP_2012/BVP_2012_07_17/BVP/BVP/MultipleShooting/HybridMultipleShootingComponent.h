@@ -23,9 +23,6 @@ class HybridMultipleShootingComponent
 {
 private: 
 	ProblemAbstract<T>* _problem;
-	vector<InitCondition<T>> _meshData;
-	PointSimple<T> _ptLeft;
-	PointSimple<T> _ptRight;
 	double _precision;
 	typedef Eigen::Matrix<T, Eigen::Dynamic,1> Vector;
 	typedef Eigen::SparseMatrix<T> Matrix;
@@ -250,9 +247,9 @@ private:
 	}
 
 	///Method to run Newton iterations
-	vector<InitCondition<T>> RunNewtonIterations(vector<InitCondition<T>> meshData)
+	vector<InitCondition<T>> RunNewtonIterations(vector<InitCondition<T>> meshData, T desiredMaxStepSize)
 	{
-		vector<InitCondition<T>> MD(std::begin(meshData), std::end(meshData));
+		vector<InitCondition<T>> MD = RefineMesh(meshData, desiredMaxStepSize);
 
 		T absCorrection = 1;
 
@@ -262,7 +259,7 @@ private:
 
 			vector<T> newVector = RunSweepMethod(fDSMS, absCorrection);
 
-			MD = VectorToMeshData(MD, newVector);
+			MD = RefineMesh(VectorToMeshData(MD, newVector), desiredMaxStepSize);
 		}
 		return MD;
 	}
@@ -587,71 +584,38 @@ private:
 		//auxutils::SaveToFile(result.F, "F:\\F.txt");
 		//auxutils::SaveToFile(result.U, "F:\\V.txt");
 	}
+
 public:
 	///Constructor
-	HybridMultipleShootingComponent(ProblemAbstract<T>& problem, 
-		PointSimple<T> ptLeft, PointSimple<T> ptRight, double precision)
+	HybridMultipleShootingComponent(ProblemAbstract<T>& problem)
 	{
-		//throw NotImplementedException();
 		_problem = &problem;
-		_ptLeft = ptLeft;
-		_ptRight = ptRight;
-		_precision = precision;
+		_precision = std::numeric_limits<T>::epsilon();;
+	}
 
-		T h = 0.0001;
-		TroeschHybridCannon<T> thc((*_problem), h, 0.0001);
+	vector<InitCondition<T>> Run(
+		const PointSimple<T>& ptLeft, const PointSimple<T>& ptRight, 
+		const double desiredStepSize)
+	{
+		T h = desiredStepSize;
+
+		TroeschHybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), h, min(0.01, h*10));
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
 		BisectionComponent<T> bc(thc);
-		bc.DerivativeBisectionGen(0, 1, 0, 1, 0, 1, evalFunc);
-		_meshData = thc.GetKnotVector();
+		bc.DerivativeBisectionGen(ptLeft, ptRight, 0, 1, evalFunc);
+		auto meshData = thc.GetKnotVector();
 
-		auxutils::SaveToFile(_meshData, "f:\\ExactSolution.txt");
+		//auxutils::SaveToFile(meshData, "f:\\ExactSolution.txt");
 
-		_meshData[_meshData.size() - 1].Value = 1;;
-		_meshData[_meshData.size() - 1].Argument = 1;;
-
-		/*
-		NewtonData ND;
-		vector<InitCondition<T>> MD(std::begin(_meshData), std::end(_meshData));
-
-		Vector newVect;
-		T norm = 1;
-		for (int i = 0 ; i < 10 && norm > _precision; i++)
-		{
-			GenerateNewtonData(MD, ND);
-
-			Eigen::SparseLU<Matrix> solver; // Our BiCGStab solver;
-			//solver.setMaxIterations(1000);
-
-			solver.analyzePattern(ND.matrix);// Initialization of the solver
-			solver.factorize(ND.matrix);
-			Vector correction = solver.solve(ND.F);
-
-			T det = solver.absDeterminant();
-			string error = solver.lastErrorMessage();
-
-			T norm1;
-			if (newVect.rows() == ND.U.rows())
-			    norm1 = (newVect - ND.U).norm();
-
-			newVect = ND.U - correction;
-
-			//auxutils::SaveToFile(newVect, "f:\\Sol.txt");
-			//auxutils::SaveToFile(correction, "f:\\correction.txt");
-
-		    MD = VectorToMeshData(MD, newVect);
-
-			norm = correction.norm();
-		}
-		*/
-		//auxutils::SaveToFile(MD, "f:\\NewtonExactSolution.txt");
+		meshData[meshData.size() - 1].Value = ptRight.Value;
+		meshData[meshData.size() - 1].Argument = ptRight.Argument;
 		
-		auto vec = RunNewtonIterations(RefineMesh(_meshData, h));
-		auxutils::SaveToFile(vec, "f:\\NewtonExactSolutionSweep.txt");
+		auto sol = RunNewtonIterations(meshData, h);
 
+		//auxutils::SaveToFile(sol, "f:\\NewtonExactSolutionSweep.txt");
 
-		//T diff = DiffMeshDatas(MD, vec);
+		return sol;
 	}
 };
 
