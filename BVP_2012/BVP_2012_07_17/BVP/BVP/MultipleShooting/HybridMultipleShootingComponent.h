@@ -8,10 +8,6 @@
 #include "..\Cannon\TroeschHybridCannon.h"
 #include "..\ShootingSimple\BisectionComponent.h"
 
-#include <Eigen/Sparse>
-#include <Eigen/Dense>
-#include <Eigen/MPRealSupport>
-
 #include "..\Utils\Exceptions.h"
 #include "..\FunctionApproximation\X_Function.h"
 #include <vector>
@@ -24,8 +20,6 @@ class HybridMultipleShootingComponent
 private: 
 	ProblemAbstract<T>* _problem;
 	double _precision;
-	typedef Eigen::Matrix<T, Eigen::Dynamic,1> Vector;
-	typedef Eigen::SparseMatrix<T> Matrix;
 
 	///Method to refine mesh according to the given step
 	vector<InitCondition<T>> RefineMesh(vector<InitCondition<T>> meshData, T step)
@@ -101,6 +95,7 @@ private:
 		return result;
 	}
 
+	/*
 	//Method that converts mesh data to vector
 	Vector MeshDataToVector(vector<InitCondition<T>> meshData)
 	{
@@ -114,7 +109,7 @@ private:
 
 		return result;
 	}
-
+	*/
 
 	///Returns mesh data obtained from the previous mesh data and the given vector
 	vector<InitCondition<T>> VectorToMeshData(vector<InitCondition<T>> baseMeshData, vector<T> vect)
@@ -148,6 +143,7 @@ private:
 		return result;
 	}
 
+	/*
 	///Returns mesh data obtained from the previous mesh data and the given vector
 	vector<InitCondition<T>> VectorToMeshData(vector<InitCondition<T>> baseMeshData, Vector vect)
 	{
@@ -158,6 +154,7 @@ private:
 
 		return VectorToMeshData(baseMeshData, vec);
 	}
+	*/
 
 	///Method to compare two mesh data
 	T DiffMeshDatas(vector<InitCondition<T>> meshData1, vector<InitCondition<T>> meshData2)
@@ -180,15 +177,6 @@ private:
 
 		return diff;
 	}
-
-	///A struct that contains data for a Newton method'd iteration 
-	struct NewtonData
-	{
-	public:
-		Matrix matrix;
-		Vector F;
-		Vector U;
-	};
 
 	///Method to run sweep method
 	vector<T> RunSweepMethod(FourDiagonalSweepMethodStruct<T> fDSMS, T& absCorrection)
@@ -417,11 +405,21 @@ private:
 
 		auto uVector = MeshDataToStdVector(meshData);
 
-		for (int i = 0; i < uVector.size(); i++)
-			result[i][4] = uVector[i];
+		for (std::vector<T>::size_type i = 0; i < uVector.size(); i++)
+			result[(int)i][4] = uVector[i];
 
 		return result;
-	}
+	};
+
+	/*
+	///A struct that contains data for a Newton method'd iteration 
+	struct NewtonData
+	{
+	public:
+		Matrix matrix;
+		Vector F;
+		Vector U;
+	};
 
 	///Generates Jacobi matrix from the given meth data vector
 	void GenerateNewtonData(vector<InitCondition<T>> meshData, NewtonData& result)
@@ -584,7 +582,7 @@ private:
 		//auxutils::SaveToFile(result.F, "F:\\F.txt");
 		//auxutils::SaveToFile(result.U, "F:\\V.txt");
 	}
-
+	*/
 public:
 	///Constructor
 	HybridMultipleShootingComponent(ProblemAbstract<T>& problem)

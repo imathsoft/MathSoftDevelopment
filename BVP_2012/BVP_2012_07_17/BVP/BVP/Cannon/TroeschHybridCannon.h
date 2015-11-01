@@ -15,14 +15,14 @@ private:
 	static bool StraightCannonCheckFunc(InitCondition<T>& ic)
 	{
 		return (abs(ic.Derivative) <= 1);
-	}
+	};
 
 protected:
 	inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish)
 	{
 		InitCondition<T> result = {0,0,0,0};
 		return result;
-	}
+	};
 
 public:
 	///Constructor
@@ -35,13 +35,13 @@ public:
 	{
 		_straightCannon = new XCannon<T>(problem, defaultStepSize, precision, TroeschHybridCannon<T>::StraightCannonCheckFunc);
 		_inverseCannon = new XCannonInverse<T>(problem, defaultStepSize, precision);
-	}
+	};
 
 	~TroeschHybridCannon()
 	{
 		delete _straightCannon;
 		delete _inverseCannon;
-	}
+	};
 
 	virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& funcTarget, const T& dFuncStart) override
 	{
@@ -54,7 +54,7 @@ public:
 			result.Derivative = 1/tempResult.Derivative;
 		}
 		return result;
-	}
+	};
 
 	/// <summary>
 	/// Saves to file.
@@ -67,7 +67,7 @@ public:
      
 		SaveToFile(saveFile);
 		saveFile.close();
-	}
+	};
 
 	/// <summary>
 	/// Saves to file.
@@ -84,7 +84,7 @@ public:
 				auxutils::WriteToStream(saveFile, knot.Derivative);
 				saveFile <<  endl;
 			}
-	}
+	};
 
 	//Returns vector of knots
 	virtual std::vector<InitCondition<T>> GetKnotVector() override

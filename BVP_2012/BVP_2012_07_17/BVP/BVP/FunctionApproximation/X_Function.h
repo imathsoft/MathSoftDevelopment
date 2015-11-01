@@ -2,10 +2,6 @@
 #define GUARD_X_FUNCTION
 #include <iostream>
 #include <fstream>
-#include <conio.h>
-#include <Eigen/Dense>
-#include <Eigen/MPRealSupport>
-#include <array>
 #include <list>
 #include "GradientVector.h"
 #include "InitialCondition.h"
@@ -45,7 +41,7 @@ inline int EstimateIterationsSingle(const T& numerator, const T& precision)
 template <class T>
 inline T X_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision){
 	return X(A, B, C, D, h, EstimateIterations((abs(A)*abs(h)+abs(B))*abs(h*h), precision/(abs(C*h)+abs(D))));
-}
+};
 
 //This function calculates value of u(h), where
 //diff(u(x), x, x) = (A*x+B)*u(x);   u'(0) = C; u(0)=D;
@@ -79,7 +75,7 @@ inline T X(const T& A, const T& B, const T& C, const T& D, const T& h, int n){
 	result += D;
 	delete [] mas;
     return result;
-}
+};
 
 template <class T>
 inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const T& h, int n){
@@ -117,7 +113,7 @@ inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const
 
 	delete [] mas;
     return result;
-}
+};
 
 template <class T>
 inline InitCondition<T> XI(const T& A, const T& B, const T& C, const T& D, const T& h, int n){
@@ -148,7 +144,7 @@ inline InitCondition<T> XI(const T& A, const T& B, const T& C, const T& D, const
 
 	delete [] mas;
     return result;
-}
+};
 
 // A method that computes u(h) where u(x) stisfies the following Cauchy problem
 // u''(x) = (A*x+B)*u(x);
@@ -157,7 +153,7 @@ inline InitCondition<T> XI(const T& A, const T& B, const T& C, const T& D, const
 template <class T>
 inline InitCondition<T> X3_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision){
 	return X3(A, B, C, D, h, EstimateIterationsDouble((abs(A)*abs(h)+abs(B))*abs(h*h), precision/(abs(C*h)+abs(D))));
-}
+};
 
 // A method that computes u(h) where u(x) stisfies the following Cauchy problem
 // u''(x) = (A*x+B)*u'(x);
@@ -166,7 +162,7 @@ inline InitCondition<T> X3_Func(const T& A, const T& B, const T& C, const T& D, 
 template <class T>
 inline InitCondition<T> XI_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision){
 	return XI(A, B, C, D, h, EstimateIterationsSingle((abs(A)*abs(h)+abs(B))*abs(h),precision/(abs(C))));
-}
+};
 
 template <class T>
 class X_Func_Gradient 

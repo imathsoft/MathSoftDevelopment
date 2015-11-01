@@ -2,6 +2,7 @@
 #define GUARD_XCANNON_INVERSE
 
 #include "XCannonAbstract.h"
+#include "../FunctionApproximation/X_Function.h"
 
 template <class T>
 class XCannonInverse : public XCannonAbstract<T>
@@ -28,7 +29,7 @@ protected:
 		knot.Argument = prevKnot.Argument + H;
 
 		return knot;
-	}
+	};
 
 public:	
 	/// <summary>
@@ -47,7 +48,7 @@ public:
 	{
 		_aCoeff = _problem->GetACoeffInverse();
 		_bCoeff = _problem->GetBCoeffInverse();
-	}
+	};
 
 	/// <summary>
 	/// Saves to file.
@@ -56,7 +57,7 @@ public:
 	virtual void SaveToFile(const char* fileName) override
 	{
 		SaveFunctionToFile(fileName, true /*invertMapping*/);
-	}
+	};
 
 	/// <summary>
 	/// Saves to file.
@@ -65,7 +66,7 @@ public:
 	virtual void SaveToFile(ofstream& saveFileStream) override
 	{
 		SaveFunctionToFile(saveFileStream, true /*invertMapping*/);
-	}
+	};
 };
 
 #endif

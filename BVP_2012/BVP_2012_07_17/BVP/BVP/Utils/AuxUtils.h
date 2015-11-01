@@ -4,8 +4,6 @@
 #include <mpreal.h>
 #include <fstream>
 
-#include <Eigen/Sparse>
-#include <Eigen/MPRealSupport>
 #include <boost\multiprecision\cpp_dec_float.hpp>
 #include <boost/multiprecision/debug_adaptor.hpp> 
 
@@ -16,7 +14,7 @@ namespace auxutils
 {
 	inline double Sqrt(double d)
 	{
-		return sqrt((double)d);
+		return std::sqrt((double)d);
 	}
 
 	inline mpfr::mpreal Sqrt(mpfr::mpreal mpr)
@@ -112,26 +110,6 @@ namespace auxutils
 
 	///Method to write sparse matrix into a text file
 	template <class T>
-	void SaveToFile(Eigen::SparseMatrix<T> matrix, char* filename)
-	{
-		 ofstream file;
-		 file.open (filename);
-         file << matrix;
-         file.close();
-	}
-
-	///Method to write sparse matrix into a text file
-	template <class T>
-	void SaveToFile(Eigen::Matrix<T, Eigen::Dynamic, 1> matrix, char* filename)
-	{
-		 ofstream file;
-		 file.open (filename);
-         file << matrix;
-         file.close();
-	}
-
-	///Method to write sparse matrix into a text file
-	template <class T>
 	void SaveToFile(std::vector<T> mesh, char* filename, std::streamsize pecision = 15)
 	{
 		 ofstream file;
@@ -144,6 +122,6 @@ namespace auxutils
 		 }
          file.close();
 	}
-}
+};
 
 #endif

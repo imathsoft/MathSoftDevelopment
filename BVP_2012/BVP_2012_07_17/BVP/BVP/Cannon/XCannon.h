@@ -2,6 +2,7 @@
 #define GUARD_X_CANNON
 
 #include "XCannonAbstract.h"
+#include "../FunctionApproximation/X_Function.h"
 
 template <class T>
 class XCannon : public XCannonAbstract<T>
@@ -29,7 +30,7 @@ protected:
 		knot.Argument = prevKnot.Argument + H;
 
 		return knot;
-	}
+	};
 
 public:	
 	/// <summary>
@@ -48,7 +49,7 @@ public:
 	{
 		_aCoeff = _problem->GetACoeff();
 		_bCoeff = _problem->GetBCoeff();
-	}
+	};
 
 	/// <summary>
 	/// Saves to file.
@@ -57,7 +58,7 @@ public:
 	virtual void SaveToFile(const char* fileName) override
 	{
 		SaveFunctionToFile(fileName, false /*invertMapping*/);
-	}
+	};
 
 	/// <summary>
 	/// Saves to file.
@@ -66,7 +67,7 @@ public:
 	virtual void SaveToFile(ofstream& saveFileStream) override
 	{
 		SaveFunctionToFile(saveFileStream, false /*invertMapping*/);
-	}
+	};
 };
 
 #endif

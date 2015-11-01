@@ -1,10 +1,10 @@
 #ifndef GUARD_XCANNON_ABSTRACT
 #define GUARD_XCANNON_ABSTRACT
 
-#include "..\FunctionApproximation\X_Function.h"
 #include "..\Problems\ProblemAbstract.h"
 #include "..\FunctionApproximation\InitialCondition.h"
 #include <vector>
+#include <list>
 
 template <class T>
 class BisectionComponent;
@@ -13,7 +13,7 @@ template <class T>
 class XCannonAbstract
 {
 protected:
-	typedef list<InitCondition<T>> ICLIST;
+	typedef std::list<InitCondition<T>> ICLIST;
 	ICLIST _listIC;
 	typename ICLIST::iterator iLst;
 	ProblemAbstract<T>* _problem;
@@ -32,7 +32,7 @@ protected:
 	/// <param name="saveFile">The save file.</param>
 	/// <param name="invertMapping">if set to <c>true</c> [invert mapping].</param>
 	/// A method to save function values to the specified file
-	void SaveFunctionToFile(ofstream& saveFile, bool invertMapping)
+	void SaveFunctionToFile(std::ofstream& saveFile, bool invertMapping)
 	{
 		if (invertMapping)
 		{
@@ -54,7 +54,7 @@ protected:
 				saveFile <<  endl;
 			}
 		}
-	}
+	};
 
 	/// <summary>
 	/// Saves the function to file.
@@ -68,7 +68,7 @@ protected:
      
 		SaveFunctionToFile(saveFile, invertMapping);
 		saveFile.close();
-	}
+	};
 
 	/// <summary>
 	/// Shoots the specified argument start.
@@ -116,7 +116,7 @@ public:
 		_hFunc = hFunc;
 		_checkFunc = checkFunc;
 		_precision = precision;
-	}
+	};
 
 	/// <summary>
 	/// Gets the precision.
@@ -125,7 +125,7 @@ public:
 	double GetPrecision()
 	{
 		return _precision;
-	}
+	};
 
 	//Returns vector of knots
 	/// <summary>
@@ -149,7 +149,7 @@ public:
 	virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& dFuncStart)
 	{
 		return Shoot(argStart, argFinish, funcStart, 0 /*does not matter*/, dFuncStart);
-	}
+	};
 
 	/// <summary>
 	/// Finalizes an instance of the <see cref="XCannonAbstract{T}"/> class.
@@ -157,11 +157,11 @@ public:
 	virtual ~XCannonAbstract()
 	{
 		_listIC.clear();
-	}
+	};
 
 	virtual void SaveToFile(const char* fileName) = 0;
 
-	virtual void SaveToFile(ofstream& saveFileStream) = 0;
+	virtual void SaveToFile(std::ofstream& saveFileStream) = 0;
 
 	friend class BisectionComponent<T>;
 };

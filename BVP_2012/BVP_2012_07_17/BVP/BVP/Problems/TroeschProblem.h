@@ -122,11 +122,11 @@ public:
 	}
 
 	///A method to return std:function wrapper of the gradient of A coefficient
-	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetACoeffGradient()
+	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetACoeffGradient()
 	{
 		return [=](const T& derivative, const T& value, const T& argument ) 
 		{
-			array<T, 3> result;
+			std::array<T, 3> result;
 			result[0] = dNonlin(value);
 			result[1] = ddNonlin(value)*derivative;
 			result[2] = 0; 
@@ -142,11 +142,11 @@ public:
 	}
 
 	///A method to return std:function wrapper of the gradient of B coefficient
-	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetBCoeffGradient()
+	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetBCoeffGradient()
 	{
 		return [=](const T& derivative, const T& value, const T& argument ) 
 		{
-			array<T, 3> result;
+			std::array<T, 3> result;
 			result[0] = 0;
 			result[1] = dNonlin(value);
 			result[2] = 0; 
@@ -169,11 +169,11 @@ public:
 	}
 
 	///A method to return std:function wrapper of the gradient of A coefficient for inverse problem
-	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetACoeffInverseGradient()
+	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetACoeffInverseGradient()
 	{
 		return [=](const T& derivative, const T& value, const T& argument ) 
 		{
-			array<T, 3> result;
+			std::array<T, 3> result;
 			T N  = Nonlin(argument);
 			T dN  = dNonlin(argument);
 			T ddN = ddNonlin(argument);
@@ -202,11 +202,11 @@ public:
 	}
 
 	///A method to return std:function wrapper of the gradient of B coefficient for inverse problem
-	virtual std::function<array<T, 3>(const T&, const T&, const T&)> GetBCoeffInverseGradient()
+	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetBCoeffInverseGradient()
 	{
 		return [=](const T& derivative, const T& value, const T& argument ) 
 		{
-			array<T, 3> result;
+			std::array<T, 3> result;
 			T N  = Nonlin(argument);
 			T dN  = dNonlin(argument);
 

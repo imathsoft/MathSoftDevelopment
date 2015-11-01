@@ -1,6 +1,8 @@
 #ifndef GUARD_GRADIENT_VECTOR
 #define GUARD_GRADIENT_VECTOR
 
+#include <ostream>
+#include <array>
 
 template <class T, int _Cols>
 class GradientVector
