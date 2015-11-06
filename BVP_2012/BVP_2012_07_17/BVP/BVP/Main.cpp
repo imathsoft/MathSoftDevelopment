@@ -1,11 +1,17 @@
 #include "Cannon\TroeschHybridCannon.h"
 #include "ShootingSimple\BisectionComponent.h"
 #include "Problems\TroeschProblem.h"
+#include "MultipleShooting\HybridMultipleShootingComponent.h"
+#include "Utils\AuxUtils.h"
 #include <time.h>
+#include <boost\timer.hpp>
 #include <omp.h>
 
 using namespace std;
-using namespace mpfr;
+using namespace auxutils;
+
+//typedef float_50_noet numType;
+typedef double numType;
 
 // Get current date/time, format is YYYY-MM-DD.HH:mm:ss
 const std::string currentDateTime() {
@@ -21,31 +27,38 @@ const std::string currentDateTime() {
 }
 
 int main(){
-	mpreal::set_default_prec(64);
 	char answer = 'y';
 	while (answer == 'y')
 	{
 		cout << "lambda =";
-		mpreal l;
+		numType l;
 		cin >> l;
-		mpreal h;
+		numType h;
 		cout << "h = ";
 		cin >> h;
-		h = max(0.0001, min(0.1, h));
+		h = max(0.00001, min(0.1, h));
 		cout <<"h= " << h<< endl;
 
-		TroeschProblem<mpreal> tpf(l);
-		TroeschHybridCannon<mpreal> thc(tpf, h, 1e-16);
+		TroeschProblem<numType> tp(l);
 
-		std::function<int(const InitCondition<mpreal>&)> evalFunc = 
-					 [](const InitCondition<mpreal>& ic) { return sgn(ic.Value - ic.Argument); };
-		BisectionComponent<mpreal> bc(thc);
-		cout << currentDateTime() << endl;
-		bc.DerivativeBisectionGen("0.0", "1.0", "0.0", "1.0", "0.0", "1.0", evalFunc);
-		cout << currentDateTime() << endl;
-		string fileName = "TroeschProblemSolution.txt";
-		thc.SaveToFile(fileName.c_str());
-		cout << "Result is saved to " << fileName << endl;
+		PointSimple<numType> ptLeft;
+		ptLeft.Argument  = 0;
+		ptLeft.Value  = 0;
+
+		PointSimple<numType> ptRight;
+		ptRight.Argument  = 1;
+		ptRight.Value  = 1;
+
+		HybridMultipleShootingComponent<numType> HMSComp(tp);
+
+		//cout << currentDateTime() << endl;
+		boost::timer t;
+		std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, h);
+		//cout << currentDateTime() << endl;
+		cout << t.elapsed() << endl;
+		std::string fileName = "f:\\TroeschProblemSolution.txt";
+		//auxutils::SaveToFile(solution, fileName.c_str());
+		//cout << "Result is saved to " << fileName << endl;
 		cout << "Continue? y/n";
 		cin >> answer;
 	}

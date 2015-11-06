@@ -588,12 +588,12 @@ public:
 	HybridMultipleShootingComponent(ProblemAbstract<T>& problem)
 	{
 		_problem = &problem;
-		_precision = std::numeric_limits<T>::epsilon();;
+		_precision = std::numeric_limits<T>::epsilon();
 	}
 
 	vector<InitCondition<T>> Run(
 		const PointSimple<T>& ptLeft, const PointSimple<T>& ptRight, 
-		const double desiredStepSize)
+		const T desiredStepSize)
 	{
 		T h = desiredStepSize;
 

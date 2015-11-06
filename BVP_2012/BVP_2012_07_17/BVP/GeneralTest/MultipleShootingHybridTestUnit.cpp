@@ -44,6 +44,8 @@ namespace GeneralTest
 
 				Assert::IsTrue(abs(solution[0].Derivative - 1.64877364654916e-008) <= 1e-21, 
 					Message("du(0) is different"));
+				Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 22026.4657494062) <= 1e-10, 
+					Message("du(1) is different"));
 			}
 			catch (exception e)
 			{

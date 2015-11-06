@@ -106,4 +106,12 @@ inline std::ostream& operator << (std::ostream& out, const InitCondition<U>& ic)
 	return out;
 };
 
+namespace std {
+
+	template<class T> class numeric_limits<InitCondition<T>> {
+        public:
+			static const int digits10 = numeric_limits<T>::digits10;
+    };
+} 
+
 #endif
