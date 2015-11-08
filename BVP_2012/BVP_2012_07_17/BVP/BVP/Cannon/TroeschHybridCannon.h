@@ -27,7 +27,7 @@ protected:
 public:
 	///Constructor
 	TroeschHybridCannon(ProblemAbstract<T>& problem, const T defaultStepSize, 
-		double precision, 
+		T precision, 
 		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
 		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
 		XCannonAbstract(problem, defaultStepSize, precision, checkFunc, 

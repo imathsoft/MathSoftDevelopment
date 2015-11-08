@@ -111,6 +111,9 @@ namespace std {
 	template<class T> class numeric_limits<InitCondition<T>> {
         public:
 			static const int digits10 = numeric_limits<T>::digits10;
+			static const bool is_integer = numeric_limits<T>::is_integer;
+			static const int  min_exponent = numeric_limits<T>::min_exponent;
+			static const int  max_exponent = numeric_limits<T>::max_exponent;
     };
 } 
 

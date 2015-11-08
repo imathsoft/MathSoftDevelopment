@@ -38,8 +38,8 @@ inline int EstimateIterationsSingle(const T& numerator, const T& precision)
 	return i;
 };
 
-template <class T>
-inline T X_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision){
+template <class T, class P>
+inline T X_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision){
 	return X(A, B, C, D, h, EstimateIterations((abs(A)*abs(h)+abs(B))*abs(h*h), precision/(abs(C*h)+abs(D))));
 };
 
@@ -150,8 +150,8 @@ inline InitCondition<T> XI(const T& A, const T& B, const T& C, const T& D, const
 // u''(x) = (A*x+B)*u(x);
 // u(0) = D;
 // u'(0) = C;
-template <class T>
-inline InitCondition<T> X3_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision){
+template <class T, class P>
+inline InitCondition<T> X3_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision){
 	return X3(A, B, C, D, h, EstimateIterationsDouble((abs(A)*abs(h)+abs(B))*abs(h*h), precision/(abs(C*h)+abs(D))));
 };
 
@@ -159,8 +159,8 @@ inline InitCondition<T> X3_Func(const T& A, const T& B, const T& C, const T& D, 
 // u''(x) = (A*x+B)*u'(x);
 // u(0) = D;
 // u'(0) = C;
-template <class T>
-inline InitCondition<T> XI_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision){
+template <class T, class P>
+inline InitCondition<T> XI_Func(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision){
 	return XI(A, B, C, D, h, EstimateIterationsSingle((abs(A)*abs(h)+abs(B))*abs(h),precision/(abs(C))));
 };
 
@@ -201,7 +201,7 @@ public :
 	}
 
     ///Returns gradient of X3_Func(...)
-	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision)
+	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const T& precision)
 	{
 		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
 		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
@@ -211,11 +211,11 @@ public :
 
 		X_Func_Gradient<T> result;
 
-		return result = X3_Func<typename GVTypes<T>::OptimalGradientVector>(EA, EB, EC, ED, EH, precision);
+		return result = X3_Func<typename GVTypes<T>::OptimalGradientVector, T>(EA, EB, EC, ED, EH, precision);
 	}
 
 	///Returns gradient of XI_Func_Gradient
-	static inline typename X_Func_Gradient<T> XI_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const double precision)
+	static inline typename X_Func_Gradient<T> XI_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const T& precision)
 	{
 		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
 		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
@@ -225,7 +225,7 @@ public :
 
 		X_Func_Gradient<T> result;
 
-		return result = XI_Func<GVTypes<T>::OptimalGradientVector>(EA, EB, EC, ED, EH, precision);
+		return result = XI_Func<typename GVTypes<T>::OptimalGradientVector, T>(EA, EB, EC, ED, EH, precision);
 	}
 };
 

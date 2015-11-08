@@ -19,7 +19,7 @@ class HybridMultipleShootingComponent
 {
 private: 
 	ProblemAbstract<T>* _problem;
-	double _precision;
+	T _precision;
 
 	///Method to refine mesh according to the given step
 	vector<InitCondition<T>> RefineMesh(vector<InitCondition<T>> meshData, T step)
@@ -588,7 +588,7 @@ public:
 	HybridMultipleShootingComponent(ProblemAbstract<T>& problem)
 	{
 		_problem = &problem;
-		_precision = std::numeric_limits<T>::epsilon();
+		_precision = 10 * std::numeric_limits<T>::epsilon();
 	}
 
 	vector<InitCondition<T>> Run(
@@ -597,21 +597,17 @@ public:
 	{
 		T h = desiredStepSize;
 
-		TroeschHybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), h, min(0.01, h*10));
+		TroeschHybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), h, min((T)1/100, h*10));
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
 		BisectionComponent<T> bc(thc);
 		bc.DerivativeBisectionGen(ptLeft, ptRight, 0, 1, evalFunc);
 		auto meshData = thc.GetKnotVector();
 
-		//auxutils::SaveToFile(meshData, "f:\\ExactSolution.txt");
-
 		meshData[meshData.size() - 1].Value = ptRight.Value;
 		meshData[meshData.size() - 1].Argument = ptRight.Argument;
 		
 		auto sol = RunNewtonIterations(meshData, h);
-
-		//auxutils::SaveToFile(sol, "f:\\NewtonExactSolutionSweep.txt");
 
 		return sol;
 	}

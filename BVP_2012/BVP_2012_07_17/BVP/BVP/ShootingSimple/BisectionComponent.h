@@ -3,13 +3,14 @@
 
 #include "..\Cannon\XCannon.h"
 #include "..\FunctionApproximation\PointSimple.h"
+#include "..\Utils\AuxUtils.h"
 
 template <class T>
 class BisectionComponent
 {
 private:
 	XCannonAbstract<T>* _cannon;
-	double _precision;
+	T _precision;
 
 	InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& uTarget, const T& dFuncStart)
 	{

@@ -22,7 +22,7 @@ protected:
 	std::function<T(const int, const int)> _hFunc;
 	std::function<bool(InitCondition<T>&)> _checkFunc;
 	T _h; // default step size
-	double _precision;
+	T _precision;
 
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) = 0;
 
@@ -107,7 +107,7 @@ public:
 	/// <param name="hFunc">The h function.</param>
 	/// <param name="checkFunc">The check function.</param>
 	/// <param name="precision">The precision.</param>
-	XCannonAbstract(ProblemAbstract<T>& problem, const T defaultStepSize, double precision, 
+	XCannonAbstract(ProblemAbstract<T>& problem, const T defaultStepSize, const T precision, 
 		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
 		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; })
 	{
@@ -122,7 +122,7 @@ public:
 	/// Gets the precision.
 	/// </summary>
 	/// <returns></returns>
-	double GetPrecision()
+	T GetPrecision()
 	{
 		return _precision;
 	};

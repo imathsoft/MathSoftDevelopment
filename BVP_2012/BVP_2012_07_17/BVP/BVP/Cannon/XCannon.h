@@ -42,7 +42,7 @@ public:
 	/// <param name="hFunc">The h function.</param>
 	/// <param name="checkFunc">The check function.</param>
 	/// <param name="precision">The precision.</param>
-	XCannon(ProblemAbstract<T>& problem, const T defaultStepSize, double precision, 
+	XCannon(ProblemAbstract<T>& problem, const T defaultStepSize, const T precision, 
 		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
 		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
 		XCannonAbstract(problem, defaultStepSize, precision, checkFunc, hFunc)

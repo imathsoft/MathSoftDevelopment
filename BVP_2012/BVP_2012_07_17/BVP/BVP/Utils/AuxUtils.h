@@ -3,12 +3,13 @@
 
 #include <mpreal.h>
 #include <fstream>
+#include <strstream>
 
 #include <boost\multiprecision\cpp_dec_float.hpp>
 #include <boost/multiprecision/debug_adaptor.hpp> 
 
-//typedef boost::multiprecision::number<boost::multiprecision::debug_adaptor<boost::multiprecision::cpp_dec_float<50>>, boost::multiprecision::et_off> float_50_noet;
-typedef boost::multiprecision::number<boost::multiprecision::cpp_dec_float<30>, boost::multiprecision::et_off> float_50_noet;
+//typedef boost::multiprecision::number<boost::multiprecision::debug_adaptor<boost::multiprecision::cpp_dec_float<20>>, boost::multiprecision::et_off> float_50_noet;
+typedef boost::multiprecision::number<boost::multiprecision::cpp_dec_float<20>, boost::multiprecision::et_off> float_50_noet;
 
 namespace auxutils
 {
@@ -62,21 +63,13 @@ namespace auxutils
 		return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
 	}
 
-	inline float_50_noet abs(float_50_noet mpr)
+	template <class T>
+	inline std::string ToString( const T val)
 	{
-		return boost::multiprecision::abs(mpr);
-	}
-
-	inline float_50_noet max(float_50_noet mpr1, 
-		float_50_noet mpr2)
-	{
-		return mpr1 > mpr2 ? mpr1 : mpr2;
-	}
-
-	inline float_50_noet min(float_50_noet mpr1, 
-		float_50_noet mpr2)
-	{
-		return mpr1 < mpr2 ? mpr1 : mpr2;
+		std::stringstream ss;
+		ss.precision(std::numeric_limits<T>::digits10);
+		ss << val;
+		return ss.str();
 	}
 
 	///Square root approximation using Halley's method (that is faster than the Newton's one)
