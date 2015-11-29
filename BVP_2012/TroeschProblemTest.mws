@@ -3,11 +3,12 @@
 1 0 0 0 0 1 }{CSTYLE "2D Math" -1 2 "Times" 0 1 0 0 0 0 0 0 2 0 0 0 0 
 0 0 1 }{CSTYLE "2D Output" 2 20 "" 0 1 0 0 255 1 0 0 0 0 0 0 0 0 0 1 }
 {PSTYLE "Normal" -1 0 1 {CSTYLE "" -1 -1 "Times" 1 12 0 0 0 1 2 2 2 2 
-2 2 1 1 1 1 }1 1 0 0 0 0 1 0 1 0 2 2 0 1 }{PSTYLE "Maple Output" -1 
-11 1 {CSTYLE "" -1 -1 "Times" 1 12 0 0 0 1 2 2 2 2 2 2 1 1 1 1 }3 3 0 
-0 0 0 1 0 1 0 2 2 0 1 }{PSTYLE "Maple Plot" -1 13 1 {CSTYLE "" -1 -1 "
-Times" 1 12 0 0 0 1 2 2 2 2 2 2 1 1 1 1 }3 1 0 0 0 0 1 0 1 0 2 2 0 1 }
-}
+2 2 1 1 1 1 }1 1 0 0 0 0 1 0 1 0 2 2 0 1 }{PSTYLE "Text Output" -1 6 
+1 {CSTYLE "" -1 -1 "Courier" 1 10 0 0 255 1 2 2 2 2 2 1 2 1 3 1 }1 1 
+0 0 0 0 1 0 1 0 2 2 0 1 }{PSTYLE "Maple Output" -1 11 1 {CSTYLE "" -1 
+-1 "Times" 1 12 0 0 0 1 2 2 2 2 2 2 1 1 1 1 }3 3 0 0 0 0 1 0 1 0 2 2 
+0 1 }{PSTYLE "Maple Plot" -1 13 1 {CSTYLE "" -1 -1 "Times" 1 12 0 0 0 
+1 2 2 2 2 2 2 1 1 1 1 }3 1 0 0 0 0 1 0 1 0 2 2 0 1 }}
 {SECT 0 {EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 194 "with(ArrayTools):\n
 with(plots):\nDigits:=39;\nts_data := readdata(\"F:/GitHubRepo/MathSof
 tDevelopment/BVP_2012/BVP_2012_07_17/BVP/BVP/TroeschProblemSolution.tx
@@ -441,5 +442,65 @@ Lm\\gs\"p^+)[8(f(F_el7$Fjgo$\"F7&41KFLm\\g#[;\"RM*)='y%F_el7$Fjgo$\"F7
  " 0 "" {MPLTEXT 1 0 99 "l:=1;\nT1:=dsolve(\{diff(u(x),x,x)-l*sinh(l*u
 (x))=0, u(0)=0, u(1)=1\}, numeric, output=listprocedure);" }}{PARA 11 
 "" 1 "" {XPPMATH 20 "6#>%\"lG\"\"\"" }}{PARA 11 "" 1 "" {TEXT -1 0 "" 
-}}}}{MARK "4 0 0" 0 }{VIEWOPTS 1 1 0 1 1 1803 1 1 1 1 }{PAGENUMBERS 0 
-1 2 33 1 1 }
+}}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 62 "T1:=dsolve(\{diff(X(h),h,
+h)= (A*h+B)*X(h), X(0)=D, D(X)(0)=C\});" }}{PARA 0 "> " 0 "" {MPLTEXT 
+1 0 0 "" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%#T1G/-%\"XG6#%\"hG,&**,&*
+(-%'AiryBiG6#*&,$%\"AG!\"\"#!\"#\"\"$%\"BG\"\"\"F9%\"CGF9)F2#\"\"#F7F9
+F4*(%\"DGF9F3F9-F/6$F9F1F9F9F9F3F4,&*&F.F9-%'AiryAiGFAF9F9*&F@F9-FEF0F
+9F4F4-FE6#*&F2F5,&*&F3F9F)F9F9F8F9F9F9F4**F3F4FBF4,&*(F:F9F;F9FGF9F4*(
+F?F9F3F9FDF9F9F9-F/FIF9F9" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 
+107 "latex(A*(AiryBi(1/(-A)^(2/3)*B)*AiryAi(1,1/(-A)^(2/3)*B)-AiryBi(1
+,1/(-A)^(2/3)*B)*AiryAi(1/(-A)^(2/3)*B)));" }}{PARA 6 "" 1 "" {TEXT 
+-1 53 "A \\left( \{Bi(\{\\frac \{B\}\{ \\left( -A \\right) ^\{2/3\}\}
+\})\}" }}{PARA 6 "" 1 "" {TEXT -1 47 "\{Ai(1,\{\\frac \{B\}\{ \\left( \+
+-A \\right) ^\{2/3\}\}\})\}-" }}{PARA 6 "" 1 "" {TEXT -1 46 "\{Bi(1,\{
+\\frac \{B\}\{ \\left( -A \\right) ^\{2/3\}\}\})\}" }}{PARA 6 "" 1 "" 
+{TEXT -1 53 "\{Ai(\{\\frac \{B\}\{ \\left( -A \\right) ^\{2/3\}\}\})\}
+ \\right) " }}{PARA 6 "" 1 "" {TEXT -1 0 "" }}}{EXCHG {PARA 0 "> " 0 "
+" {MPLTEXT 1 0 140 "E := latex(simplify(solve(T1, X(h)) * A*(AiryBi(1/
+(-A)^(2/3)*B)*AiryAi(1,1/(-A)^(2/3)*B)-AiryBi(1,1/(-A)^(2/3)*B)*AiryAi
+(1/(-A)^(2/3)*B))));" }}{PARA 0 "> " 0 "" {MPLTEXT 1 0 0 "" }}{PARA 6 
+"" 1 "" {TEXT -1 47 "\{Ai(\{\\frac \{Ah+B\}\{ \\left( -A \\right) ^\{2
+/3\}\}\})\}" }}{PARA 6 "" 1 "" {TEXT -1 70 "\{Bi(\{\\frac \{B\}\{ \\le
+ft( -A \\right) ^\{2/3\}\}\})\}C \\left( -A \\right) ^\{2/3\}" }}
+{PARA 6 "" 1 "" {TEXT -1 67 "-\{Ai(\{\\frac \{Ah+B\}\{ \\left( -A \\ri
+ght) ^\{2/3\}\}\})\} \\left( D \\right) A" }}{PARA 6 "" 1 "" {TEXT -1 
+47 "\{Bi(1,\{\\frac \{B\}\{ \\left( -A \\right) ^\{2/3\}\}\})\}-" }}
+{PARA 6 "" 1 "" {TEXT -1 70 "\{Bi(\{\\frac \{Ah+B\}\{ \\left( -A \\rig
+ht) ^\{2/3\}\}\})\}C \\left( -A \\right) ^\{2" }}{PARA 6 "" 1 "" 
+{TEXT -1 48 "/3\}\{Ai(\{\\frac \{B\}\{ \\left( -A \\right) ^\{2/3\}\}
+\})\}+" }}{PARA 6 "" 1 "" {TEXT -1 66 "\{Bi(\{\\frac \{Ah+B\}\{ \\left
+( -A \\right) ^\{2/3\}\}\})\} \\left( D \\right) A" }}{PARA 6 "" 1 "" 
+{TEXT -1 46 "\{Ai(1,\{\\frac \{B\}\{ \\left( -A \\right) ^\{2/3\}\}\})
+\}" }}{PARA 6 "" 1 "" {TEXT -1 0 "" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#
+>%\"EG6\"" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 133 "simplify(Airy
+Ai(1/(-A)^(2/3)*(A*h+B))*AiryBi(1/(-A)^(2/3)*B)*C*(-A)^(2/3)-AiryAi(1/
+(-A)^(2/3)*(A*h+B))*D*A*AiryBi(1,1/(-A)^(2/3)*B));" }}{PARA 11 "" 1 "
+" {XPPMATH 20 "6#,&**-%'AiryAiG6#*&,$%\"AG!\"\"#!\"#\"\"$,&*&F*\"\"\"%
+\"hGF1F1%\"BGF1F1F1-%'AiryBiG6#*&F)F,F3F1F1%\"CGF1)F)#\"\"#F.F1F1**F%F
+1%\"DGF1F*F1-F56$F1F7F1F+" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 
+24 "subst( solve(T1, X(h)));" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#,$*(,*
+**-%'AiryAiG6#*&,$%\"AG!\"\"#!\"#\"\"$,&*&F,\"\"\"%\"hGF3F3%\"BGF3F3F3
+-%'AiryBiG6#*&F+F.F5F3F3%\"CGF3)F+#\"\"#F0F3F-**F'F3%\"DGF3F,F3-F76$F3
+F9F3F3**-F7F)F3F:F3F;F3-F(F8F3F3**FCF3F?F3F,F3-F(FAF3F-F3F,F-,&*&F6F3F
+FF3F3*&F@F3FDF3F-F-F-" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 87 "la
+tex(solve(dsolve(\{diff(Y(h),h,h)= (A*h+B)*diff(Y(h), h), Y(0)=D, D(Y)
+(0)=C\}), Y(h)));" }}{PARA 6 "" 1 "" {TEXT -1 70 "1/2\\, \\left( 2\\, \+
+\\left( D \\right) \{\{\\rm e\}^\{1/2\\,\{\\frac \{\{B\}^\{2\}\}\{A\}
+\}\}" }}{PARA 6 "" 1 "" {TEXT -1 66 "\}A-\{\{\\rm erf\}\\left(\{\\frac
+ \{B\}\{\\sqrt \{-2\\,A\}\}\}\\right)\}C\\sqrt \{\\pi \}" }}{PARA 6 "
+" 1 "" {TEXT -1 68 "\\sqrt \{-2\\,A\}+\{\{\\rm erf\}\\left(\{\\frac \{
+Ah+B\}\{\\sqrt \{-2\\,A\}\}\}\\right)\}C" }}{PARA 6 "" 1 "" {TEXT -1 
+70 "\\sqrt \{\\pi \}\\sqrt \{-2\\,A\} \\right)  \\left( \{\{\\rm e\}^
+\{1/2\\,\{\\frac \{\{B\}^\{" }}{PARA 6 "" 1 "" {TEXT -1 31 "2\}\}\{A\}
+\}\}\} \\right) ^\{-1\}\{A\}^\{-1\}" }}{PARA 6 "" 1 "" {TEXT -1 0 "" }
+}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 80 "solve(dsolve(\{diff(Y(h),h
+,h)= (A*h+B)*diff(Y(h), h), Y(0)=D, D(Y)(0)=C\}), Y(h));" }}{PARA 11 "
+" 1 "" {XPPMATH 20 "6#,$*&#\"\"\"\"\"#F&*(,(**F'F&%\"DGF&-%$expG6#,$*(
+F'!\"\"%\"BGF'%\"AGF1F&F&F3F&F&**-%$erfG6#*&F2F&,$*&F'F&F3F&F1#F1F'F&%
+\"CGF&%#PiGF%F9F%F1**-F66#*&F9F;,&*&F3F&%\"hGF&F&F2F&F&F&F<F&F=F%F9F%F
+&F&F,F1F3F1F&F&" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 47 "latex(2*
+(int(exp(-t^2), t = 0 .. x))/sqrt(Pi));" }}{PARA 6 "" 1 "" {TEXT -1 
+25 "\{\{\\rm erf\}\\left(x\\right)\}" }}{PARA 6 "" 1 "" {TEXT -1 0 "" 
+}}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 0 "" }}}}{MARK "13 0 0" 0 }
+{VIEWOPTS 1 1 0 1 1 1803 1 1 1 1 }{PAGENUMBERS 0 1 2 33 1 1 }
