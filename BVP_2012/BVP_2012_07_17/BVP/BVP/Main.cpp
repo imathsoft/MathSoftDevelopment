@@ -36,7 +36,7 @@ int main(){
 		numType h;
 		cout << "h = ";
 		cin >> h;
-		h = max(0.00001, min(0.1, h));
+		h = max((numType)0.000001, min((numType)0.1, h));
 		cout <<"h= " << h<< endl;
 
 		TroeschProblem<numType> tp(l);
