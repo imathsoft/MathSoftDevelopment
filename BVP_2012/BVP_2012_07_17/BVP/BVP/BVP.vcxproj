@@ -225,6 +225,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h" />
+    <ClInclude Include="Problems\OscillatingTestProblem.h" />
     <ClInclude Include="Problems\ProblemAbstract.h" />
     <ClInclude Include="Problems\TroeschProblemStatic.h" />
     <ClInclude Include="Problems\TroeschProblem.h" />

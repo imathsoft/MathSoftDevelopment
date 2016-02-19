@@ -104,5 +104,8 @@
     <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h">
       <Filter>Header Files\MultipleShooting</Filter>
     </ClInclude>
+    <ClInclude Include="Problems\OscillatingTestProblem.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
