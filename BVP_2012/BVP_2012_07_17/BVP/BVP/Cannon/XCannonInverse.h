@@ -67,6 +67,26 @@ public:
 	{
 		SaveFunctionToFile(saveFileStream, true /*invertMapping*/);
 	};
+
+	//Returns vector of knots
+	virtual std::vector<InitCondition<T>> GetKnotVectorStreight() override
+	{
+		auto resultInv = GetKnotVector();
+		if (resultInv.size() > 0)
+		{
+			std::transform(resultInv.begin(), resultInv.end(), resultInv.begin(), [](InitCondition<T> ic) ->
+				InitCondition<T>{ 
+					InitCondition<T> result;
+					result.Value = ic.Argument;
+					result.Argument = ic.Value;
+					result.Derivative = 1/ic.Derivative;
+					result.SecDerivative = - ic.SecDerivative/(auxutils::sqr(ic.Derivative) * ic.Derivative);
+					return result;
+			});
+		}
+
+		return resultInv;
+	}
 };
 
 #endif

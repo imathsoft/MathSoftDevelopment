@@ -42,9 +42,9 @@ namespace GeneralTest
 				std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, 0.0001);
 
 				Assert::IsTrue(abs(solution[0].Derivative - 1.64877364654916e-008) <= 1e-21, 
-					Message("du(0) is different"));
+					Message("du(0) is different" + auxutils::ToString(solution[0].Derivative)));
 				Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 22026.4657494062) <= 1e-10, 
-					Message("du(1) is different"));
+					Message("du(1) is different" + auxutils::ToString(solution[solution.size() - 1].Derivative)));
 			}
 			catch (exception e)
 			{

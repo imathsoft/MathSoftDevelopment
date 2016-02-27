@@ -3,8 +3,11 @@
 
 #include "..\Problems\ProblemAbstract.h"
 #include "..\FunctionApproximation\InitialCondition.h"
+#include "..\Utils\AuxUtils.h"
 #include <vector>
 #include <list>
+
+using namespace auxutils;
 
 template <class T>
 class BisectionComponent;
@@ -70,6 +73,27 @@ protected:
 		saveFile.close();
 	};
 
+	///Method to validate start and finish arguments with respect to step value
+	///Returns false if it is impossible to get to the finish argument from the start argument 
+	///using the given step size value
+	bool ValidateArgumentSegmentAndStep(const T& argStart, const T& argFinish)
+	{
+		return ValidateArgumentSegmentAndStep(argStart, argFinish, _h);
+	}
+
+	bool ValidateArgumentSegmentAndStep(const T& argStart, const T& argFinish, const T& step)
+	{
+		return abs(step) > 0 &&  sgn(argFinish - argStart) == sgn(step);;
+	}
+
+	///Returns true if the two given arguments are equal with respect to the given precision
+	bool ArgumentsAreEqualWithPrecision(const T& arg1, const T& arg2)
+	{
+		return abs(arg1 - arg2) <= 10*_precision;
+	}
+
+	bool _destinationPointIsHit;
+
 	/// <summary>
 	/// Shoots the specified argument start.
 	/// </summary>
@@ -81,18 +105,24 @@ protected:
 	/// <returns></returns>
 	virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& funcTarget, const T& dFuncStart)
 	{
+		_destinationPointIsHit = false;
 		_listIC.clear();
 		InitCondition<T> ic;
 		ic.Value = funcStart;
 		ic.Derivative = dFuncStart;
 		ic.Argument = argStart;
 		_listIC.insert(_listIC.end(), ic);
+
+		if (!ValidateArgumentSegmentAndStep(argStart, argFinish))
+			return ic;
 					
 		do
 		{
 			ic = GetNextKnot(ic, argFinish);
 			_listIC.insert(_listIC.end(), ic);
-		} while (abs(ic.Argument- argFinish) > 10*_precision && _checkFunc(ic)); 
+		} while (!ArgumentsAreEqualWithPrecision(ic.Argument, argFinish) && _checkFunc(ic)); 
+
+		_destinationPointIsHit = ArgumentsAreEqualWithPrecision(ic.Argument, argFinish);
 
 		return ic;
 	};
@@ -116,6 +146,7 @@ public:
 		_hFunc = hFunc;
 		_checkFunc = checkFunc;
 		_precision = precision;
+		_destinationPointIsHit = false;
 	};
 
 	/// <summary>
@@ -127,6 +158,12 @@ public:
 		return _precision;
 	};
 
+	///Returns true if after shooting we hit the end of interval
+	bool DestinationPointIsHit()
+	{
+		return _destinationPointIsHit;
+	}
+
 	//Returns vector of knots
 	/// <summary>
 	/// Gets the knot vector.
@@ -137,6 +174,12 @@ public:
 		std::vector<InitCondition<T>> result(std::begin(_listIC), std::end(_listIC));
 		return result;
 	};
+
+	///Returns knot vector with respect to straight solution
+	virtual std::vector<InitCondition<T>> GetKnotVectorStreight()
+	{
+		return GetKnotVector();
+	}
 
 	/// <summary>
 	/// Shoots the specified argument start.

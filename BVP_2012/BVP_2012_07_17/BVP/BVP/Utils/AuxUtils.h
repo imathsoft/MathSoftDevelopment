@@ -4,12 +4,13 @@
 #include <mpreal.h>
 #include <fstream>
 #include <strstream>
+#include "..\FunctionApproximation\InitialCondition.h"
 
 #include <boost\multiprecision\cpp_dec_float.hpp>
 #include <boost/multiprecision/debug_adaptor.hpp> 
 
 //typedef boost::multiprecision::number<boost::multiprecision::debug_adaptor<boost::multiprecision::cpp_dec_float<20>>, boost::multiprecision::et_off> float_50_noet;
-typedef boost::multiprecision::number<boost::multiprecision::cpp_dec_float<20>, boost::multiprecision::et_off> float_50_noet;
+typedef boost::multiprecision::number<boost::multiprecision::cpp_dec_float<30>, boost::multiprecision::et_off> float_50_noet;
 
 namespace auxutils
 {
@@ -101,7 +102,7 @@ namespace auxutils
 
 	void WriteToStream(std::ofstream& stream, double value );
 
-	///Method to write sparse matrix into a text file
+	///Method to write vector of knots into a text file
 	template <class T>
 	void SaveToFile(const std::vector<T> mesh, const char* filename)
 	{
@@ -115,6 +116,22 @@ namespace auxutils
 		 }
          file.close();
 	}
+
+	///Method to write vector of knots into a "Maple"-compatible text file
+	template <class T>
+	void SaveToMapleFile(const std::vector<InitCondition<T>> mesh, const char* filename)
+	{
+		 std::ofstream file;
+		 file.precision(std::numeric_limits<T>::digits10);
+		 file.open (filename);
+		 for (std::vector<InitCondition<T>>::const_iterator m = mesh.begin(); m != mesh.end(); ++m)
+		 {
+			 file << (*m).Argument << " " << (*m).Value;
+			 file << endl;
+		 }
+         file.close();
+	}
+
 };
 
 #endif
