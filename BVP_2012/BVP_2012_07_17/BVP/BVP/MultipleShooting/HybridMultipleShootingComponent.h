@@ -242,7 +242,7 @@ private:
 		T absCorrection = 1;
 
 		///DD-160228: Achievable precision is limited by round-off errors
-		///which, in turn, depends on the number of knots
+		///which, in turn, depend on the number of knots
 		auto achievablePrec = max(auxutils::RoughSqrt((T)MD.size()) * std::numeric_limits<T>::epsilon(), _precision);
 
 		for (int i = 0; i < 10 && absCorrection > achievablePrec; i++)
