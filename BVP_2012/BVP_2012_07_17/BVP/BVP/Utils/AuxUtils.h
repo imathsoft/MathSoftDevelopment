@@ -119,14 +119,18 @@ namespace auxutils
 
 	///Method to write vector of knots into a "Maple"-compatible text file
 	template <class T>
-	void SaveToMapleFile(const std::vector<InitCondition<T>> mesh, const char* filename)
+	void SaveToMapleFile(const std::vector<InitCondition<T>> mesh, const char* filename, 
+		bool saveDerivatives = false)
 	{
 		 std::ofstream file;
 		 file.precision(std::numeric_limits<T>::digits10);
 		 file.open (filename);
 		 for (std::vector<InitCondition<T>>::const_iterator m = mesh.begin(); m != mesh.end(); ++m)
 		 {
-			 file << (*m).Argument << " " << (*m).Value;
+			 auto ic = (*m);
+			 file << ic.Argument << " " << ic.Value;
+			 if (saveDerivatives)
+				 file << " " << ic.Derivative;
 			 file << endl;
 		 }
          file.close();

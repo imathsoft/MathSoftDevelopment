@@ -241,7 +241,11 @@ private:
 
 		T absCorrection = 1;
 
-		for (int i = 0; i < 10 && absCorrection > _precision; i++)
+		///DD-160228: Achievable precision is limited by round-off errors
+		///which, in turn, depends on the number of knots
+		auto achievablePrec = max(auxutils::RoughSqrt((T)MD.size()) * std::numeric_limits<T>::epsilon(), _precision);
+
+		for (int i = 0; i < 10 && absCorrection > achievablePrec; i++)
 		{
 			FourDiagonalSweepMethodStruct<T> fDSMS = GenerateSweepMethodStruct(MD);
 
@@ -611,6 +615,18 @@ public:
 
 		return sol;
 	}
+
+	vector<InitCondition<T>> Run(vector<InitCondition<T>> initialGuess, 
+		const T desiredStepSize)
+	{
+		T h = desiredStepSize;
+
+		auto sol = RunNewtonIterations(initialGuess, h);
+
+		return sol;
+	}
+
+
 };
 
 #endif
