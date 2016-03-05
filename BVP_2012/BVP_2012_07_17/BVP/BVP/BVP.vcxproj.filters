@@ -62,9 +62,6 @@
     <ClInclude Include="Problems\ProblemAbstract.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
-    <ClInclude Include="Cannon\TroeschHybridCannon.h">
-      <Filter>Header Files\Cannon</Filter>
-    </ClInclude>
     <ClInclude Include="Cannon\XCannon.h">
       <Filter>Header Files\Cannon</Filter>
     </ClInclude>
@@ -106,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="Problems\OscillatingTestProblem.h">
       <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Cannon\HybridCannon.h">
+      <Filter>Header Files\Cannon</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

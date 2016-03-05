@@ -3,7 +3,7 @@
 #include "UnitTestAux.h"
 #include "../BVP/Utils/AuxUtils.h"
 #include "..\BVP\Problems\OscillatingTestProblem.h"
-#include "..\BVP\Cannon\TroeschHybridCannon.h"
+#include "..\BVP\Cannon\HybridCannon.h"
 #include "..\BVP\ShootingSimple\BisectionComponent.h"
 #include "..\BVP\MultipleShooting\HybridMultipleShootingComponent.h"
 
@@ -39,7 +39,7 @@ namespace GeneralTest
 		{
 			 double h = 0.01;
 			 OscillatingTestProblem<double> problem;
-			 TroeschHybridCannon<double> thc(problem, h, 10*std::numeric_limits<double>::epsilon());
+			 HybridCannon<double> thc(problem, h, 10*std::numeric_limits<double>::epsilon());
 
 			 auto result = thc.Shoot(0, 10, 1, 1e6, 1);
 			 auto knots = thc.GetKnotVectorStreight();
@@ -56,7 +56,7 @@ namespace GeneralTest
 			 std::function<bool(const InitCondition<double>&)> checkFunc = 
 				 [](const InitCondition<double>& ic) { return (abs(ic.Value) < 10) && (abs(ic.Argument) < 10); };
 
-			 TroeschHybridCannon<double> cannon(problem, h, 10*std::numeric_limits<double>::epsilon(), checkFunc);
+			 HybridCannon<double> cannon(problem, h, 10*std::numeric_limits<double>::epsilon(), checkFunc);
 
 			 std::function<int(const InitCondition<double>&)> evalFunc = 
 				 [](const InitCondition<double>& ic) { return sgn(ic.Value - 1.1); };
@@ -79,7 +79,7 @@ namespace GeneralTest
 			 std::function<bool(const InitCondition<double>&)> checkFunc = 
 				 [](const InitCondition<double>& ic) { return (abs(ic.Value) < 10) && (abs(ic.Argument) < 10); };
 
-			 TroeschHybridCannon<double> cannon(problem, h, h/10.0, checkFunc);
+			 HybridCannon<double> cannon(problem, h, h/10.0, checkFunc);
 
 			 std::function<int(const InitCondition<double>&)> evalFunc = 
 				 [=](const InitCondition<double>& ic) { return sgn(ic.Value - targetValue); };

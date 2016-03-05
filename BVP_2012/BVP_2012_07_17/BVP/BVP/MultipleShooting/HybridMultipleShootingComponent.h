@@ -5,7 +5,7 @@
 #include "..\FunctionApproximation\GradientVector.h"
 #include "..\FunctionApproximation\InitialCondition.h"
 #include "..\FunctionApproximation\PointSimple.h"
-#include "..\Cannon\TroeschHybridCannon.h"
+#include "..\Cannon\HybridCannon.h"
 #include "..\ShootingSimple\BisectionComponent.h"
 
 #include "..\Utils\Exceptions.h"
@@ -601,7 +601,7 @@ public:
 	{
 		T h = desiredStepSize;
 
-		TroeschHybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), h, min((T)1/100, h*10));
+		HybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), h, min((T)1/100, h*10));
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
 		BisectionComponent<T> bc(thc);

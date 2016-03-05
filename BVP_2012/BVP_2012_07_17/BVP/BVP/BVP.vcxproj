@@ -210,7 +210,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cannon\TroeschHybridCannon.h" />
+    <ClInclude Include="Cannon\HybridCannon.h" />
     <ClInclude Include="Cannon\XCannon.h" />
     <ClInclude Include="Cannon\XCannonAbstract.h" />
     <ClInclude Include="Cannon\XCannonInverse.h" />

@@ -9,7 +9,7 @@
 using namespace auxutils;
 
 template <class T>
-class TroeschHybridCannon : public XCannonAbstract<T>
+class HybridCannon : public XCannonAbstract<T>
 {
 private:
 	typedef std::list<std::unique_ptr<XCannonAbstract<T>>> CANNON_LIST;
@@ -25,7 +25,7 @@ protected:
 
 public:
 	///Constructor
-	TroeschHybridCannon(ProblemAbstract<T>& problem, const T defaultStepSize, 
+	HybridCannon(ProblemAbstract<T>& problem, const T defaultStepSize, 
 		T precision, 
 		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
 		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
@@ -33,7 +33,7 @@ public:
 		hFunc)
 	{};
 
-	~TroeschHybridCannon()
+	~HybridCannon()
 	{};
 
 	virtual InitCondition<T> Shoot(const T& argStart, const T& argFinish, const T& funcStart, const T& funcTarget, const T& dFuncStart) override

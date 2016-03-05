@@ -4,7 +4,7 @@
 #include "..\BVP\Cannon\XCannon.h"
 #include "..\BVP\Problems\TroeschProblem.h"
 #include "..\BVP\ShootingSimple\BisectionComponent.h"
-#include "..\BVP\Cannon\TroeschHybridCannon.h"
+#include "..\BVP\Cannon\HybridCannon.h"
 #include "UnitTestAux.h"
 
 using namespace mpfr;
@@ -74,7 +74,7 @@ namespace GeneralTest
 			 const int l = 10;
 			 TroeschProblem<mpreal> tpf(l);
 			 mpreal h = "0.01";
-			 TroeschHybridCannon<mpreal> thc(tpf, h, 1e-15);
+			 HybridCannon<mpreal> thc(tpf, h, 1e-15);
 
 			 std::function<int(const InitCondition<mpreal>&)> evalFunc = 
 				 [](const InitCondition<mpreal>& ic) { return sgn(ic.Value - ic.Argument); };
@@ -91,7 +91,7 @@ namespace GeneralTest
 			 const int l = 10;
 			 double h = 0.01;
 			 TroeschProblem<double> tpf(l);
-			 TroeschHybridCannon<double> thc(tpf, h, 1e-15);
+			 HybridCannon<double> thc(tpf, h, 1e-15);
 
 			 std::function<int(const InitCondition<double>&)> evalFunc = 
 				 [](const InitCondition<double>& ic) { return sgn(ic.Value - ic.Argument); };
