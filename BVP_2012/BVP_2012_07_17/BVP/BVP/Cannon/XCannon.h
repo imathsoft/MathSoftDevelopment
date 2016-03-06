@@ -22,7 +22,9 @@ protected:
 		T C = prevKnot.Derivative;
 		T D = prevKnot.Value;
 
-		T hOpt = (abs(A) > 1) ? 1/auxutils::RoughSqrt(abs(A)) : abs(_h);
+		T test = max(abs(A*_h), abs(B));
+
+		T hOpt = (test > 1) ? 1/auxutils::RoughSqrt(2*test) : abs(_h);
 
 		T H = sgn(_h) * min(min(hOpt, abs(_h)), abs(argFinish - prevKnot.Argument));
 

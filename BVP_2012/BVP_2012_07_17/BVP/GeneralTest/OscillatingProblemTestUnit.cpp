@@ -92,13 +92,15 @@ namespace GeneralTest
 
 			 HybridMultipleShootingComponent<double> HMSComp(problem);
 
-			 std::vector<InitCondition<double>> solution = HMSComp.Run(knots, 0.002);
+			 bool succeeded;
+			 std::vector<InitCondition<double>> solution = HMSComp.Run(knots, 0.002, succeeded);
 
+			 Assert::IsTrue(succeeded, Message("Algorithm has not succeeded"));
 			 Assert::IsTrue(abs(solution[solution.size() - 1].Value - targetValue) < 10*std::numeric_limits<double>::epsilon(), 
 				 Message("Function mismatch " + auxutils::ToString(solution[solution.size() - 1].Value)));
-			 Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 1.31696085245777) < 10*std::numeric_limits<double>::epsilon(), 
+			 Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 1.31696084860275) < 100*std::numeric_limits<double>::epsilon(), 
 				 Message("Derivative mismatch " + auxutils::ToString(solution[solution.size() - 1].Derivative)));
-			 Assert::IsTrue(abs(solution[0].Derivative - 1.25761696583347) < 10*std::numeric_limits<double>::epsilon(), 
+			 Assert::IsTrue(abs(solution[0].Derivative - 1.2576169315833) < 100*std::numeric_limits<double>::epsilon(), 
 				 Message("Derivative mismatch " + auxutils::ToString(solution[0].Derivative)));
 		}
 	};

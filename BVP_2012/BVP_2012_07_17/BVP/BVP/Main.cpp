@@ -1,4 +1,4 @@
-#include "Cannon\TroeschHybridCannon.h"
+#include "Cannon\HybridCannon.h"
 #include "ShootingSimple\BisectionComponent.h"
 #include "Problems\TroeschProblem.h"
 #include "MultipleShooting\HybridMultipleShootingComponent.h"
@@ -53,12 +53,14 @@ int main(){
 
 		//cout << currentDateTime() << endl;
 		boost::timer t;
-		std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, h);
+		bool succeeded;
+		std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, h, succeeded);
 		//cout << currentDateTime() << endl;
 		cout << t.elapsed() << endl;
+		cout << "Number of knots = " << solution.size() << endl;
 		std::string fileName = "f:\\TroeschProblemSolution.txt";
-		//auxutils::SaveToFile(solution, fileName.c_str());
-		//cout << "Result is saved to " << fileName << endl;
+		auxutils::SaveToFile(solution, fileName.c_str());
+		cout << "Result is saved to " << fileName << endl;
 		cout << "Continue? y/n";
 		cin >> answer;
 	}

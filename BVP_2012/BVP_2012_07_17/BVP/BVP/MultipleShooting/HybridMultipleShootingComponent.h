@@ -234,25 +234,47 @@ private:
 		return result;
 	}
 
-	///Method to run Newton iterations
-	vector<InitCondition<T>> RunNewtonIterations(vector<InitCondition<T>> meshData, T desiredMaxStepSize)
+	///Calculates and returns the "acheivable precision"
+	T GetAcheivablePrecision(size_t numberOfKnots)
 	{
-		vector<InitCondition<T>> MD = RefineMesh(meshData, desiredMaxStepSize);
+		return 10 * max(auxutils::RoughSqrt((T)numberOfKnots) * std::numeric_limits<T>::epsilon(), _precision);
+	}
+
+	///Method to run Newton iterations
+	vector<InitCondition<T>> RunNewtonIterations(vector<InitCondition<T>> meshData, T desiredMaxStepSize, bool& succeeded )
+	{
+		succeeded = false;
+		vector<InitCondition<T>> MD(std::begin(meshData), std::end(meshData));
 
 		T absCorrection = 1;
+		T oldAbsCorrection = 1;
 
 		///DD-160228: Achievable precision is limited by round-off errors
 		///which, in turn, depend on the number of knots
-		auto achievablePrec = max(auxutils::RoughSqrt((T)MD.size()) * std::numeric_limits<T>::epsilon(), _precision);
+		auto achievablePrec = GetAcheivablePrecision(MD.size());
 
 		for (int i = 0; i < 10 && absCorrection > achievablePrec; i++)
 		{
+			if (absCorrection*auxutils::RoughSqrt((T)MD.size()) < 1) // the process is starting to converge
+			{
+				MD = RefineMesh(MD, desiredMaxStepSize);
+				achievablePrec = GetAcheivablePrecision(MD.size());
+			}
+
 			FourDiagonalSweepMethodStruct<T> fDSMS = GenerateSweepMethodStruct(MD);
 
 			vector<T> newVector = RunSweepMethod(fDSMS, absCorrection);
 
-			MD = RefineMesh(VectorToMeshData(MD, newVector), desiredMaxStepSize);
+			if (absCorrection / oldAbsCorrection > 100 && absCorrection > 100)
+				break; // the process is divergent
+
+			oldAbsCorrection = absCorrection;
+
+			MD = VectorToMeshData(MD, newVector);
 		}
+
+		succeeded = absCorrection <= achievablePrec;
+
 		return MD;
 	}
 
@@ -597,11 +619,13 @@ public:
 
 	vector<InitCondition<T>> Run(
 		const PointSimple<T>& ptLeft, const PointSimple<T>& ptRight, 
-		const T desiredStepSize)
+		const T desiredStepSize,
+		bool& succeeded)
 	{
 		T h = desiredStepSize;
 
-		HybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), h, min((T)1/100, h*10));
+		T preStep = min((T)1/100, 10*h);
+		HybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), preStep, min((T)1/100, h/10));
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
 		BisectionComponent<T> bc(thc);
@@ -611,17 +635,18 @@ public:
 		meshData[meshData.size() - 1].Value = ptRight.Value;
 		meshData[meshData.size() - 1].Argument = ptRight.Argument;
 		
-		auto sol = RunNewtonIterations(meshData, h);
+		auto sol = RunNewtonIterations(meshData, h, succeeded);
 
 		return sol;
 	}
 
 	vector<InitCondition<T>> Run(vector<InitCondition<T>> initialGuess, 
-		const T desiredStepSize)
+		const T desiredStepSize,
+		bool& succeeded)
 	{
 		T h = desiredStepSize;
 
-		auto sol = RunNewtonIterations(initialGuess, h);
+		auto sol = RunNewtonIterations(initialGuess, h, succeeded);
 
 		return sol;
 	}

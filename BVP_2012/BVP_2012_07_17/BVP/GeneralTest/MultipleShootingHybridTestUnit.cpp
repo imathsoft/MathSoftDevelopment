@@ -39,9 +39,11 @@ namespace GeneralTest
 
 				HybridMultipleShootingComponent<numType> HMSComp(tp);
 
-				std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, 0.0001);
+				bool succeeded;
+				std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, 0.0001, succeeded);
 
-				Assert::IsTrue(abs(solution[0].Derivative - 1.64877364654916e-008) <= 1e-21, 
+			    Assert::IsTrue(succeeded, Message("Algorithm has not succeeded"));
+				Assert::IsTrue(abs(solution[0].Derivative - 1.64877350732915e-008) <= 1e-21, 
 					Message("du(0) is different" + auxutils::ToString(solution[0].Derivative)));
 				Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 22026.4657494062) <= 1e-10, 
 					Message("du(1) is different" + auxutils::ToString(solution[solution.size() - 1].Derivative)));
@@ -69,15 +71,18 @@ namespace GeneralTest
 
 				HybridMultipleShootingComponent<numTypeMp> HMSComp(tp);
 
-				std::vector<InitCondition<numTypeMp>> solution = HMSComp.Run(ptLeft, ptRight, (numTypeMp)1/50);
+				bool succeeded;
+				std::vector<InitCondition<numTypeMp>> solution = HMSComp.Run(ptLeft, ptRight, (numTypeMp)1/50, succeeded);
 
-				Assert::IsTrue(abs(solution[0].Derivative - 1.6570519017559527928e-08)<= 1e-25, 
+			    Assert::IsTrue(succeeded, Message("Algorithm has not succeeded"));
+				Assert::IsTrue(abs(solution[0].Derivative - (numTypeMp)"1.65427899503422652812559164028e-08") <= 
+					std::numeric_limits<numTypeMp>::epsilon(), 
 					Message("du(0) is different " + auxutils::ToString(solution[0].Derivative)+ " " +
-					auxutils::ToString(abs(solution[0].Derivative - 1.6570519017559527928e-08))));
+					auxutils::ToString(abs(solution[0].Derivative - (numTypeMp)"1.65427899503422652812559164028e-08"))));
 
-				Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 22026.465708960743113) <= 1e-12, 
+				Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - (numTypeMp)"22026.4657402372599676159731906") <= 1e-25, 
 					Message("du(1) is different " + auxutils::ToString(solution[solution.size() - 1].Derivative) + " " +
-					auxutils::ToString(abs(solution[solution.size() - 1].Derivative - 22026.465708960743113))));
+					auxutils::ToString(abs(solution[solution.size() - 1].Derivative - (numTypeMp)"22026.4657402372599676159731906"))));
 			}
 			catch (exception e)
 			{

@@ -72,6 +72,11 @@ public :
 		return result;
 	}
 
+	bool operator<(const InitCondition<T> &ic) const 
+	{ 
+		return Argument < ic.Argument; 
+	}
+
 	inline T NormSquared()
 	{
 		return Value * Value + Derivative * Derivative +
