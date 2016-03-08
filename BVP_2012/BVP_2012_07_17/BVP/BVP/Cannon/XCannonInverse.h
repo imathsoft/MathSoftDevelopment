@@ -23,7 +23,7 @@ protected:
 
 		T test = max(abs(A*_h), abs(B));
 
-		T hOpt = (test > 1) ? 1/abs(test) : abs(_h);
+		T hOpt = (test*_h > 0.5) ? 1/abs(2*test) : abs(_h);
 
 		T H = sgn(_h) * min(min(hOpt, abs(_h)), abs(argFinish - prevKnot.Argument));
 
