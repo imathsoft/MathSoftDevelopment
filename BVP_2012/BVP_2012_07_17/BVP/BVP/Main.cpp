@@ -28,6 +28,7 @@ const std::string currentDateTime() {
 
 int main(){
 	char answer = 'y';
+	cout.precision(std::numeric_limits<numType>::digits10);
 	while (answer == 'y')
 	{
 		cout << "lambda =";
@@ -51,17 +52,20 @@ int main(){
 
 		HybridMultipleShootingComponent<numType> HMSComp(tp);
 
-		//cout << currentDateTime() << endl;
-		boost::timer t;
-		bool succeeded;
-		std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, h, succeeded);
-		//cout << currentDateTime() << endl;
-		cout << t.elapsed() << endl;
-		cout << "Number of knots = " << solution.size() << endl;
-		std::string fileName = "f:\\TroeschProblemSolution.txt";
-		auxutils::SaveToFile(solution, fileName.c_str());
-		cout << "Result is saved to " << fileName << endl;
-		cout << "Continue? y/n";
-		cin >> answer;
+		do 
+		{
+			boost::timer t;
+			bool succeeded;
+			std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, h, succeeded);
+			//cout << currentDateTime() << endl;
+			cout << t.elapsed() << endl;
+			cout << "Number of knots = " << solution.size() << endl;
+			cout << "Init. slope = " << solution[0].Derivative << endl;
+			//std::string fileName = "f:\\TroeschProblemSolution.txt";
+			///auxutils::SaveToFile(solution, fileName.c_str());
+			//cout << "Result is saved to " << fileName << endl;
+			cout << "Continue? y/n";
+			cin >> answer;
+		} while (answer == 'r');
 	}
 }
