@@ -254,7 +254,7 @@ private:
 		///which, in turn, depend on the number of knots
 		auto achievablePrec = GetAcheivablePrecision(MD.size());
 
-		for (int i = 0; i < 10 && absCorrection > achievablePrec; i++)
+		for (int i = 0; i < MaxNumberOfNewtonIterations && absCorrection > achievablePrec; i++)
 		{
 			if (absCorrection*auxutils::RoughSqrt((T)MD.size()) < 1) // the process is starting to converge
 			{
@@ -612,8 +612,9 @@ private:
 		//auxutils::SaveToFile(result.U, "F:\\V.txt");
 	}
 	*/
-public:
 	std::vector<std::pair<int, T>> _debugData;
+public:
+	int MaxNumberOfNewtonIterations;
 
 	//Method to save debug data in the specified file (as text)
 	void SaveDebugData(const char* filename)
@@ -634,6 +635,7 @@ public:
 	{
 		_problem = &problem;
 		_precision = 10 * std::numeric_limits<T>::epsilon();
+		MaxNumberOfNewtonIterations = 10;
 	}
 
 	vector<InitCondition<T>> Run(

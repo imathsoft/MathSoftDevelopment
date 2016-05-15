@@ -23,19 +23,23 @@
 #include <functional>
 #include <vector>
 #include "../BVP/FunctionApproximation/InitialCondition.h"
+#include "../BVP/Problems/ProblemAbstract.h"
 
 namespace UnitTestAux
 {
 	///Method to calculate the deviation of the given set of knots to the given "exact solution"
 	template<class T>
 	T CalcDeviationFromExactSolution(std::vector<InitCondition<T>> knots, 
-		std::function<T(const T&)> exactSolution)
+		std::function<T(const T&)> exactSolution, bool checkDerivative = false)
 	{
 		T deviation = 0;
 		for (std::vector<InitCondition<T>>::const_iterator iter = knots.begin(); iter!= knots.end(); ++iter)
 		{
 			InitCondition<T> knot = (*iter);
-			deviation = max(deviation, abs(exactSolution(knot.Argument) - knot.Value));
+			if (checkDerivative)
+				deviation = max(deviation, abs(exactSolution(knot.Argument) - knot.Derivative));
+			else
+			    deviation = max(deviation, abs(exactSolution(knot.Argument) - knot.Value));
 		}
 
 		return deviation;
@@ -65,7 +69,58 @@ namespace UnitTestAux
 		return maxDistance;
 	}
 
+	///A "Standard test" for a problem whose solution is exp(sin(x));
+	///The "problem" can be either autonomous or not
+	template<class T,class P>
+	void StandardOscillatinProblemMultipleShoothingTest(P problem)
+	{
+		T preH = 0.1;
+		T finalH = 0.001;
+		T targetValue = 0.5804096620;
+		T targetArgument = 10;
 
+		std::function<bool(const InitCondition<T>&)> checkFunc = 
+			[=](const InitCondition<T>& ic) { return (abs(ic.Value) <= targetArgument) 
+			&& (abs(ic.Argument) <= targetArgument); };
+
+		HybridCannon<T> cannon(problem, preH, preH/10.0, checkFunc);
+
+		std::function<int(const InitCondition<T>&)> evalFunc = 
+			[=](const InitCondition<T>& ic) { return sgn(ic.Value - targetValue); };
+		BisectionComponent<T> bc(cannon);
+		Assert::IsTrue(bc.DerivativeBisectionGen(0.0, targetArgument, 1.0, 100, 0.95, 1.01, evalFunc));
+
+		auto knots = cannon.GetKnotVectorStreight();
+		knots[knots.size() - 1].Value = targetValue;
+		knots[knots.size() - 1].Argument = targetArgument;
+
+		HybridMultipleShootingComponent<T> HMSComp(problem);
+		HMSComp.MaxNumberOfNewtonIterations = 20;
+
+		bool succeeded;
+		std::vector<InitCondition<T>> solution = HMSComp.Run(knots, finalH, succeeded);
+
+		Assert::IsTrue(succeeded, Message("Multiple shoothing method has failed"));
+
+		T maxDev = CalcDeviationFromExactSolution<T>(solution, 
+	    [](const T& u){ return exp(sin(u)); });
+
+		T maxDerivativeDev = CalcDeviationFromExactSolution<T>(solution, 
+			[](const T& u){ return cos(u)*exp(sin(u)); }, true);
+
+		T vaxDistanceBetweenKnots = CalcMaxSquaredDistanceBetweenNeighbourKnots(solution);
+		Assert::IsTrue(vaxDistanceBetweenKnots < 2*finalH*finalH, 
+			Message("Too big maximal distance between neighbour knots " + 
+			auxutils::ToString(vaxDistanceBetweenKnots)));
+		Assert::IsTrue(maxDev < finalH*finalH, 
+			Message("Too big deviation, maxDev= " + auxutils::ToString(maxDev)));
+		Assert::IsTrue(maxDerivativeDev < 2*finalH*finalH, 
+			Message("Too big deviation between derivatives, maxDev= " + 
+			auxutils::ToString(maxDev)));
+		Assert::IsTrue(solution.size() > targetArgument/finalH, 
+			Message("Too few knot in the solution vector, " + 
+			auxutils::ToString(solution.size())));
+	}
 
 	static wchar_t* Message(const char* text)
 	{

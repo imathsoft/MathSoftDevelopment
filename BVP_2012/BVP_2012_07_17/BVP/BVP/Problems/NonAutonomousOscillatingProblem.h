@@ -14,31 +14,31 @@ class NonAutonomousOscillatingProblem : public ProblemNonAutonomousAbstract<T>
 	}
 
 	///Derivative of nonlinearity (with respect to u)
-	virtual T dNonlinDu(const T& u, const T& x)
+	virtual T dNonlinDu(const T& u, const T& x) override
 	{
 		return - (sin(x) + 1)/u; 
 	}
 	
 	///Derivative of nonlinearity (with respect to x)
-	virtual T dNonlinDx(const T& u, const T& x)
+	virtual T dNonlinDx(const T& u, const T& x) override
 	{
 		return - cos(x)*log(u);
 	}
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDuDu(const T& u, const T& x)
+	virtual T ddNonlinDuDu(const T& u, const T& x) override
 	{
 		return (sin(x) + 1)/auxutils::sqr(u); 
 	}
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDuDx(const T& u, const T& x)
+	virtual T ddNonlinDuDx(const T& u, const T& x) override
 	{
 		return -cos(x)/u;
 	}
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDxDx(const T& u, const T& x)
+	virtual T ddNonlinDxDx(const T& u, const T& x) override
 	{
 		return sin(x)*log(u);
 	}

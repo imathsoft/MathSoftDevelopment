@@ -3,6 +3,7 @@
 #include "UnitTestAux.h"
 #include "../BVP/Utils/AuxUtils.h"
 #include "..\BVP\Problems\OscillatingTestProblem.h"
+#include "../BVP/Problems/AutonomousOscillatingProblem.h"
 #include "..\BVP\Cannon\HybridCannon.h"
 #include "..\BVP\ShootingSimple\BisectionComponent.h"
 #include "..\BVP\MultipleShooting\HybridMultipleShootingComponent.h"
@@ -103,5 +104,13 @@ namespace GeneralTest
 			 Assert::IsTrue(abs(solution[0].Derivative - 1.2576169315833) < 100*std::numeric_limits<double>::epsilon(), 
 				 Message("Derivative mismatch " + auxutils::ToString(solution[0].Derivative)));
 		}
+
+		TEST_METHOD(StandardAutonomousOscilatingProblemMultimpeShootingDouble)
+		{
+			 AutonomousOscillatingProblem<double> problem;
+   			 StandardOscillatinProblemMultipleShoothingTest<double, 
+				 AutonomousOscillatingProblem<double>>(problem);
+		}
+
 	};
 }
