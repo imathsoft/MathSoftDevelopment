@@ -40,6 +40,9 @@
     <Filter Include="Header Files\MultipleShooting">
       <UniqueIdentifier>{ae49b016-630a-4bce-adcb-a8d29bfe490d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SpecialFunctions">
+      <UniqueIdentifier>{640e3ee3-311f-4080-a95d-5728db040ff9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -106,6 +109,21 @@
     </ClInclude>
     <ClInclude Include="Cannon\HybridCannon.h">
       <Filter>Header Files\Cannon</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\ProblemAutonomousAbstract.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\ProblemNonAutonomousAbstract.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecialFunctions\Sinhc.h">
+      <Filter>Header Files\SpecialFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\NonAutonomousTroeschProblem.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\NonAutonomousOscillatingProblem.h">
+      <Filter>Header Files\Problems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -244,6 +244,7 @@ private:
 	vector<InitCondition<T>> RunNewtonIterations(vector<InitCondition<T>> meshData, T desiredMaxStepSize, bool& succeeded )
 	{
 		succeeded = false;
+		_debugData.clear();
 		vector<InitCondition<T>> MD(std::begin(meshData), std::end(meshData));
 
 		T absCorrection = 1;
@@ -264,6 +265,8 @@ private:
 			FourDiagonalSweepMethodStruct<T> fDSMS = GenerateSweepMethodStruct(MD);
 
 			vector<T> newVector = RunSweepMethod(fDSMS, absCorrection);
+
+			_debugData.push_back(std::make_pair((int)MD.size(), absCorrection));
 
 			if (absCorrection / oldAbsCorrection > 100 && absCorrection > 100)
 				break; // the process is divergent
@@ -610,6 +613,22 @@ private:
 	}
 	*/
 public:
+	std::vector<std::pair<int, T>> _debugData;
+
+	//Method to save debug data in the specified file (as text)
+	void SaveDebugData(const char* filename)
+	{
+		std::ofstream file;
+		file.precision(std::numeric_limits<T>::digits10);
+		file.open (filename);
+		for (std::vector<std::pair<int, T>>::const_iterator m = _debugData.begin(); m != _debugData.end(); ++m)
+		{
+			auto ic = (*m);
+			file << ic.first << " " << ic.second << endl;
+		}
+        file.close();
+	}
+
 	///Constructor
 	HybridMultipleShootingComponent(ProblemAbstract<T>& problem)
 	{
@@ -620,11 +639,12 @@ public:
 	vector<InitCondition<T>> Run(
 		const PointSimple<T>& ptLeft, const PointSimple<T>& ptRight, 
 		const T desiredStepSize,
-		bool& succeeded)
+		bool& succeeded,
+		const T customPreStep = (T)0)
 	{
 		T h = desiredStepSize;
 
-		T preStep = min((T)1/100, 10*h);
+		T preStep = customPreStep > 0 ? customPreStep : min((T)1/100, 10*h);
 		HybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), preStep, min((T)1/100, h/10));
 		std::function<int(const InitCondition<T>&)> evalFunc = 
 			[](const InitCondition<T>& ic) { return sgn(ic.Value - ic.Argument); };
