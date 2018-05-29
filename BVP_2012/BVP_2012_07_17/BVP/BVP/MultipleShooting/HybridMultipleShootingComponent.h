@@ -287,16 +287,6 @@ private:
 		auto dim = 2 * (meshData.size()-1);
 		FourDiagonalSweepMethodStruct<T> result((int)dim);
 
-		auto A = _problem->GetACoeff();
-		auto B = _problem->GetBCoeff();
-		auto A_grad = _problem->GetACoeffGradient();
-		auto B_grad = _problem->GetBCoeffGradient();
-
-		auto AI = _problem->GetACoeffInverse();
-		auto BI = _problem->GetBCoeffInverse();
-		auto AI_grad = _problem->GetACoeffInverseGradient();
-		auto BI_grad = _problem->GetBCoeffInverseGradient();
-
 		InitCondition<T> curKnot;
 		InitCondition<T> prevKnot;
 		InitCondition<T> nextKnot;
@@ -310,28 +300,28 @@ private:
 		if (abs(curKnot.Derivative) <= 1.0)
 		{
 			dX = X_Func_Gradient<T>::X3_Func_Gradient(
-				A(curKnot.Derivative, curKnot.Value, curKnot.Argument),
-				B(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
+				_problem->GetACoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument),
+				_problem->GetBCoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
 				curKnot.Derivative, 
 				curKnot.Value, 
 				nextKnot.Argument - curKnot.Argument, _precision);
 			
-			A_grad_value = A_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
-			B_grad_value = B_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+			A_grad_value = _problem->GetACoeffGradient(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+			B_grad_value = _problem->GetBCoeffGradient(curKnot.Derivative, curKnot.Value, curKnot.Argument);
 
 			result[0][3] = dX.X - nextKnot.Value;
 			result[1][3] = dX.dh - nextKnot.Derivative;
 		} else
 		{
 			dX = X_Func_Gradient<T>::XI_Func_Gradient(
-				AI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
-				BI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
+				_problem->GetACoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
+				_problem->GetBCoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
 				1/curKnot.Derivative, 
 				curKnot.Argument, 
 				nextKnot.Value - curKnot.Value, _precision);
 
-			A_grad_value = AI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
-			B_grad_value = BI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+			A_grad_value = _problem->GetACoeffInverseGradient(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+			B_grad_value = _problem->GetBCoeffInverseGradient(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
 
 			result[0][3] = dX.X - nextKnot.Argument;
 			result[1][3] = dX.dh - 1/nextKnot.Derivative;
@@ -357,28 +347,28 @@ private:
 			if (abs(curKnot.Derivative) <= 1.0)
 			{
 				dX = X_Func_Gradient<T>::X3_Func_Gradient(
-					A(curKnot.Derivative, curKnot.Value, curKnot.Argument),
-					B(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
+					_problem->GetACoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument),
+					_problem->GetBCoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
 					curKnot.Derivative, 
 					curKnot.Value, 
 					nextKnot.Argument - curKnot.Argument, _precision);
 
-				A_grad_value = A_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
-				B_grad_value = B_grad(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+				A_grad_value = _problem->GetACoeffGradient(curKnot.Derivative, curKnot.Value, curKnot.Argument);
+				B_grad_value = _problem->GetBCoeffGradient(curKnot.Derivative, curKnot.Value, curKnot.Argument);
 
 				result[currRow][3] = dX.X - nextKnot.Value;
 				result[currRow + 1][3] = dX.dh - nextKnot.Derivative;
 			} else
 			{
 				dX = X_Func_Gradient<T>::XI_Func_Gradient(
-					AI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
-					BI(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
+					_problem->GetACoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
+					_problem->GetBCoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
 					1/curKnot.Derivative, 
 					curKnot.Argument, 
 					nextKnot.Value - curKnot.Value, _precision);
 
-				A_grad_value = AI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
-				B_grad_value = BI_grad(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+				A_grad_value = _problem->GetACoeffInverseGradient(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
+				B_grad_value = _problem->GetBCoeffInverseGradient(1/curKnot.Derivative, curKnot.Argument, curKnot.Value);
 
 				result[currRow][3] = dX.X - nextKnot.Argument;
 				result[currRow + 1][3] = dX.dh - 1/nextKnot.Derivative;

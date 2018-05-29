@@ -16,8 +16,8 @@ protected:
 	/// <returns></returns>
 	virtual inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish) override
 	{
-		T A = _aCoeff(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
-		T B = _bCoeff(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
+		T A = _problem->GetACoeffInverse(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
+		T B = _problem->GetBCoeffInverse(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
     	T C = prevKnot.Derivative;
 		T D = prevKnot.Value;
 
@@ -47,10 +47,7 @@ public:
 		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
 		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
 		XCannonAbstract(problem, defaultStepSize, precision, checkFunc, hFunc)
-	{
-		_aCoeff = _problem->GetACoeffInverse();
-		_bCoeff = _problem->GetBCoeffInverse();
-	};
+	{};
 
 	/// <summary>
 	/// Saves to file.

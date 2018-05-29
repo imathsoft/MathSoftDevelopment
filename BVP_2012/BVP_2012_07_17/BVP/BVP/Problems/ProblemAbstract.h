@@ -10,27 +10,27 @@ class ProblemAbstract
 {
 	public:
 	///A method to return std:function wrapper of the A coefficient
-	virtual std::function<T(const T&, const T&, const T&)> GetACoeff() =0;
+	virtual T GetACoeff(const T& derivative, const T& value, const T& argument) = 0;
 
 	///A method to return std:function wrapper of the gradient of A coefficient
-	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetACoeffGradient() = 0;
+	virtual std::array<T, 3> GetACoeffGradient(const T& derivative, const T& value, const T& argument) = 0;
 
 	///A method to return std:function wrapper of the B coefficient
-	virtual std::function<T(const T&, const T&, const T&)> GetBCoeff() = 0;
+	virtual T GetBCoeff(const T& derivative, const T& value, const T& argument) = 0;
 
 	///A method to return std:function wrapper of the gradient of B coefficient
-	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetBCoeffGradient() = 0;
+	virtual std::array<T, 3> GetBCoeffGradient(const T& derivative, const T& value, const T& argument) = 0;
 
 	///A method to return std:function wrapper of the A coefficient for inverse problem
-	virtual std::function<T(const T&, const T&, const T&)> GetACoeffInverse() = 0;
+	virtual T GetACoeffInverse(const T& derivative, const T& value, const T& argument) = 0;
 
 	///A method to return std:function wrapper of the gradient of A coefficient for inverse problem
-	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetACoeffInverseGradient() = 0;
+	virtual std::array<T, 3> GetACoeffInverseGradient(const T& derivative, const T& value, const T& argument ) = 0;
 
 	///A method to return std:function wrapper of the B coefficient for inverse problem
-	virtual std::function<T(const T&, const T&, const T&)> GetBCoeffInverse() = 0;
+	virtual T GetBCoeffInverse(const T& derivative, const T& value, const T& argument) = 0;
 
 	///A method to return std:function wrapper of the gradient of B coefficient for inverse problem
-	virtual std::function<std::array<T, 3>(const T&, const T&, const T&)> GetBCoeffInverseGradient() = 0;
+	virtual std::array<T, 3> GetBCoeffInverseGradient(const T& derivative, const T& value, const T& argument) = 0;
 };
 #endif 

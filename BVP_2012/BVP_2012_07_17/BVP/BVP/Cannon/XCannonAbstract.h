@@ -20,8 +20,6 @@ protected:
 	ICLIST _listIC;
 	typename ICLIST::iterator iLst;
 	ProblemAbstract<T>* _problem;
-	std::function<T(const T&, const T&, const T&)> _aCoeff;
-	std::function<T(const T&, const T&, const T&)> _bCoeff;
 	std::function<T(const int, const int)> _hFunc;
 	std::function<bool(InitCondition<T>&)> _checkFunc;
 	T _h; // default step size
