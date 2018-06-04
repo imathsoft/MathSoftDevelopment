@@ -67,8 +67,9 @@ public:
 	inline GradientVector<T, _Cols>  operator/(const double d) const
 	{
 		GradientVector<T, _Cols> result;
+		T multiplicant = T(1.0)/d;
 		for (int i = 0; i < _Cols; ++i)
-			result[i] = (*this)[i]/d;
+			result[i] = (*this)[i]*multiplicant;
 		return result;
 	}
 
