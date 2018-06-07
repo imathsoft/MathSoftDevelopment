@@ -13,6 +13,13 @@ public:
 	//Constructor
     GradientVector()
 	{};
+
+	GradientVector(const T& initVal)
+	{
+		for (int i = 0; i < _Cols; ++i)
+			 _body[i] = initVal;
+	}
+
 	//Destructor
 	~GradientVector()
 	{};

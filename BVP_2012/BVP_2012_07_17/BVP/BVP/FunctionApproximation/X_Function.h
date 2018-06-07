@@ -79,16 +79,14 @@ inline T X(const T& A, const T& B, const T& C, const T& D, const T& h, int n){
 
 template <class T>
 inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const T& h, int n){
-	T* mas = new T[3*n+2];
-	InitCondition<T> result;
-    int k;
+	std::vector<T> baseCoefficientBuffer(3*n+3);
+	T* mas = &baseCoefficientBuffer[1];
+	mas[-1] = T(0);
     mas[0] = D;
     mas[1] = C;
-    mas[2] = B*D/2;
-    mas[3] = (B*C+A*D)/6;
-    mas[4] = A*C/12;
 
-    for (int i = 2; i <= n; i++) {
+    int k;
+    for (int i = 1; i <= n; i++) {
         k = 3 * i - 2;
         mas[k+3] = mas[k]*A/((k+3)*(k+2));
         for (int j = k; j >= 2 * i - 2; j--) { 
@@ -96,6 +94,7 @@ inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const
         }
     }
 
+	InitCondition<T> result;
 	result.Value =  mas[3 * n + 1] * h;
     for (int i = 3 * n; i > 0; i--) {
 		result.Value = (result.Value + mas[i]) * h;
@@ -111,7 +110,54 @@ inline InitCondition<T> X3(const T& A, const T& B, const T& C, const T& D, const
 	result.Derivative = (result.Derivative + mas[0] * B) * h + C;
 	result.SecDerivative = (A * h + B) * result.Value;
 
-	delete [] mas;
+    return result;
+};
+
+template <class T, class P>
+inline InitCondition<T> X4_Func(const T& A, const T& B, const T& C, const T& D, const T& E, const T& F, const T& h, const P& precision){
+	const int maxPower = 40;
+	const int minPower = 10;
+	std::vector<T> baseCoefficientBuffer(maxPower+2);
+	T* mas = &baseCoefficientBuffer[1];
+	mas[-1] = T(0);
+    mas[0] = D;
+    mas[1] = C;
+	mas[2] = (B*D + F)/2;
+	mas[3] = (A*D + B*C + E)/6;
+
+	int currentPower = 3;
+	const auto hAbs = abs(h);
+	auto hPowerAbs = hAbs;
+
+	do
+	{
+		currentPower++;
+
+		if (baseCoefficientBuffer.size() <= currentPower + 1)
+		{
+			baseCoefficientBuffer.resize(2*baseCoefficientBuffer.size());
+			mas = &baseCoefficientBuffer[1];
+		}
+
+		mas[currentPower] = (mas[currentPower-2]*B+mas[currentPower-3]*A)/((currentPower-1)*(currentPower));
+		hPowerAbs *= hAbs;
+
+	} while(currentPower < minPower || abs(mas[currentPower])*hPowerAbs > precision);
+
+	InitCondition<T> result;
+	result.Value =  mas[currentPower];
+    for (int i = currentPower - 1; i >= 0; i--) {
+		result.Value = result.Value * h + mas[i];
+    }
+
+    result.Derivative = mas[currentPower]*A*h/(currentPower+2);
+    for (int j = currentPower; j >= 0; j--) { 
+        result.Derivative = (result.Derivative + (mas[j]*B+mas[j-1]*A)/(j+1)) * h;
+    }
+
+	result.Derivative += (E * h / 2 + F) * h  + C;
+	result.SecDerivative = (A * h + B) * result.Value + E*h + F;
+
     return result;
 };
 

@@ -25,14 +25,37 @@ namespace GeneralTest
 		  Assert::IsTrue(abs("11.237250563288499476414732181933848865" - invertFunc.Value) < 1e-36);
 		}
 
-		TEST_METHOD(StraightXFunctionTestMethod)
+		TEST_METHOD(StraightX3FunctionTestMethod)
 		{
 		  mpreal::set_default_prec(128);
-		  auto invertFunc = X3_Func<mpreal>(10,-2,-30,14,"0.1",1e-36);
 
-		  Assert::IsTrue(abs("-31.895112005308260774136632962176948035" - invertFunc.Derivative) < 
+		  auto streightFunc = X3_Func<mpreal>(10,-2,-30,14,"0.1",1e-36);
+
+		  Assert::IsTrue(abs("-31.895112005308260774136632962176948035" - streightFunc.Derivative) < 
 			  1e-36);
-		  Assert::IsTrue(abs("10.890975443956699164876695239161704776" - invertFunc.Value) < 1e-36);
+		  Assert::IsTrue(abs("10.890975443956699164876695239161704776" - streightFunc.Value) < 1e-36);
+		}
+
+		TEST_METHOD(StraightX4FunctionTestMethod)
+		{
+		  mpreal::set_default_prec(128);
+
+		  auto streightFunc = X4_Func<mpreal>(10,-2,-30, 14, 0, 0, "0.1",1e-36);
+
+		  Assert::IsTrue(abs("-31.895112005308260774136632962176948035" - streightFunc.Derivative) < 
+			  1e-36);
+		  Assert::IsTrue(abs("10.890975443956699164876695239161704776" - streightFunc.Value) < 1e-36);
+		}
+
+		TEST_METHOD(StraightX4FunctionNonuniformTestMethod)
+		{
+		  mpreal::set_default_prec(128);
+
+		  auto streightFunc = X4_Func<mpreal>(10,-2,-30, 14, 13, 17, "0.1",1e-36);
+
+		  Assert::IsTrue(abs("-30.133716147148905398140439228392955594" - streightFunc.Derivative) < 1e-36);
+		  Assert::IsTrue(abs( "10.978041548052233737621628620689023378" - streightFunc.Value) < 1e-36);
+		  Assert::IsTrue(abs( "7.32195845194776626237837137931097662187" - streightFunc.SecDerivative) < 1e-36);
 		}
 
 		TEST_METHOD(StraightXFunctionDerivativesTestMethod)
