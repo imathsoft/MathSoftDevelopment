@@ -2,7 +2,6 @@
 #define GUARD_TROESCH_PROBLEM_ABSTRACT
 
 #include <array>
-#include <functional>
 
 ///Abstract class to represent problems with different nonlinearities
 template <class T>
@@ -32,5 +31,11 @@ class ProblemAbstract
 
 	///A method to return std:function wrapper of the gradient of B coefficient for inverse problem
 	virtual std::array<T, 3> GetBCoeffInverseGradient(const T& derivative, const T& value, const T& argument) = 0;
+
+	///Returns value of E coefficient at the given point x
+	virtual T GetECoeff(const T& x) = 0;
+
+	///Returns value of F coefficient at the given point x
+	virtual T GetFCoeff(const T& x) = 0;
 };
 #endif 

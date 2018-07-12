@@ -171,6 +171,11 @@
     <ClCompile Include="XCannonTestUnit.cpp" />
     <ClCompile Include="XFunctionTestUnit.cpp" />
   </ItemGroup>
+  <ItemGroup>
+	<None Include="TestData\OscillatingTestProblemMSInitGuess.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

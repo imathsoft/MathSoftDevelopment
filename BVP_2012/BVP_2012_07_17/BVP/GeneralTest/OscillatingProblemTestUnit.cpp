@@ -73,23 +73,11 @@ namespace GeneralTest
 
 		TEST_METHOD(OscillatingProblemMultiShootingHybridDoubleTestMethod)
 		{
-			 double h = 0.1;
-			 double targetValue = 1.15;
 			 OscillatingTestProblem<double> problem;
 
-			 std::function<bool(const InitCondition<double>&)> checkFunc = 
-				 [](const InitCondition<double>& ic) { return (abs(ic.Value) < 10) && (abs(ic.Argument) < 10); };
+			 auto knots = auxutils::ReadFromFile<InitCondition<double>>("TestData\\OscillatingTestProblemMSInitGuess.txt");
 
-			 HybridCannon<double> cannon(problem, h, h/10.0, checkFunc);
-
-			 std::function<int(const InitCondition<double>&)> evalFunc = 
-				 [=](const InitCondition<double>& ic) { return sgn(ic.Value - targetValue); };
-			 BisectionComponent<double> bc(cannon);
-			 Assert::IsTrue(bc.DerivativeBisectionGen(0.0, 10.0, 1.0, 100, 0.0, 1.25, evalFunc));
-
-			 auto knots = cannon.GetKnotVectorStreight();
-			 knots[knots.size() - 1].Value = targetValue;
-			 knots[knots.size() - 1].Argument = 10.0;
+			 double targetValue = knots[knots.size() - 1].Value;
 
 			 HybridMultipleShootingComponent<double> HMSComp(problem);
 
@@ -98,7 +86,7 @@ namespace GeneralTest
 
 			 Assert::IsTrue(succeeded, Message("Algorithm has not succeeded"));
 			 Assert::IsTrue(abs(solution[solution.size() - 1].Value - targetValue) < 10*std::numeric_limits<double>::epsilon(), 
-				 Message("Function mismatch " + auxutils::ToString(solution[solution.size() - 1].Value)));
+				 Message("Function mismatch " + auxutils::ToString(solution[solution.size() - 1].Value - targetValue)));
 			 Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 1.31696084860275) < 100*std::numeric_limits<double>::epsilon(), 
 				 Message("Derivative mismatch " + auxutils::ToString(solution[solution.size() - 1].Derivative)));
 			 Assert::IsTrue(abs(solution[0].Derivative - 1.2576169315833) < 100*std::numeric_limits<double>::epsilon(), 

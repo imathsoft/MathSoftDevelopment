@@ -16,6 +16,9 @@
     <Filter Include="Source Files\Utils">
       <UniqueIdentifier>{1114144f-8851-4f38-8c27-2b5822c4eda6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TestData">
+      <UniqueIdentifier>{9995a876-5574-4edd-ac0e-b7739df5fd64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -47,5 +50,10 @@
     <ClCompile Include="NonAutonomousProblemsTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TestData\OscillatingTestProblemMSInitGuess.txt">
+      <Filter>TestData</Filter>
+    </None>
   </ItemGroup>
 </Project>

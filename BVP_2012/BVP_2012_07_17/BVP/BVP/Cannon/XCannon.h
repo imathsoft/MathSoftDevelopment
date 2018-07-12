@@ -21,6 +21,8 @@ protected:
 		T B = _problem->GetBCoeff(prevKnot.Derivative, prevKnot.Value, prevKnot.Argument);
 		T C = prevKnot.Derivative;
 		T D = prevKnot.Value;
+		T E = _problem->GetECoeff(prevKnot.Argument);
+		T F = _problem->GetFCoeff(prevKnot.Argument);
 
 		T test = max(abs(A*_h), abs(B));
 
@@ -28,7 +30,7 @@ protected:
 
 		T H = sgn(_h) * min(min(hOpt, abs(_h)), abs(argFinish - prevKnot.Argument));
 
-		InitCondition<T> knot = X3_Func(A, B, C, D, H, _precision);
+		InitCondition<T> knot = X4_Func(A, B, C, D, E, F, H, _precision);
 		knot.Argument = prevKnot.Argument + H;
 
 		return knot;

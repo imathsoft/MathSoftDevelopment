@@ -304,6 +304,8 @@ private:
 				_problem->GetBCoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
 				curKnot.Derivative, 
 				curKnot.Value, 
+				_problem->GetECoeff(curKnot.Argument),
+				_problem->GetFCoeff(curKnot.Argument),
 				nextKnot.Argument - curKnot.Argument, _precision);
 			
 			A_grad_value = _problem->GetACoeffGradient(curKnot.Derivative, curKnot.Value, curKnot.Argument);
@@ -351,6 +353,8 @@ private:
 					_problem->GetBCoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
 					curKnot.Derivative, 
 					curKnot.Value, 
+					_problem->GetECoeff(curKnot.Argument),
+					_problem->GetFCoeff(curKnot.Argument),
 					nextKnot.Argument - curKnot.Argument, _precision);
 
 				A_grad_value = _problem->GetACoeffGradient(curKnot.Derivative, curKnot.Value, curKnot.Argument);

@@ -43,10 +43,10 @@ namespace GeneralTest
 				std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, 0.0001, succeeded);
 
 			    Assert::IsTrue(succeeded, Message("Algorithm has not succeeded"));
-				Assert::IsTrue(abs(solution[0].Derivative - 1.64877350732915e-008) <= 1e-21, 
-					Message("du(0) is different" + auxutils::ToString(solution[0].Derivative)));
-				Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - 22026.4657494062) <= 1e-10, 
-					Message("du(1) is different" + auxutils::ToString(solution[solution.size() - 1].Derivative)));
+				auto startDerivativeDiff = abs(solution[0].Derivative - 1.64877350732915e-008); 
+				Assert::IsTrue(startDerivativeDiff <= 5e-20, Message("du(0) is different" + auxutils::ToString(startDerivativeDiff)));
+				auto finalDerivativeDiff = abs(solution[solution.size() - 1].Derivative - 22026.4657494062);
+				Assert::IsTrue(finalDerivativeDiff <= 1e-10, Message("du(1) is different" + auxutils::ToString(finalDerivativeDiff)));
 			}
 			catch (exception e)
 			{
@@ -75,14 +75,14 @@ namespace GeneralTest
 				std::vector<InitCondition<numTypeMp>> solution = HMSComp.Run(ptLeft, ptRight, (numTypeMp)1/50, succeeded);
 
 			    Assert::IsTrue(succeeded, Message("Algorithm has not succeeded"));
-				Assert::IsTrue(abs(solution[0].Derivative - (numTypeMp)"1.65427899503422652812559164028e-08") <= 
-					std::numeric_limits<numTypeMp>::epsilon(), 
-					Message("du(0) is different " + auxutils::ToString(solution[0].Derivative)+ " " +
-					auxutils::ToString(abs(solution[0].Derivative - (numTypeMp)"1.65427899503422652812559164028e-08"))));
 
-				Assert::IsTrue(abs(solution[solution.size() - 1].Derivative - (numTypeMp)"22026.4657402372599676159731906") <= 1e-25, 
-					Message("du(1) is different " + auxutils::ToString(solution[solution.size() - 1].Derivative) + " " +
-					auxutils::ToString(abs(solution[solution.size() - 1].Derivative - (numTypeMp)"22026.4657402372599676159731906"))));
+				auto startDerivativeDiff = abs(solution[0].Derivative - (numTypeMp)"1.65428160979175801124447457829e-08");
+				Assert::IsTrue(startDerivativeDiff <= std::numeric_limits<numTypeMp>::epsilon(), 
+					Message("du(0) is different " + auxutils::ToString(solution[0].Derivative)+ " " + auxutils::ToString(startDerivativeDiff)));
+
+				auto finalDerivativeDiff = abs(solution[solution.size() - 1].Derivative - (numTypeMp)"22026.4657402382174165421786901");
+				Assert::IsTrue( finalDerivativeDiff <= 1e-24, 
+					Message("du(1) is different " + auxutils::ToString(solution[solution.size() - 1].Derivative) + " " + auxutils::ToString(finalDerivativeDiff)));
 			}
 			catch (exception e)
 			{

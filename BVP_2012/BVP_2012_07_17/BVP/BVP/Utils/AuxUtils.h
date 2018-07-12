@@ -9,7 +9,7 @@
 #include <boost\multiprecision\cpp_dec_float.hpp>
 #include <boost/multiprecision/debug_adaptor.hpp> 
 
-//typedef boost::multiprecision::number<boost::multiprecision::debug_adaptor<boost::multiprecision::cpp_dec_float<20>>, boost::multiprecision::et_off> float_50_noet;
+//typedef boost::multiprecision::number<boost::multiprecision::debug_adaptor<boost::multiprecision::cpp_dec_float<30>>, boost::multiprecision::et_off> float_50_noet;
 typedef boost::multiprecision::number<boost::multiprecision::cpp_dec_float<30>, boost::multiprecision::et_off> float_50_noet;
 
 namespace auxutils
@@ -107,15 +107,33 @@ namespace auxutils
 	void SaveToFile(const std::vector<T> mesh, const char* filename)
 	{
 		 std::ofstream file;
-		 file.precision(std::numeric_limits<T>::digits10);
 		 file.open (filename);
+		 file.precision(std::numeric_limits<T>::digits10 + 2);
 		 for (std::vector<T>::const_iterator m = mesh.begin(); m != mesh.end(); ++m)
 		 {
-			 file << (*m);
-			 file << endl;
+			 file << std::endl << (*m);
 		 }
          file.close();
 	}
+
+	///Method to write vector of knots into a text file
+	template <class T>
+	std::vector<T> ReadFromFile(const char* filename)
+	{
+		std::vector<T> mesh;
+		std::ifstream file;
+		file.open (filename);
+		while (!file.eof())
+		{
+			T data;
+			file >> data;
+			mesh.push_back(data);
+		}
+        file.close();
+
+		return mesh;
+	}
+
 
 	///Method to write vector of knots into a "Maple"-compatible text file
 	template <class T>

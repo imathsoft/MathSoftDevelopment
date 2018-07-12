@@ -91,6 +91,9 @@ public :
 	template<class U>
 	friend inline std::ostream& operator << (std::ostream& out, const InitCondition<U>& ic);
 
+	template<class U>
+	friend inline std::istream& operator >> (std::istream& in, const InitCondition<U>& ic);
+
 	inline const InitCondition<T>&  operator=(const typename GVTypes<T>::SmallGradientVector& gv)
 	{
 		Value = gv[0];
@@ -102,12 +105,17 @@ public :
 };
 
 template<class U>
+inline std::istream& operator >> (std::istream& in, InitCondition<U>& ic)
+{
+	in >> ic.Value >> ic.Derivative >> ic.SecDerivative >> ic.Argument;
+
+	return in;
+}
+
+template<class U>
 inline std::ostream& operator << (std::ostream& out, const InitCondition<U>& ic)
 {
-	out << "Val = " << ic.Value << endl;
-	out << "Der = " << ic.Derivative << endl;
-	out << "SecDer = " << ic.SecDerivative << endl;
-	out << "Argument = " << ic.Argument << endl;
+	out << ic.Value << " " << ic.Derivative << " " << ic.SecDerivative << " " << ic.Argument;
 	return out;
 };
 

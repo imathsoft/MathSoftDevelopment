@@ -129,6 +129,8 @@ inline InitCondition<T> X4_Func(const T& A, const T& B, const T& C, const T& D, 
 	const auto hAbs = abs(h);
 	auto hPowerAbs = hAbs;
 
+	int lengthOfTailBelowThreshold = 0;
+
 	do
 	{
 		currentPower++;
@@ -142,7 +144,12 @@ inline InitCondition<T> X4_Func(const T& A, const T& B, const T& C, const T& D, 
 		mas[currentPower] = (mas[currentPower-2]*B+mas[currentPower-3]*A)/((currentPower-1)*(currentPower));
 		hPowerAbs *= hAbs;
 
-	} while(currentPower < minPower || abs(mas[currentPower])*hPowerAbs > precision);
+		if (abs(mas[currentPower])*hPowerAbs <= precision)
+			lengthOfTailBelowThreshold++;
+		else 
+			lengthOfTailBelowThreshold = 0;
+
+	} while(currentPower < minPower || lengthOfTailBelowThreshold < 4);
 
 	InitCondition<T> result;
 	result.Value =  mas[currentPower];
@@ -247,17 +254,19 @@ public :
 	}
 
     ///Returns gradient of X3_Func(...)
-	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const T& precision)
+	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& E, const T& F, const T& h, const T& precision)
 	{
 		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
 		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
 		GVTypes<T>::OptimalGradientVector EB; EB << B << 0 << 1 << 0 << 0;
 		GVTypes<T>::OptimalGradientVector EC; EC << C << 0 << 0 << 1 << 0;
 		GVTypes<T>::OptimalGradientVector ED; ED << D << 0 << 0 << 0 << 1;
+		GVTypes<T>::OptimalGradientVector EE; EE << E << 0 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVector EF; EF << F << 0 << 0 << 0 << 0;
 
 		X_Func_Gradient<T> result;
 
-		return result = X3_Func<typename GVTypes<T>::OptimalGradientVector, T>(EA, EB, EC, ED, EH, precision);
+		return result = X4_Func<typename GVTypes<T>::OptimalGradientVector, T>(EA, EB, EC, ED, EE, EF, EH, precision);
 	}
 
 	///Returns gradient of XI_Func_Gradient

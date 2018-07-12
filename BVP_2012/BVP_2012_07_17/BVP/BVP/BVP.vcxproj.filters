@@ -128,5 +128,11 @@
     <ClInclude Include="Problems\AutonomousOscillatingProblem.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
+    <ClInclude Include="Problems\ProblemNonUniformAbstract.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\AutonomousNonUniformProblem.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
