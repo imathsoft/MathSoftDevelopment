@@ -166,13 +166,14 @@
     <ClCompile Include="..\BVP\Utils\AuxUtils.cpp" />
     <ClCompile Include="MultipleShootingHybridTestUnit.cpp" />
     <ClCompile Include="NonAutonomousProblemsTest.cpp" />
+    <ClCompile Include="NonUniformProblemTest.cpp" />
     <ClCompile Include="OscillatingProblemTestUnit.cpp" />
     <ClCompile Include="TroeschProblemTestUnit.cpp" />
     <ClCompile Include="XCannonTestUnit.cpp" />
     <ClCompile Include="XFunctionTestUnit.cpp" />
   </ItemGroup>
   <ItemGroup>
-	<None Include="TestData\OscillatingTestProblemMSInitGuess.txt">
+    <None Include="TestData\OscillatingTestProblemMSInitGuess.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
