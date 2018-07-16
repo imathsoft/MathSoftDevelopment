@@ -62,6 +62,30 @@ namespace GeneralTest
 			 maxDerivError = std::max_element(errorVector.begin(), errorVector.end(), 
 				 [](const InitCondition<double>& ic1, const InitCondition<double>& ic2) {return abs(ic1.Derivative) < abs(ic2.Derivative); })->Derivative;
 		}
+
+		std::vector<InitCondition<double>> GetHybridBisectionResult(const double alpha, const double h)
+		{
+			 double argStart = 1;
+			 double uStart = sin(alpha*argStart);
+			 double argTarget = 4;
+			 double uTarget = sin(argTarget*alpha);
+			 double duLeft = alpha*cos(alpha*argStart) - 0.1;
+			 double duRight = alpha*cos(alpha*argStart) + 0.1;
+			 AutonomousNonUniformProblem<double> problem(alpha);
+
+			 std::function<bool(const InitCondition<double>&)> checkFunc = 
+				 [](const InitCondition<double>& ic) { return (abs(ic.Value) < 10) && (abs(ic.Argument) < 4); };
+
+			 HybridCannon<double> cannon(problem, h, 10*std::numeric_limits<double>::epsilon(), checkFunc);
+
+			 std::function<int(const InitCondition<double>&)> evalFunc = 
+				 [=](const InitCondition<double>& ic) { return sgn(ic.Value - uTarget); };
+			 BisectionComponent<double> bc(cannon);
+			 Assert::IsTrue(bc.DerivativeBisectionGen(argStart, argTarget, uStart, uTarget, duLeft, duRight, evalFunc));
+
+			 return cannon.GetKnotVectorStreight();
+		}
+
 	public:
 		
 		TEST_METHOD(NonUniformHybridShootingTest)
@@ -111,5 +135,28 @@ namespace GeneralTest
 			 Assert::IsTrue(derivativeRatio >= auxutils::sqr(h2/h1), Message("Too low ratio for derivatives: " + auxutils::ToString(derivativeRatio)));
 		}
 
+		TEST_METHOD(NonUniformHybridBisectionTest)
+		{
+			 double h1 = 0.0001;
+			 double alpha = 2;
+			 double h2 = h1*10;
+
+			 auto result_h1 = GetHybridBisectionResult(alpha, h1);
+			 auto result_h2 = GetHybridBisectionResult(alpha, h2);
+
+			 double maxValueError_h1, maxDerivError_h1;
+
+			 GetMaxValueAndDerivativeErrors(result_h1, alpha, maxValueError_h1, maxDerivError_h1);
+
+			 double maxValueError_h2, maxDerivError_h2;
+
+			 GetMaxValueAndDerivativeErrors(result_h2, alpha, maxValueError_h2, maxDerivError_h2);
+
+			 double valueRatio = maxValueError_h2/maxValueError_h1;
+			 double derivativeRatio = maxDerivError_h2/maxDerivError_h1;
+
+			 Assert::IsTrue(valueRatio >= auxutils::sqr(h2/h1), Message("Too low ratio for values: " + auxutils::ToString(valueRatio)));
+			 Assert::IsTrue(derivativeRatio >= auxutils::sqr(h2/h1)*(1-0.002), Message("Too low ratio for derivatives: " + auxutils::ToString(derivativeRatio)));
+		}
 	};
 }
