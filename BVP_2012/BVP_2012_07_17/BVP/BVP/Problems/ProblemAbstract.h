@@ -37,5 +37,11 @@ class ProblemAbstract
 
 	///Returns value of F coefficient at the given point x
 	virtual T GetFCoeff(const T& x) = 0;
+
+	///Returns derivative of E coefficient with respect to x
+	virtual T GetdEdX(const T& x) = 0;
+
+	///Returns derivative of F coefficient with respect to x
+	virtual T GetdFdX(const T& x) = 0;
 };
 #endif 

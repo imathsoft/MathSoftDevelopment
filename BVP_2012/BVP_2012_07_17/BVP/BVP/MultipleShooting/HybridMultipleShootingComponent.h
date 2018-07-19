@@ -22,7 +22,7 @@ private:
 	T _precision;
 
 	///Method to refine mesh according to the given step
-	vector<InitCondition<T>> RefineMesh(vector<InitCondition<T>> meshData, T step)
+	vector<InitCondition<T>> RefineMesh(const vector<InitCondition<T>>& meshData, T step)
 	{
 		vector<InitCondition<T>> result; 
 
@@ -62,7 +62,7 @@ private:
 	}
 
 	//Method that converts mesh data to vector
-	vector<T> MeshDataToStdVector(vector<InitCondition<T>> meshData)
+	vector<T> MeshDataToStdVector(const vector<InitCondition<T>>& meshData)
 	{
 		auto dim = 2 * (meshData.size() - 1);
 		vector<T> result;
@@ -112,7 +112,7 @@ private:
 	*/
 
 	///Returns mesh data obtained from the previous mesh data and the given vector
-	vector<InitCondition<T>> VectorToMeshData(vector<InitCondition<T>> baseMeshData, vector<T> vect)
+	vector<InitCondition<T>> VectorToMeshData(const vector<InitCondition<T>>& baseMeshData, const vector<T>& vect)
 	{
 		vector<InitCondition<T>> result(std::begin(baseMeshData), std::end(baseMeshData));
 
@@ -157,7 +157,7 @@ private:
 	*/
 
 	///Method to compare two mesh data
-	T DiffMeshDatas(vector<InitCondition<T>> meshData1, vector<InitCondition<T>> meshData2)
+	T DiffMeshDatas(const vector<InitCondition<T>>& meshData1, const vector<InitCondition<T>>& meshData2)
 	{
 		if (meshData1.size() != meshData2.size())
 			return 100;
@@ -179,7 +179,7 @@ private:
 	}
 
 	///Method to run sweep method
-	vector<T> RunSweepMethod(FourDiagonalSweepMethodStruct<T> fDSMS, T& absCorrection)
+	vector<T> RunSweepMethod(FourDiagonalSweepMethodStruct<T>& fDSMS, T& absCorrection)
 	{
 		vector<T> result;
 		result.resize(fDSMS.RowCount());
@@ -241,7 +241,7 @@ private:
 	}
 
 	///Method to run Newton iterations
-	vector<InitCondition<T>> RunNewtonIterations(vector<InitCondition<T>> meshData, T desiredMaxStepSize, bool& succeeded )
+	vector<InitCondition<T>> RunNewtonIterations(const vector<InitCondition<T>>& meshData, T desiredMaxStepSize, bool& succeeded )
 	{
 		succeeded = false;
 		_debugData.clear();
@@ -268,6 +268,8 @@ private:
 
 			_debugData.push_back(std::make_pair((int)MD.size(), absCorrection));
 
+			_correctionMagnitudes.push_back(absCorrection);
+
 			if (absCorrection / oldAbsCorrection > 100 && absCorrection > 100)
 				break; // the process is divergent
 
@@ -282,7 +284,7 @@ private:
 	}
 
 	///Method to generate sweep method struct
-	FourDiagonalSweepMethodStruct<T> GenerateSweepMethodStruct(vector<InitCondition<T>>& meshData)
+	FourDiagonalSweepMethodStruct<T> GenerateSweepMethodStruct(const vector<InitCondition<T>>& meshData)
 	{
 		auto dim = 2 * (meshData.size()-1);
 		FourDiagonalSweepMethodStruct<T> result((int)dim);
@@ -344,7 +346,6 @@ private:
 			nextKnot = meshData[i + 1];
 
 			int currRow = 2 * (int)i;
-			int currCol = 2 * (int)i - 1;
 
 			if (abs(curKnot.Derivative) <= 1.0)
 			{
@@ -395,11 +396,16 @@ private:
 
 				result[currRow][0]     = dX.dA * A_grad_value[2] +
 						                                dX.dB * B_grad_value[2] - 
-														dX.dh;
+														dX.dh + 
+														dX.dE*_problem->GetdEdX(curKnot.Argument) + 
+														dX.dF * _problem->GetdFdX(curKnot.Argument);
 
 				result[currRow + 1][0] = dX.dhdA * A_grad_value[2] +
 						                                dX.dhdB * B_grad_value[2] - 
-														dX.dhdh;
+														dX.dhdh +
+														dX.dhdE*_problem->GetdEdX(curKnot.Argument) + 
+														dX.dhdF * _problem->GetdFdX(curKnot.Argument);
+
 			}
 			else
 			{
@@ -607,8 +613,17 @@ private:
 	}
 	*/
 	std::vector<std::pair<int, T>> _debugData;
+
+	std::vector<T> _correctionMagnitudes;
 public:
 	int MaxNumberOfNewtonIterations;
+
+	///Returns container with absolute values of approximation corrections added at each iteration of the Newton's method
+	///It is supposed to be used in testing purposes to assert quadratic convergence rate
+	std::vector<T> GetCorrectionMgnitudes()
+	{
+		return _correctionMagnitudes;
+	}
 
 	//Method to save debug data in the specified file (as text)
 	void SaveDebugData(const char* filename)
@@ -629,7 +644,7 @@ public:
 	{
 		_problem = &problem;
 		_precision = 10 * std::numeric_limits<T>::epsilon();
-		MaxNumberOfNewtonIterations = 10;
+		MaxNumberOfNewtonIterations = 20;
 	}
 
 	vector<InitCondition<T>> Run(
@@ -639,6 +654,7 @@ public:
 		const T customPreStep = (T)0)
 	{
 		T h = desiredStepSize;
+		_correctionMagnitudes.clear();
 
 		T preStep = customPreStep > 0 ? customPreStep : min((T)1/100, 10*h);
 		HybridCannon<T> thc((*HybridMultipleShootingComponent::_problem), preStep, min((T)1/100, h/10));
@@ -656,11 +672,12 @@ public:
 		return sol;
 	}
 
-	vector<InitCondition<T>> Run(vector<InitCondition<T>> initialGuess, 
+	vector<InitCondition<T>> Run(const vector<InitCondition<T>>& initialGuess, 
 		const T desiredStepSize,
 		bool& succeeded)
 	{
 		T h = desiredStepSize;
+		_correctionMagnitudes.clear();
 
 		auto sol = RunNewtonIterations(initialGuess, h, succeeded);
 

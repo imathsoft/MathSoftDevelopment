@@ -18,7 +18,7 @@ public:
 	}
 
 	///REturns count of columns
-	int RowCount()
+	int RowCount() const
 	{
 		return _rowCount;
 	}

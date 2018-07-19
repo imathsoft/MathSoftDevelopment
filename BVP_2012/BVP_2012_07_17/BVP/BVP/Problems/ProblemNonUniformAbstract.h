@@ -28,4 +28,16 @@ public:
 	{
 		return Phi(x);
 	}
+	
+	///Returns derivative of E coefficient with respect to x
+	virtual T GetdEdX(const T& x) override
+	{
+		return ddPhi(x);
+	}
+
+	///Returns derivative of F coefficient with respect to x
+	virtual T GetdFdX(const T& x) override
+	{
+		return dPhi(x);
+	}
 };

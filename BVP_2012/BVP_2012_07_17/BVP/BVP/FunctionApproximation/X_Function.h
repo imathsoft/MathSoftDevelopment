@@ -226,12 +226,16 @@ public :
 	T dB;
 	T dC;
 	T dD;
+	T dE;
+	T dF;
 	T dh;
 	T dhdh;
 	T dhdA;
 	T dhdB;
 	T dhdC;
 	T dhdD;
+	T dhdE;
+	T dhdF;
 
 	///Overloaded assignment operator
 	inline X_Func_Gradient<T>& operator=(const InitCondition<typename GVTypes<T>::OptimalGradientVector>& fullGradient)
@@ -241,12 +245,40 @@ public :
 		dB = fullGradient.Value[2];
 		dC = fullGradient.Value[3];
 		dD = fullGradient.Value[4];
+		dE = T(0);
+		dF = T(0);
 
 		dh = fullGradient.Derivative[0];
 		dhdA = fullGradient.Derivative[1];
 		dhdB = fullGradient.Derivative[2];
 		dhdC = fullGradient.Derivative[3];
 		dhdD = fullGradient.Derivative[4];
+		dhdE = T(0);
+		dhdF = T(0);
+
+		dhdh = fullGradient.SecDerivative[0];
+
+		return *this;
+	}
+
+	///Overloaded assignment operator
+	inline X_Func_Gradient<T>& operator=(const InitCondition<typename GVTypes<T>::OptimalGradientVectorExtended>& fullGradient)
+	{
+		X = fullGradient.Value[0];
+		dA = fullGradient.Value[1];
+		dB = fullGradient.Value[2];
+		dC = fullGradient.Value[3];
+		dD = fullGradient.Value[4];
+		dE = fullGradient.Value[5];
+		dF = fullGradient.Value[6];
+
+		dh = fullGradient.Derivative[0];
+		dhdA = fullGradient.Derivative[1];
+		dhdB = fullGradient.Derivative[2];
+		dhdC = fullGradient.Derivative[3];
+		dhdD = fullGradient.Derivative[4];
+		dhdE = fullGradient.Derivative[5];
+		dhdF = fullGradient.Derivative[6];
 
 		dhdh = fullGradient.SecDerivative[0];
 
@@ -256,17 +288,17 @@ public :
     ///Returns gradient of X3_Func(...)
 	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& E, const T& F, const T& h, const T& precision)
 	{
-		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EB; EB << B << 0 << 1 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EC; EC << C << 0 << 0 << 1 << 0;
-		GVTypes<T>::OptimalGradientVector ED; ED << D << 0 << 0 << 0 << 1;
-		GVTypes<T>::OptimalGradientVector EE; EE << E << 0 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EF; EF << F << 0 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVectorExtended EH; EH << h << 0 << 0 << 0 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVectorExtended EA; EA << A << 1 << 0 << 0 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVectorExtended EB; EB << B << 0 << 1 << 0 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVectorExtended EC; EC << C << 0 << 0 << 1 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVectorExtended ED; ED << D << 0 << 0 << 0 << 1 << 0 << 0;
+		GVTypes<T>::OptimalGradientVectorExtended EE; EE << E << 0 << 0 << 0 << 0 << 1 << 0;
+		GVTypes<T>::OptimalGradientVectorExtended EF; EF << F << 0 << 0 << 0 << 0 << 0 << 1;
 
 		X_Func_Gradient<T> result;
 
-		return result = X4_Func<typename GVTypes<T>::OptimalGradientVector, T>(EA, EB, EC, ED, EE, EF, EH, precision);
+		return result = X4_Func<typename GVTypes<T>::OptimalGradientVectorExtended, T>(EA, EB, EC, ED, EE, EF, EH, precision);
 	}
 
 	///Returns gradient of XI_Func_Gradient

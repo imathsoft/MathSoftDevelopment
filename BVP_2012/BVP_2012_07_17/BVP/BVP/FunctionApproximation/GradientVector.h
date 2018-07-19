@@ -117,6 +117,7 @@ public:
 
 	const int FULL_GRAD_VECT_SIZE = 6;
 	const int OPTIMAL_GRAD_VECT_SIZE = 5;
+	const int OPTIMAL_GRAD_VECT_EXTENDED_SIZE = 7;
 	const int SMALL_GRAD_VECT_SIZE = 2;
 
 	template<class T>
@@ -126,6 +127,7 @@ public:
 		typedef GradientVector<T, SMALL_GRAD_VECT_SIZE> SmallGradientVector;
 		typedef GradientVector<T, FULL_GRAD_VECT_SIZE> FullGradientVector;
 		typedef GradientVector<T, OPTIMAL_GRAD_VECT_SIZE> OptimalGradientVector;
+		typedef GradientVector<T, OPTIMAL_GRAD_VECT_EXTENDED_SIZE> OptimalGradientVectorExtended;
 	};
 
 #endif
