@@ -137,5 +137,8 @@
     <ClInclude Include="Problems\AutonomousNonUniformProblem.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
+    <ClInclude Include="Problems\NonAutonomousNonUniformProblem.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

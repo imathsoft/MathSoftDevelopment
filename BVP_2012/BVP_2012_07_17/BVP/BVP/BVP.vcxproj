@@ -228,6 +228,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="Problems\AutonomousNonUniformProblem.h" />
     <ClInclude Include="Problems\AutonomousNonUniformStiffProblem.h" />
     <ClInclude Include="Problems\AutonomousOscillatingProblem.h" />
+    <ClInclude Include="Problems\NonAutonomousNonUniformProblem.h" />
     <ClInclude Include="Problems\NonAutonomousOscillatingProblem.h" />
     <ClInclude Include="Problems\NonAutonomousTroeschProblem.h" />
     <ClInclude Include="Problems\ProblemNonUniformAbstract.h" />
