@@ -43,6 +43,9 @@
     <Filter Include="Header Files\SpecialFunctions">
       <UniqueIdentifier>{640e3ee3-311f-4080-a95d-5728db040ff9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\FunctionApproximation\DerivativeEvaluator">
+      <UniqueIdentifier>{bf16bb53-6446-4647-85f3-d67d6ca80591}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -139,6 +142,12 @@
     </ClInclude>
     <ClInclude Include="Problems\NonAutonomousNonUniformProblem.h">
       <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\JordanBlock.h">
+      <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\DifferentiableFunction.h">
+      <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
