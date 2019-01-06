@@ -5,6 +5,7 @@
 #include <list>
 #include "GradientVector.h"
 #include "InitialCondition.h"
+#include "../Utils/AuxUtils.h"
 
 using namespace std;
 
@@ -198,6 +199,83 @@ inline InitCondition<T> XI(const T& A, const T& B, const T& C, const T& D, const
 	delete [] mas;
     return result;
 };
+
+///Returns value of the function x(u) at point x = h, where x(u) is the solution to the Cauchy problem
+/// x''(u) = (A*u+B)*(x')^3,  x'(0) = C,  x(0) = D;
+///The value is calculated with the given "precision"
+template <class T, class P>
+inline InitCondition<T> XI_Bernoulli(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision)
+{
+	const int maxPower = 40;
+	const int minPower = 10;
+	std::vector<T> sol_series(maxPower + 1);
+	std::vector<T> sol_series_sqr(maxPower + 1);
+
+	sol_series[0] = C;
+	T prev_cube_coeff = T(0);
+	T next_cube_coeff = T(0);
+
+	int lengthOfTailBelowThreshold = 0;
+	int current_index = 0;
+
+	do
+	{
+		sol_series_sqr[current_index] = T(0);
+		for (int i = 0; i <= current_index; i++)
+		{
+			sol_series_sqr[current_index] += sol_series[i]*sol_series[current_index - i];
+		}
+
+		prev_cube_coeff = next_cube_coeff;
+
+		next_cube_coeff = T(0);
+
+		for (int i = 0; i<= current_index; i++)
+		{
+			next_cube_coeff += sol_series[i]*sol_series_sqr[current_index - i];
+		}
+
+		current_index++;
+
+		if (current_index >= 1000)
+			throw "Series does not converge";
+
+		if (sol_series.size() <= current_index)
+		{
+			sol_series.resize(2*sol_series.size());
+			sol_series_sqr.resize(2*sol_series.size());
+		}
+
+		sol_series[current_index] = h*(A*h*prev_cube_coeff + B*next_cube_coeff)/T(current_index);
+
+		if (abs(sol_series[current_index]) < precision)
+		{
+			lengthOfTailBelowThreshold++;
+		}
+		else
+		{
+			lengthOfTailBelowThreshold = 0;
+		}
+
+	} while (lengthOfTailBelowThreshold < 4 || current_index < minPower);
+
+
+	InitCondition<T> result;
+	result.Value = T(0);
+	result.Derivative = T(0);
+
+	for (int index = current_index; index >= 0; index--)
+	{
+		result.Derivative += sol_series[index];
+		result.Value += h*sol_series[index]/T(index+1);
+	}
+
+	result.Value += D;
+
+	result.SecDerivative = (A*h+B)*result.Derivative*result.Derivative*result.Derivative;
+
+	return result;
+}
 
 // A method that computes u(h) where u(x) stisfies the following Cauchy problem
 // u''(x) = (A*x+B)*u(x);

@@ -3,6 +3,7 @@
 #include "CppUnitTest.h"
 #include "..\BVP\FunctionApproximation\X_Function.h"
 #include "UnitTestAux.h"
+#include <numeric>
 
 using namespace mpfr;
 using namespace UnitTestAux;
@@ -186,5 +187,38 @@ namespace GeneralTest
 				(invertFunc.SecDerivative[0, 0] - invertFunc.Derivative[0, 1]).toString()));
 		}
 
+		template <class T>
+		T XI_Bernoulli_check_function(const T A, const T B, const T C, const T D, const T h)
+		{
+			return log((h*A*C+B*C+auxutils::Sqrt(A*A*C*C*h*h+2*A*B*C*C*h+A))/(B*C+auxutils::Sqrt(A)))/auxutils::Sqrt(A) + D;
+		}
+
+		template <class T>
+		T XI_Bernoulli_derivative_check_function(const T A, const T B, const T C, const T h)
+		{
+			return 1/(auxutils::Sqrt(1/(C*C) - A*h*h - 2*B*h));
+		}
+
+		TEST_METHOD(XI_Bernoulli_test)
+		{
+			//Arrange
+			double A = 10;
+			double B = 100;
+			double C = 0.5;
+			double D = 3;
+			double h = 0.015;
+			auto reference_func = XI_Bernoulli_check_function(A, B, C, D, h);
+			auto reference_deriv = XI_Bernoulli_derivative_check_function(-A, -B, C, h);
+			auto reference_deriv_sec = -(A*h + B)*reference_deriv*reference_deriv*reference_deriv;
+
+			//Act
+			auto result = XI_Bernoulli<double>(-A, -B, C, D, h, std::numeric_limits<double>::epsilon());
+
+			//Assert
+			Assert::IsTrue(abs((result.Value - reference_func)/reference_func) <= std::numeric_limits<double>::epsilon() && 
+						   abs((result.Derivative - reference_deriv)/reference_deriv) <= std::numeric_limits<double>::epsilon() && 
+						   abs((result.SecDerivative - reference_deriv_sec)/reference_deriv_sec) <= 3*std::numeric_limits<double>::epsilon(),
+						   L"Mismatch between calculated and reference values");
+		}
 	};
 }
