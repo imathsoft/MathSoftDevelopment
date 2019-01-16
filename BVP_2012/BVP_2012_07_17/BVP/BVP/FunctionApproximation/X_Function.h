@@ -207,7 +207,7 @@ template <class T, class P>
 inline InitCondition<T> XI_Bernoulli(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision)
 {
 	const int maxPower = 40;
-	const int minPower = 10;
+	const int minPower = 5;
 	std::vector<T> sol_series(maxPower + 1);
 	std::vector<T> sol_series_sqr(maxPower + 1);
 
@@ -246,7 +246,7 @@ inline InitCondition<T> XI_Bernoulli(const T& A, const T& B, const T& C, const T
 			sol_series_sqr.resize(2*sol_series.size());
 		}
 
-		sol_series[current_index] = h*(A*h*prev_cube_coeff + B*next_cube_coeff)/T(current_index);
+		sol_series[current_index] = (h/current_index)*(A*h*prev_cube_coeff + B*next_cube_coeff);
 
 		if (abs(sol_series[current_index]) < precision)
 		{
@@ -267,7 +267,7 @@ inline InitCondition<T> XI_Bernoulli(const T& A, const T& B, const T& C, const T
 	for (int index = current_index; index >= 0; index--)
 	{
 		result.Derivative += sol_series[index];
-		result.Value += h*sol_series[index]/T(index+1);
+		result.Value += h*sol_series[index]/(index+1);
 	}
 
 	result.Value += D;
@@ -364,7 +364,8 @@ public :
 	}
 
     ///Returns gradient of X3_Func(...)
-	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& E, const T& F, const T& h, const T& precision)
+	template <class P>
+	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& E, const T& F, const T& h, const P& precision)
 	{
 		GVTypes<T>::OptimalGradientVectorExtended EH; EH << h << 0 << 0 << 0 << 0 << 0 << 0;
 		GVTypes<T>::OptimalGradientVectorExtended EA; EA << A << 1 << 0 << 0 << 0 << 0 << 0;
@@ -380,7 +381,8 @@ public :
 	}
 
 	///Returns gradient of XI_Func_Gradient
-	static inline typename X_Func_Gradient<T> XI_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const T& precision)
+	template <class P>
+	static inline typename X_Func_Gradient<T> XI_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision)
 	{
 		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
 		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
@@ -392,6 +394,22 @@ public :
 
 		return result = XI_Func<typename GVTypes<T>::OptimalGradientVector, T>(EA, EB, EC, ED, EH, precision);
 	}
+
+	///Returns gradient of XI_Func_Gradient
+	template <class P>
+	static inline typename X_Func_Gradient<T> XI_Func_Bernoulli_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision)
+	{
+		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
+		GVTypes<T>::OptimalGradientVector EB; EB << B << 0 << 1 << 0 << 0;
+		GVTypes<T>::OptimalGradientVector EC; EC << C << 0 << 0 << 1 << 0;
+		GVTypes<T>::OptimalGradientVector ED; ED << D << 0 << 0 << 0 << 1;
+
+		X_Func_Gradient<T> result;
+
+		return result = XI_Bernoulli<typename GVTypes<T>::OptimalGradientVector, T>(EA, EB, EC, ED, EH, precision);
+	}
+
 };
 
 #endif

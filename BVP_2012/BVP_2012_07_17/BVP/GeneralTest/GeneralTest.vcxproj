@@ -164,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\BVP\Utils\AuxUtils.cpp" />
+    <ClCompile Include="bvp_t_30_test.cpp" />
     <ClCompile Include="DifferentiableFunctionTest.cpp" />
     <ClCompile Include="MultipleShootingHybridTestUnit.cpp" />
     <ClCompile Include="NonAutonomousProblemsTest.cpp" />

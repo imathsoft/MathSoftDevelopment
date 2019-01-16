@@ -8,35 +8,35 @@ class ProblemNonUniformAbstract : public ProblemAbstract<T>
 {
 protected:
 	///Right hand side function (non-uniformity term)
-	virtual T Phi(const T& x) = 0;
+	virtual T Phi(const T& x) const = 0;
 
 	///The first order derivative of the non-unoformity term
-	virtual T dPhi(const T& x) = 0;
+	virtual T dPhi(const T& x) const = 0;
 
 	///The second order derivative of the non-unoformity term
-	virtual T ddPhi(const T& x) = 0;
+	virtual T ddPhi(const T& x) const = 0;
 
 public:
 	///Returns value of E coefficient at the given point x
-	virtual T GetECoeff(const T& x) override
+	virtual T GetECoeff(const T& x) const override
 	{
 		return dPhi(x);
 	}
 
 	///Returns value of F coefficient at the given point x
-	virtual T GetFCoeff(const T& x) override
+	virtual T GetFCoeff(const T& x) const override
 	{
 		return Phi(x);
 	}
 	
 	///Returns derivative of E coefficient with respect to x
-	virtual T GetdEdX(const T& x) override
+	virtual T GetdEdX(const T& x) const override
 	{
 		return ddPhi(x);
 	}
 
 	///Returns derivative of F coefficient with respect to x
-	virtual T GetdFdX(const T& x) override
+	virtual T GetdFdX(const T& x) const override
 	{
 		return dPhi(x);
 	}

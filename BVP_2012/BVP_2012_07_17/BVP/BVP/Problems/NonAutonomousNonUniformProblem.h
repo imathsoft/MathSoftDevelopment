@@ -12,49 +12,49 @@ private:
 protected:
 
 	///Nonlineariti for the Troesch problem
-	virtual T Nonlin(const T& u, const T& x) override
+	virtual T Nonlin(const T& u, const T& x) const override
 	{
 		return exp(2*u + cos(_alpha*x)) - _alpha*_alpha;
 	}
 
 	///Derivative of nonlinearity (with respect to u)
-	virtual T dNonlinDu(const T& u, const T& x) override
+	virtual T dNonlinDu(const T& u, const T& x) const override
 	{
 		return 2*exp(2*u + cos(_alpha*x));
 	}
 	
 	///Derivative of nonlinearity (with respect to x)
-	virtual T dNonlinDx(const T& u, const T& x) override
+	virtual T dNonlinDx(const T& u, const T& x) const override
 	{
 		return -_alpha*sin(_alpha*x)*exp(2*u + cos(_alpha*x));
 	}
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDuDu(const T& u, const T& x) override
+	virtual T ddNonlinDuDu(const T& u, const T& x) const override
 	{
 		return 4*exp(2*u + cos(_alpha*x));;
 	}
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDuDx(const T& u, const T& x) override
+	virtual T ddNonlinDuDx(const T& u, const T& x) const override
 	{
 		return -2*_alpha*sin(_alpha*x)*exp(2*u + cos(_alpha*x));
 	}
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDxDx(const T& u, const T& x) override
+	virtual T ddNonlinDxDx(const T& u, const T& x) const override
 	{
 		return _alpha*_alpha*(auxutils::sqr(sin(_alpha*x)) - cos(_alpha*x))*exp(2*u + cos(_alpha*x));
 	}
 
 	///Right hand side function (non-uniformity term)
-	virtual T Phi(const T& x) override
+	virtual T Phi(const T& x) const override
 	{
 		return -exp(2*sin(_alpha*x) + cos(_alpha*x))*sin(_alpha*x);
 	}
 
 	///The first order derivative of the non-unoformity term
-	virtual T dPhi(const T& x)  override
+	virtual T dPhi(const T& x) const override
 	{
 		T t1 = _alpha * x;
 		T t2 = cos(t1);
@@ -65,7 +65,7 @@ protected:
 	}
 
 	///The second order derivative of the non-unoformity term
-	virtual T ddPhi(const T& x)  override
+	virtual T ddPhi(const T& x) const override
 	{
 		T t1 = _alpha * _alpha;
 		T t2 = _alpha * x;

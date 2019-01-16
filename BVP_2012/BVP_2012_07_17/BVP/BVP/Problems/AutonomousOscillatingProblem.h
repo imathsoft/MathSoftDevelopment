@@ -8,38 +8,38 @@ template <class T>
 class AutonomousOscillatingProblem : public ProblemAutonomousAbstract<T>
 {
 	protected:
-	virtual T Nonlin(const T& u) override
+	virtual T Nonlin(const T& u) const override
 	{
 		T ln = log(u);
 		return  1 - ln*(ln + 1); 
 	}
 
 	///Derivative of nonlinearity (with respect to u)
-	virtual T dNonlin(const T& u) override
+	virtual T dNonlin(const T& u) const override
 	{
 		return - (1 + 2*log(u))/u; 
 	}
 	
 	///Second derivative of nonlinearity
-	virtual T ddNonlin(const T& u) override
+	virtual T ddNonlin(const T& u) const override
 	{
 		return (2*log(u) - 1)/auxutils::sqr(u); 
 	}
 
 	///Right hand side function (non-uniformity term)
-	virtual T Phi(const T& x) override
+	virtual T Phi(const T& x) const override
 	{
 		return T(0);
 	}
 
 	///The first order derivative of the non-unoformity term
-	virtual T dPhi(const T& x)  override
+	virtual T dPhi(const T& x) const override
 	{
 		return T(0);
 	}
 
 	///The second order derivative of the non-unoformity term
-	virtual T ddPhi(const T& x)  override
+	virtual T ddPhi(const T& x) const override
 	{
 		return T(0);
 	}

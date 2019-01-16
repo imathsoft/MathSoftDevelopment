@@ -11,33 +11,33 @@ class ProblemNonAutonomousAbstract : public ProblemNonUniformAbstract<T>
 {
 	protected:
 	///Nonlineariti for the Troesch problem
-	virtual T Nonlin(const T& u, const T& x) = 0;
+	virtual T Nonlin(const T& u, const T& x) const = 0;
 
 	///Derivative of nonlinearity (with respect to u)
-	virtual T dNonlinDu(const T& u, const T& x) = 0;
+	virtual T dNonlinDu(const T& u, const T& x) const = 0;
 	
 	///Derivative of nonlinearity (with respect to x)
-	virtual T dNonlinDx(const T& u, const T& x) = 0;
+	virtual T dNonlinDx(const T& u, const T& x) const = 0;
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDuDu(const T& u, const T& x) = 0;
+	virtual T ddNonlinDuDu(const T& u, const T& x) const = 0;
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDuDx(const T& u, const T& x) = 0;
+	virtual T ddNonlinDuDx(const T& u, const T& x) const = 0;
 
 	///Second derivative of nonlinearity
-	virtual T ddNonlinDxDx(const T& u, const T& x) = 0;
+	virtual T ddNonlinDxDx(const T& u, const T& x) const = 0;
 
 	public:
 	///A method to return std:function wrapper of the A coefficient
-	virtual T GetACoeff(const T& derivative, const T& value, const T& argument) override
+	virtual T GetACoeff(const T& derivative, const T& value, const T& argument) const override
 	{
 		// N^{'}_{u}(u(x), x)u^{'}(x) + N^{'}_{x}(u(x), x)
 		return dNonlinDu(value, argument)*derivative + dNonlinDx(value, argument); 
 	}
 
 	///A method to return std:function wrapper of the gradient of A coefficient
-	virtual std::array<T, 3> GetACoeffGradient(const T& derivative, const T& value, const T& argument) override
+	virtual std::array<T, 3> GetACoeffGradient(const T& derivative, const T& value, const T& argument) const override
 	{
 		std::array<T, 3> result;
 		T ddNDuDx = ddNonlinDuDx(value, argument);
@@ -51,14 +51,14 @@ class ProblemNonAutonomousAbstract : public ProblemNonUniformAbstract<T>
 	}
 
 	///A method to return std:function wrapper of the B coefficient
-	virtual T GetBCoeff(const T& derivative, const T& value, const T& argument) override
+	virtual T GetBCoeff(const T& derivative, const T& value, const T& argument) const override
 	{
 		///N(u,x)
 		return Nonlin(value, argument); 
 	}
 
 	///A method to return std:function wrapper of the gradient of B coefficient
-	virtual std::array<T, 3> GetBCoeffGradient(const T& derivative, const T& value, const T& argument) override
+	virtual std::array<T, 3> GetBCoeffGradient(const T& derivative, const T& value, const T& argument) const override
 	{
 		std::array<T, 3> result;
 		result[0] = 0;
@@ -70,7 +70,7 @@ class ProblemNonAutonomousAbstract : public ProblemNonUniformAbstract<T>
 	}
 
 	///A method to return std:function wrapper of the A coefficient for inverse problem
-	virtual T GetACoeffInverse(const T& derivative, const T& value, const T& argument) override
+	virtual T GetACoeffInverse(const T& derivative, const T& value, const T& argument) const override
 	{
 		T derivSquared = auxutils::sqr(derivative);
 		T N = Nonlin(argument, value);
@@ -81,7 +81,7 @@ class ProblemNonAutonomousAbstract : public ProblemNonUniformAbstract<T>
 	}
 
 	///A method to return std:function wrapper of the gradient of A coefficient for inverse problem
-	virtual std::array<T, 3> GetACoeffInverseGradient(const T& derivative, const T& value, const T& argument ) override
+	virtual std::array<T, 3> GetACoeffInverseGradient(const T& derivative, const T& value, const T& argument ) const override
 	{
 		std::array<T, 3> result;
 		T N  = Nonlin(argument, value);
@@ -110,14 +110,14 @@ class ProblemNonAutonomousAbstract : public ProblemNonUniformAbstract<T>
 	}
 
 	///A method to return std:function wrapper of the B coefficient for inverse problem
-	virtual T GetBCoeffInverse(const T& derivative, const T& value, const T& argument) override
+	virtual T GetBCoeffInverse(const T& derivative, const T& value, const T& argument) const override
 	{
 		///- (N(u, x) + \Phi(x))*u*(x')^{2}
 		return - (Nonlin(argument, value)*argument + Phi(value))*auxutils::sqr(derivative);
 	}
 
 	///A method to return std:function wrapper of the gradient of B coefficient for inverse problem
-	virtual std::array<T, 3> GetBCoeffInverseGradient(const T& derivative, const T& value, const T& argument) override
+	virtual std::array<T, 3> GetBCoeffInverseGradient(const T& derivative, const T& value, const T& argument) const override
 	{
 		std::array<T, 3> result;
 		T N  = Nonlin(argument, value);

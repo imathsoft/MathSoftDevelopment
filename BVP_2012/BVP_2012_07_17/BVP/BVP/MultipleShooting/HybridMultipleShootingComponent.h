@@ -301,7 +301,7 @@ private:
 		typename X_Func_Gradient<T> dX;
 		if (abs(curKnot.Derivative) <= 1.0)
 		{
-			dX = X_Func_Gradient<T>::X3_Func_Gradient(
+			dX = _problem->step_streight_gradient(
 				_problem->GetACoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument),
 				_problem->GetBCoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
 				curKnot.Derivative, 
@@ -317,7 +317,7 @@ private:
 			result[1][3] = dX.dh - nextKnot.Derivative;
 		} else
 		{
-			dX = X_Func_Gradient<T>::XI_Func_Gradient(
+			dX = _problem->step_inverse_gradient(
 				_problem->GetACoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
 				_problem->GetBCoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
 				1/curKnot.Derivative, 
@@ -349,7 +349,7 @@ private:
 
 			if (abs(curKnot.Derivative) <= 1.0)
 			{
-				dX = X_Func_Gradient<T>::X3_Func_Gradient(
+				dX = _problem->step_streight_gradient(
 					_problem->GetACoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument),
 					_problem->GetBCoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument), 
 					curKnot.Derivative, 
@@ -365,7 +365,7 @@ private:
 				result[currRow + 1][3] = dX.dh - nextKnot.Derivative;
 			} else
 			{
-				dX = X_Func_Gradient<T>::XI_Func_Gradient(
+				dX = _problem->step_inverse_gradient(
 					_problem->GetACoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value),
 					_problem->GetBCoeffInverse(1/curKnot.Derivative, curKnot.Argument, curKnot.Value), 
 					1/curKnot.Derivative, 

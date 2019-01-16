@@ -24,13 +24,11 @@ protected:
 		T E = _problem->GetECoeff(prevKnot.Argument);
 		T F = _problem->GetFCoeff(prevKnot.Argument);
 
-		T test = max(abs(A*_h), abs(B));
+		T hOpt = _problem->get_optimal_step_straight(A, B, _h);
 
-		T hOpt = (test*_h*_h > 0.5) ? 1/auxutils::RoughSqrt(2*test) : abs(_h);
+		T H = sgn(_h) * min(hOpt, abs(argFinish - prevKnot.Argument));
 
-		T H = sgn(_h) * min(min(hOpt, abs(_h)), abs(argFinish - prevKnot.Argument));
-
-		InitCondition<T> knot = X4_Func(A, B, C, D, E, F, H, _precision);
+		InitCondition<T> knot = _problem->step_streight(A, B, C, D, E, F, H, _precision);
 		knot.Argument = prevKnot.Argument + H;
 
 		return knot;
