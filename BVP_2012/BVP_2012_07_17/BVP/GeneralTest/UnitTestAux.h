@@ -27,6 +27,22 @@
 
 namespace UnitTestAux
 {
+	template <class T>
+	bool CheckQuadraticConvergenceOfNewtonMethd(const std::vector<T>& successiveCorrections)
+	{
+		int numberOfAcceptableCorrections = 0;
+		for (size_t index = successiveCorrections.size() - 1; index > 0; index--)
+		{
+			T prevCorrectionSquared = auxutils::sqr(successiveCorrections[index - 1]);
+			if (3* prevCorrectionSquared >= successiveCorrections[index])
+				numberOfAcceptableCorrections++;
+			else if (index < successiveCorrections.size() - 1) //we can skip the very last correction because it can be not "clear" enough
+				break;
+		}
+
+		return numberOfAcceptableCorrections >= 2;
+	}
+
 	///Method to calculate the deviation of the given set of knots to the given "exact solution"
 	template<class T>
 	T CalcDeviationFromExactSolution(std::vector<InitCondition<T>> knots, 

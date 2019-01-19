@@ -90,7 +90,7 @@ public:
 		const auto ddN_ddu = ddNonlin_ddu(derivative_inverse, argument);
 		const auto sqr_argument = auxutils::sqr(argument);
 
-		result[0] = (ddN_dudu_deriv*argument + dN_du_deriv + (ddN_ddu_deriv*N + auxutils::sqr(dN_du_deriv))*sqr_argument*derivative)/auxutils::sqr(derivative_inverse) -
+		result[0] = (ddN_dudu_deriv*argument + dN_du_deriv + (ddN_ddu_deriv*N + auxutils::sqr(dN_du_deriv))*sqr_argument*derivative)*auxutils::sqr(derivative_inverse) -
 			dN_du_deriv*N*sqr_argument;
 		result[1] = T(0);
 		result[2] = -ddN_ddu*argument - 2*dN_du - (ddN_dudu_deriv*N + dN_du_deriv*dN_du)*sqr_argument*derivative - 2*dN_du_deriv*N*argument*derivative;
@@ -108,7 +108,7 @@ public:
 	{
 		std::array<T, 3> result;
 		const auto derivative_inverse = T(1)/derivative;
-		result[0] = dNonlin_du_deriv(derivative_inverse, argument)*argument/auxutils::sqr(derivative_inverse);
+		result[0] = dNonlin_du_deriv(derivative_inverse, argument)*argument*auxutils::sqr(derivative_inverse);
 		result[1] = T(0);
 		result[2] = -dNonlin_du(derivative_inverse, argument)*argument - Nonlin(derivative_inverse, argument);
 		return result;

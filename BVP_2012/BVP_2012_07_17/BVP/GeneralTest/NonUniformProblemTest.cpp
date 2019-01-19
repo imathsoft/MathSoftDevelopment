@@ -134,22 +134,6 @@ namespace GeneralTest
 		}
 
 		template <class T>
-		bool CheckQuadraticConvergenceOfNewtonMethd(const std::vector<T>& successiveCorrections)
-		{
-			int numberOfAcceptableCorrections = 0;
-			for (size_t index = successiveCorrections.size() - 1; index > 0; index--)
-			{
-				T prevCorrectionSquared = auxutils::sqr(successiveCorrections[index - 1]);
-				if (3* prevCorrectionSquared >= successiveCorrections[index])
-					numberOfAcceptableCorrections++;
-				else if (index < successiveCorrections.size() - 1) //we can skip the very last correction because it can be not "clear" enough
-					break;
-			}
-
-			return numberOfAcceptableCorrections >= 2;
-		}
-
-		template <class T>
 		void AssertQuadraticOrderOfApproximation(const std::vector<InitCondition<T>>& approximation_h1, const T h1, 
 			const std::vector<InitCondition<T>>& approximation_h2, const T h2, const T alpha, 
 			const T percentToleranceFunc, const T percentToleranceDeriv)

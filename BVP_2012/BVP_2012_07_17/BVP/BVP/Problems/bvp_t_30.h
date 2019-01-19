@@ -34,5 +34,5 @@ protected:
 	T ddNonlin_ddu_deriv(const T& u_deriv, const T& u) const override { return T(0); };
 
 	///Second derivative of nonlinearity with respect to u and u_deriv
-	T ddNonlin_dudu_deriv(const T& u_deriv, const T& u) const { return T(0); }
+	T ddNonlin_dudu_deriv(const T& u_deriv, const T& u) const override { return T(0); }
 };
