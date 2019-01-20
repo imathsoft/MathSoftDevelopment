@@ -11,6 +11,12 @@ public:
 		lambda = lambda_;
 	}
 
+	///Returns pointer to a deep copy of the current instance of the class
+	std::unique_ptr<ProblemAbstract<T>> copy() const override
+	{
+		return std::unique_ptr<ProblemAbstract<T>>(new Bvp_t_30<T>(lambda));
+	}
+
 protected:
 	///Nonlineariti
 	T Nonlin(const T& u_deriv, const T& u) const override

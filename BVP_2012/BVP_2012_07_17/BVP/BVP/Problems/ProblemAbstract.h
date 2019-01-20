@@ -10,6 +10,9 @@ template <class T>
 class ProblemAbstract
 {
 	public:
+	///Returns pointer to a deep copy of the current instance of the class
+	virtual std::unique_ptr<ProblemAbstract<T>> copy() const = 0;
+
 	///A method to return std:function wrapper of the A coefficient
 	virtual T GetACoeff(const T& derivative, const T& value, const T& argument) const = 0;
 

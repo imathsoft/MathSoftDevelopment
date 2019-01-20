@@ -29,39 +29,16 @@ namespace auxutils
 		return boost::multiprecision::sqrt(mpr);
 	}
 
-	inline double sqr(double d)
+	template <class T>
+	inline T sqr(const T& d)
 	{
 		return d*d;
 	}
 
-	inline float sqr(float f)
+	template <class T>
+	inline int sgn(T x)
 	{
-		return f*f;
-	}
-
-	inline float_50_noet sqr(float_50_noet mpr)
-	{
-		return mpr*mpr;
-	}
-
-	inline mpfr::mpreal sqr(mpfr::mpreal mpr)
-	{
-		return mpfr::sqr(mpr);
-	}
-
-	inline int sqr(int intVal)
-	{
-		return intVal*intVal;
-	}
-
-	inline int sgn(float_50_noet mpr)
-	{
-		return boost::math::sign(mpr);
-	}
-
-	inline int sgn(double x)
-	{
-		return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
+		return (x > T(0)) ? 1 : ((x < T(0)) ? -1 : 0);
 	}
 
 	template <class T>

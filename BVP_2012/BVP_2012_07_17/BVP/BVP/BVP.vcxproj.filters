@@ -155,5 +155,8 @@
     <ClInclude Include="Problems\bvp_t_30.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
+    <ClInclude Include="Problems\AutonomousGeneralDiagnosticsProblem.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

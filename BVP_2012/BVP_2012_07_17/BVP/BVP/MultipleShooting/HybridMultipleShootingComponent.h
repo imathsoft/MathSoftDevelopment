@@ -18,7 +18,7 @@ template <class T>
 class HybridMultipleShootingComponent
 {
 private: 
-	ProblemAbstract<T>* _problem;
+	const std::unique_ptr<ProblemAbstract<T>> _problem;
 	T _precision;
 
 	///Method to refine mesh according to the given step
@@ -44,7 +44,7 @@ private:
 
 			if (vect.NormSquaredNaive() >= maxSquaredDist)
 			{
-				T naiveNorm = auxutils::Sqrt(vect.NormSquaredNaive());
+				T naiveNorm = auxutils::Sqrt(vect.NormSquaredNaive()); //TODO : avoid using the sruare root function 
 				vect = vect / naiveNorm;
 				T tau = step;
 
@@ -640,9 +640,8 @@ public:
 	}
 
 	///Constructor
-	HybridMultipleShootingComponent(ProblemAbstract<T>& problem)
+	HybridMultipleShootingComponent(const ProblemAbstract<T>& problem) : _problem(problem.copy())
 	{
-		_problem = &problem;
 		_precision = 10 * std::numeric_limits<T>::epsilon();
 		MaxNumberOfNewtonIterations = 20;
 	}

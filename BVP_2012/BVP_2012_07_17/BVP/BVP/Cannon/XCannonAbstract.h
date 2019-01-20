@@ -19,7 +19,7 @@ protected:
 	typedef std::list<InitCondition<T>> ICLIST;
 	ICLIST _listIC;
 	typename ICLIST::iterator iLst;
-	ProblemAbstract<T>* _problem;
+	const std::unique_ptr<const ProblemAbstract<T>> _problem;
 	std::function<T(const int, const int)> _hFunc;
 	std::function<bool(InitCondition<T>&)> _checkFunc;
 	T _h; // default step size
@@ -135,11 +135,10 @@ public:
 	/// <param name="hFunc">The h function.</param>
 	/// <param name="checkFunc">The check function.</param>
 	/// <param name="precision">The precision.</param>
-	XCannonAbstract(ProblemAbstract<T>& problem, const T defaultStepSize, const T precision, 
+	XCannonAbstract(const ProblemAbstract<T>& problem, const T defaultStepSize, const T precision, 
 		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
-		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; })
+		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : _problem(problem.copy())
 	{
-		_problem = &problem;
 		_h = defaultStepSize;
 		_hFunc = hFunc;
 		_checkFunc = checkFunc;

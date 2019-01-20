@@ -12,11 +12,17 @@ class NonAutonomousTroeschProblem : public ProblemNonAutonomousAbstract<T>
 	private:
 		T l;
 	public:
-		///Constructor
-		NonAutonomousTroeschProblem(T lambda)
-		{
-			l = lambda;
-		}
+	///Constructor
+	NonAutonomousTroeschProblem(T lambda)
+	{
+		l = lambda;
+	}
+
+	///Returns pointer to a deep copy of the current instance of the class
+	std::unique_ptr<ProblemAbstract<T>> copy() const override
+	{
+		return std::unique_ptr<ProblemAbstract<T>>(new NonAutonomousTroeschProblem<T>(l));
+	}
 
 	protected:
 	///Nonlineariti for the Troesch problem

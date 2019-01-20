@@ -25,7 +25,7 @@ protected:
 
 public:
 	///Constructor
-	HybridCannon(ProblemAbstract<T>& problem, const T defaultStepSize, 
+	HybridCannon(const ProblemAbstract<T>& problem, const T defaultStepSize, 
 		T precision, 
 		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
 		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 

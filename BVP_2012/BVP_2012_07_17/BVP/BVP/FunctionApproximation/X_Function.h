@@ -237,8 +237,8 @@ inline InitCondition<T> XI_Bernoulli(const T& A, const T& B, const T& C, const T
 
 		current_index++;
 
-		if (current_index >= 1000)
-			throw "Series does not converge";
+		if (current_index >= 300 && abs(sol_series[current_index]) >= abs(sol_series[current_index-1]))
+			throw "The iterations do not converge";
 
 		if (sol_series.size() <= current_index)
 		{

@@ -60,6 +60,12 @@ class NonAutonomousOscillatingProblem : public ProblemNonAutonomousAbstract<T>
 	{
 		return T(0);
 	}
+public:
+	///Returns pointer to a deep copy of the current instance of the class
+	std::unique_ptr<ProblemAbstract<T>> copy() const override
+	{
+		return std::unique_ptr<ProblemAbstract<T>>(new NonAutonomousOscillatingProblem<T>());
+	}
 };
 
 #endif

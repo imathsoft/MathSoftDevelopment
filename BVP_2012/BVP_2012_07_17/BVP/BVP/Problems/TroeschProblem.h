@@ -19,6 +19,12 @@ public:
 		l = lambda;
 	}
 
+	///Returns pointer to a deep copy of the current instance of the class
+	std::unique_ptr<ProblemAbstract<T>> copy() const override
+	{
+		return std::unique_ptr<ProblemAbstract<T>>(new TroeschProblem<T>(l));
+	}
+
 protected:
 	///Right hand side function (non-uniformity term)
 	virtual T Phi(const T& x) const override

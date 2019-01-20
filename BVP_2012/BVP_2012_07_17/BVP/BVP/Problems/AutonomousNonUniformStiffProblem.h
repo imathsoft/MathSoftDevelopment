@@ -55,4 +55,11 @@ public:
 		_oneOverSqrtLambda = T(1)/auxutils::Sqrt(_lambda);
 		_oneOverLambda = _oneOverSqrtLambda*_oneOverSqrtLambda;
 	}
+
+	///Returns pointer to a deep copy of the current instance of the class
+	std::unique_ptr<ProblemAbstract<T>> copy() const override
+	{
+		return std::unique_ptr<ProblemAbstract<T>>(new AutonomousNonUniformStiffProblem<T>(lambda));
+	}
+
 };

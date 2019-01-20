@@ -140,8 +140,9 @@ public:
 
 	T get_optimal_step_inverse(const T& A, const T& B, const T& C, const T& step_desired) const override
 	{
-		T test = abs(step_desired*C*C*(A*step_desired + 2*B));
-		T step_optimal = (test > 0.5) ? 1/abs(2*test) : abs(step_desired);
-		return min(step_optimal, abs(step_desired));
+		const T desired_step_abs = abs(step_desired);
+		const T test = 1/abs(3*C*C*(abs(A)*desired_step_abs + 2*abs(B)));
+		T step_optimal = min(test, desired_step_abs);
+		return min(step_optimal, desired_step_abs);
 	}
 };

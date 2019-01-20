@@ -52,4 +52,10 @@ public:
 	{
 		_alpha = alpha;
 	}
+
+	///Returns pointer to a deep copy of the current instance of the class
+	std::unique_ptr<ProblemAbstract<T>> copy() const override
+	{
+		return std::unique_ptr<ProblemAbstract<T>>(new AutonomousNonUniformProblem<T>(_alpha));
+	}
 };
