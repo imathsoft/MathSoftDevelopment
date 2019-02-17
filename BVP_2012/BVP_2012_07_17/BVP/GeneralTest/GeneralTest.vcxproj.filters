@@ -59,6 +59,9 @@
     <ClCompile Include="bvp_t_30_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bvp_t_x_test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TestData\OscillatingTestProblemMSInitGuess.txt">

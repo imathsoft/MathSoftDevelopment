@@ -149,13 +149,16 @@
     <ClInclude Include="FunctionApproximation\DerivativeEvaluator\DifferentiableFunction.h">
       <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
     </ClInclude>
-    <ClInclude Include="Problems\ProblemAutnomousGeneralAbstract.h">
-      <Filter>Header Files\Problems</Filter>
-    </ClInclude>
     <ClInclude Include="Problems\bvp_t_30.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
     <ClInclude Include="Problems\AutonomousGeneralDiagnosticsProblem.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\bvp_t_x.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\ProblemGeneralAbstract.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
   </ItemGroup>
