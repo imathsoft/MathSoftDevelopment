@@ -242,6 +242,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="Problems\ProblemAbstract.h" />
     <ClInclude Include="Problems\ProblemAutonomousAbstract.h" />
     <ClInclude Include="Problems\ProblemNonAutonomousAbstract.h" />
+    <ClInclude Include="Problems\TroeschProblemBernoulli.h" />
     <ClInclude Include="Problems\TroeschProblemStatic.h" />
     <ClInclude Include="Problems\TroeschProblem.h" />
     <ClInclude Include="ShootingSimple\BisectionComponent.h" />

@@ -161,5 +161,8 @@
     <ClInclude Include="Problems\ProblemGeneralAbstract.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
+    <ClInclude Include="Problems\TroeschProblemBernoulli.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
