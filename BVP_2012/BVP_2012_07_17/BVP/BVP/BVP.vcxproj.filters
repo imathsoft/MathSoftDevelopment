@@ -134,9 +134,6 @@
     <ClInclude Include="Problems\ProblemNonUniformAbstract.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
-    <ClInclude Include="Problems\AutonomousNonUniformStiffProblem.h">
-      <Filter>Header Files\Problems</Filter>
-    </ClInclude>
     <ClInclude Include="Problems\AutonomousNonUniformProblem.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
@@ -162,6 +159,9 @@
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
     <ClInclude Include="Problems\TroeschProblemBernoulli.h">
+      <Filter>Header Files\Problems</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\bvp_t_21.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <functional>
 #include "UnitTestAux.h"
 #include "../BVP/FunctionApproximation/InitialCondition.h"
 #include "../BVP/Utils/AuxUtils.h"
@@ -25,7 +26,8 @@ namespace GeneralTest
 		const numTypeMp a, const numTypeMp b,
 		const numTypeMp u_a, const numTypeMp u_b,
 		const numTypeMp deriv_min, const numTypeMp deriv_max,
-		const numTypeMp deriv_initial_reference, const numTypeMp deriv_final_reference)
+		const std::function< numTypeMp( numTypeMp)> reference_function,
+		const std::function< numTypeMp( numTypeMp)> reference_derivative)
 	{
 		std::function<bool(const InitCondition<numTypeMp>&)> checkFunc = 
 			[](const InitCondition<numTypeMp>& ic) { return (abs(ic.Value) < 3) && (abs(ic.Argument) < 3); };
@@ -41,8 +43,8 @@ namespace GeneralTest
 
 		const auto knots = cannon.GetKnotVectorStreight();
 
-		const auto diff_deriv_initial = abs(knots.begin()->Derivative - deriv_initial_reference);
-		const auto diff_deriv_final = abs(knots.rbegin()->Derivative - deriv_final_reference);
+		const auto diff_deriv_initial = abs(knots.begin()->Derivative - reference_derivative(a));
+		const auto diff_deriv_final = abs(knots.rbegin()->Derivative - reference_derivative(b));
 
 		Assert::IsTrue(diff_deriv_initial < h*h, L"Too big deviation from the reference");
 		Assert::IsTrue(diff_deriv_final < h*h, L"Too big deviation from the reference");
@@ -53,12 +55,13 @@ namespace GeneralTest
 		const numTypeMp a, const numTypeMp b,
 		const numTypeMp u_a, const numTypeMp u_b,
 		const numTypeMp deriv_min, const numTypeMp deriv_max,
-		const T deriv_initial_reference, const T deriv_final_reference)
+		const std::function< numTypeMp( numTypeMp)> reference_function,
+		const std::function< numTypeMp( numTypeMp)> reference_derivative)
 	{
 		std::function<bool(const InitCondition<T>&)> checkFunc = 
 			[](const InitCondition<T>& ic) { return (abs(ic.Value) < 3) && (abs(ic.Argument) < 3); };
 
-		T h = 0.01;
+		T h = 0.0001;
 
 		HybridCannon<T> cannon(problem, h, 0.001, checkFunc);
 
@@ -77,8 +80,8 @@ namespace GeneralTest
 		bool succeeded;
 		std::vector<InitCondition<T>> result = HMSComp.Run(init_guess, h, succeeded);
 
-		const auto diff_deriv_initial = abs(result.begin()->Derivative - deriv_initial_reference);
-		const auto diff_deriv_final = abs(result.rbegin()->Derivative - deriv_final_reference);
+		const auto diff_deriv_initial = abs(result.begin()->Derivative - reference_derivative(a));
+		const auto diff_deriv_final = abs(result.rbegin()->Derivative - reference_derivative(b));
 
 		Assert::IsTrue(diff_deriv_initial < h*h, L"Too big deviation from the reference");
 		Assert::IsTrue(diff_deriv_final < h*h, L"Too big deviation from the reference");
@@ -100,12 +103,14 @@ namespace GeneralTest
 			const auto sol = [lambda](const numTypeMp x) { return exp(x*(x+2)/auxutils::Sqrt(lambda)); };
 			const auto sol_deriv = [lambda](const numTypeMp x) { return 2*(x+1)*exp(x*(x+2)/auxutils::Sqrt(lambda))/auxutils::Sqrt(lambda); };
 
-			run_hybrid_cannon_test(problem, -1, 0, u_a, 1, 0, 1,  sol_deriv(-1), sol_deriv(0));
+			const auto solution_inverse = [lambda](const numTypeMp u){ return 1+auxutils::Sqrt(1+auxutils::Sqrt(lambda)*log(u)); };
+
+			run_hybrid_cannon_test(problem, -1, 0, u_a, 1, 0, 1, sol, sol_deriv);
 		}
 
 		TEST_METHOD(bvp_t_x_hybrid_multiple_shooting_test)
 		{
-			numTypeMp lambda = 0.05;
+			numTypeMp lambda = 0.001;
 			Bvp_t_x<numTypeMp> problem(lambda);
 
 			numTypeMp u_a = exp(-1*(-1+2)/auxutils::Sqrt(lambda));
@@ -113,7 +118,7 @@ namespace GeneralTest
 			const auto sol = [lambda](const numTypeMp x) { return exp(x*(x+2)/auxutils::Sqrt(lambda)); };
 			const auto sol_deriv = [lambda](const numTypeMp x) { return 2*(x+1)*exp(x*(x+2)/auxutils::Sqrt(lambda))/auxutils::Sqrt(lambda); };
 
-			run_hybrid_multiple_shooting_test(problem,-1, 0, u_a, 1, 0, 1, sol_deriv(-1), sol_deriv(0));
+			run_hybrid_multiple_shooting_test(problem,-1, 0, u_a, 1, 0, 1, sol, sol_deriv);
 		}
 	};
 }

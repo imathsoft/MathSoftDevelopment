@@ -21,6 +21,8 @@ private:
 	const std::unique_ptr<ProblemAbstract<T>> _problem;
 	T _precision;
 
+	const T _critical_d_value;
+
 	///Method to refine mesh according to the given step
 	vector<InitCondition<T>> RefineMesh(const vector<InitCondition<T>>& meshData, T step)
 	{
@@ -70,7 +72,7 @@ private:
 		InitCondition<T> curKnot = meshData[0];
 		InitCondition<T> prevKnot;
 
-		result[0] = abs(curKnot.Derivative) <= 1.0 ? meshData[0].Derivative : 
+		result[0] = abs(curKnot.Derivative) <= _critical_d_value ? meshData[0].Derivative : 
 			1/meshData[0].Derivative;
 
 		for (std::vector<InitCondition<T>>::size_type i = 1; i < meshData.size() - 1; i++)
@@ -80,16 +82,16 @@ private:
 
 			int curRow = 2 * (int)i - 1;
 
-			result[curRow + 1] = abs(curKnot.Derivative) <= 1.0 ? 
+			result[curRow + 1] = abs(curKnot.Derivative) <= _critical_d_value ? 
 				curKnot.Derivative : 1/curKnot.Derivative;
 
-			result[curRow] = abs(prevKnot.Derivative) <= 1.0 ? 
+			result[curRow] = abs(prevKnot.Derivative) <= _critical_d_value ? 
 				curKnot.Value : curKnot.Argument;
 		}
 
 		curKnot = meshData[meshData.size() - 1];
 
-		result[dim - 1] = abs(curKnot.Derivative) <= 1.0 ? 
+		result[dim - 1] = abs(curKnot.Derivative) <= _critical_d_value ? 
 				curKnot.Derivative : 1/curKnot.Derivative;
 
 		return result;
@@ -122,22 +124,22 @@ private:
 		if (vect.size() != vectDim)
 			throw exception("Nuexpected vector size");
 
-        result[0].Derivative = abs(baseMeshData[0].Derivative) <= 1.0 ? vect[0] : 1/vect[0];
+        result[0].Derivative = abs(baseMeshData[0].Derivative) <= _critical_d_value ? vect[0] : 1/vect[0];
 
 		for (std::vector<InitCondition<T>>::size_type i = 1; i < result.size() - 1; i++)
 		{
 			int curRow = 2 * (int)i - 1;
 
-            result[i].Derivative = abs(baseMeshData[i].Derivative) <= 1.0 ? 
+            result[i].Derivative = abs(baseMeshData[i].Derivative) <= _critical_d_value ? 
 				vect[curRow + 1] : 1/vect[curRow + 1];
 
-			if (abs(baseMeshData[i - 1].Derivative) <= 1.0)
+			if (abs(baseMeshData[i - 1].Derivative) <= _critical_d_value)
 				result[i].Value = vect[curRow];
 			else
 				result[i].Argument = vect[curRow];
 		}
 
-            result[dim - 1].Derivative = abs(baseMeshData[dim - 1].Derivative) <= 1.0 ? 
+            result[dim - 1].Derivative = abs(baseMeshData[dim - 1].Derivative) <= _critical_d_value ? 
 				vect[vectDim - 1] : 1/vect[vectDim - 1];
 
 		return result;
@@ -248,17 +250,21 @@ private:
 		vector<InitCondition<T>> MD(std::begin(meshData), std::end(meshData));
 
 		T absCorrection = 1;
-		T oldAbsCorrection = 1;
+		T oldAbsCorrection;
 
 		///DD-160228: Achievable precision is limited by round-off errors
 		///which, in turn, depend on the number of knots
 		auto achievablePrec = GetAcheivablePrecision(MD.size());
 
-		for (int i = 0; i < MaxNumberOfNewtonIterations && absCorrection > achievablePrec; i++)
+		for (int i = 0; i < MaxNumberOfNewtonIterations && 
+			(absCorrection > achievablePrec || oldAbsCorrection >= 1); i++)
 		{
+			oldAbsCorrection = absCorrection;
+
 			if (absCorrection*auxutils::RoughSqrt((T)MD.size()) < 1) // the process is starting to converge
 			{
 				MD = RefineMesh(MD, desiredMaxStepSize);
+
 				achievablePrec = GetAcheivablePrecision(MD.size());
 			}
 
@@ -272,8 +278,6 @@ private:
 
 			if (absCorrection / oldAbsCorrection > 100 && absCorrection > 100)
 				break; // the process is divergent
-
-			oldAbsCorrection = absCorrection;
 
 			MD = VectorToMeshData(MD, newVector);
 		}
@@ -299,7 +303,7 @@ private:
 		curKnot = meshData[0];
 		nextKnot = meshData[1];
 		typename X_Func_Gradient<T> dX;
-		if (abs(curKnot.Derivative) <= 1.0)
+		if (abs(curKnot.Derivative) <= _critical_d_value)
 		{
 			dX = _problem->step_streight_gradient(
 				_problem->GetACoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument),
@@ -347,7 +351,7 @@ private:
 
 			int currRow = 2 * (int)i;
 
-			if (abs(curKnot.Derivative) <= 1.0)
+			if (abs(curKnot.Derivative) <= _critical_d_value)
 			{
 				dX = _problem->step_streight_gradient(
 					_problem->GetACoeff(curKnot.Derivative, curKnot.Value, curKnot.Argument),
@@ -389,9 +393,9 @@ private:
 
 			result[currRow - 2][2] = - 1;
 
-			if ((abs(prevKnot.Derivative) <= 1.0) ^ (abs(curKnot.Derivative) <= 1.0))
+			if ((abs(prevKnot.Derivative) <= _critical_d_value) ^ (abs(curKnot.Derivative) <= _critical_d_value))
 			{
-				auto derivative = abs(curKnot.Derivative) <= 1.0 ? curKnot.Derivative : 1/curKnot.Derivative;
+				auto derivative = abs(curKnot.Derivative) <= _critical_d_value ? curKnot.Derivative : 1/curKnot.Derivative;
 				result[currRow - 1][2]     = 1.0 / auxutils::sqr(derivative);
 
 				result[currRow][0]     = dX.dA * A_grad_value[2] +
@@ -424,9 +428,9 @@ private:
 		InitCondition<T> penultKnot = meshData[meshData.size() - 2];
 		InitCondition<T> lastKnot = meshData[meshData.size() - 1];
 
-		if ((abs(penultKnot.Derivative) <= 1.0) ^ (abs(lastKnot.Derivative) <= 1.0))
+		if ((abs(penultKnot.Derivative) <= _critical_d_value) ^ (abs(lastKnot.Derivative) <= _critical_d_value))
 		{
-			auto derivative = abs(lastKnot.Derivative) <= 1.0 ? lastKnot.Derivative : 1/lastKnot.Derivative;
+			auto derivative = abs(lastKnot.Derivative) <= _critical_d_value ? lastKnot.Derivative : 1/lastKnot.Derivative;
 			result[(int)dim - 1][2] = 1 / auxutils::sqr(derivative); 
 		}
 		else
@@ -640,7 +644,9 @@ public:
 	}
 
 	///Constructor
-	HybridMultipleShootingComponent(const ProblemAbstract<T>& problem) : _problem(problem.copy())
+	HybridMultipleShootingComponent(const ProblemAbstract<T>& problem, const T critical_d_value = T(1)) : 
+		_problem(problem.copy()), 
+		_critical_d_value(critical_d_value)
 	{
 		_precision = 10 * std::numeric_limits<T>::epsilon();
 		MaxNumberOfNewtonIterations = 20;
