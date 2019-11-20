@@ -16,6 +16,8 @@ private:
 
 	CANNON_LIST _cannonList;
 
+	const T _critical_d_value;
+
 protected:
 	inline InitCondition<T> GetNextKnot(const InitCondition<T> prevKnot, const T& argFinish)
 	{
@@ -27,8 +29,9 @@ public:
 	///Constructor
 	HybridCannon(const ProblemAbstract<T>& problem, const T defaultStepSize, 
 		T precision, 
-		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, 
+		std::function<bool(InitCondition<T>&)> checkFunc = [](InitCondition<T>& ic){ return true; }, const T critical_d_value = T(1), 
 		std::function<T(const int, const int)> hFunc = [](const int a, const int b){ return 1; }) : 
+		_critical_d_value(critical_d_value),
 		XCannonAbstract(problem, defaultStepSize, precision, checkFunc, 
 		hFunc)
 	{};
@@ -46,16 +49,19 @@ public:
 		if (!ValidateArgumentSegmentAndStep(argStart, argFinish))
 			return result;
 
-		auto subCheckFunction = [=](InitCondition<T>& ic){ 
-			return abs(ic.Derivative) <= 1 && _checkFunc(ic); };
+		auto subCheckFunction_straight = [=](InitCondition<T>& ic){ 
+			return abs(ic.Derivative) <= _critical_d_value && _checkFunc(ic); };
+
+		auto subCheckFunction_inverse = [=](InitCondition<T>& ic){ 
+			return abs(ic.Derivative) <= T(1)/_critical_d_value && _checkFunc(ic); };
 
 		while (_checkFunc(result) && 
 			!_destinationPointIsHit)
 		{
-			if (abs(result.Derivative) < 1)
+			if (abs(result.Derivative) < _critical_d_value)
 			{
 				auto cannon = std::unique_ptr<XCannon<T>>(
-					new XCannon<T>(*_problem, _h, _precision, subCheckFunction ));
+					new XCannon<T>(*_problem, _h, _precision, subCheckFunction_straight ));
 
 				result = cannon->Shoot(result.Argument, argFinish, result.Value, result.Derivative);
 
@@ -72,7 +78,7 @@ public:
 					inverseStepSize = -_h;
 
 				auto cannon = std::unique_ptr<XCannonInverse<T>>(
-					new XCannonInverse<T>(*_problem, inverseStepSize, _precision, subCheckFunction));
+					new XCannonInverse<T>(*_problem, inverseStepSize, _precision, subCheckFunction_inverse));
 
 				T inverseArgFinish;
 				if (ValidateArgumentSegmentAndStep(result.Value, funcTarget, inverseStepSize))

@@ -229,7 +229,7 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h" />
     <ClInclude Include="Problems\AutonomousGeneralDiagnosticsProblem.h" />
     <ClInclude Include="Problems\AutonomousNonUniformProblem.h" />
-    <ClInclude Include="Problems\AutonomousNonUniformStiffProblem.h" />
+    <ClInclude Include="Problems\bvp_t_21.h" />
     <ClInclude Include="Problems\AutonomousOscillatingProblem.h" />
     <ClInclude Include="Problems\bvp_t_30.h" />
     <ClInclude Include="Problems\bvp_t_x.h" />
