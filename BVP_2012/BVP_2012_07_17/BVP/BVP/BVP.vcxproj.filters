@@ -164,5 +164,8 @@
     <ClInclude Include="Problems\bvp_t_21.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\SolutionUtils.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -77,14 +77,18 @@ public :
 		return Argument < ic.Argument; 
 	}
 
-	inline T NormSquared()
+	inline T NormSquared() const
 	{
 		return Value * Value + Derivative * Derivative +
 			SecDerivative * SecDerivative + Argument * Argument;
 	}
 
-	inline T NormSquaredNaive()
+	template <bool Deriv>
+	inline T NormSquaredPartial() const
 	{
+		if (Deriv)
+			return Derivative * Derivative + Argument * Argument;
+
 		return Value * Value + Argument * Argument;
 	}
 

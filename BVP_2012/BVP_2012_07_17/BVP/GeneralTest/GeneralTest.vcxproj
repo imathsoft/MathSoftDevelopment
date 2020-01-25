@@ -172,6 +172,7 @@
     <ClCompile Include="NonAutonomousProblemsTest.cpp" />
     <ClCompile Include="NonUniformProblemTest.cpp" />
     <ClCompile Include="OscillatingProblemTestUnit.cpp" />
+    <ClCompile Include="SimplificationTest.cpp" />
     <ClCompile Include="TroeschProblemTestUnit.cpp" />
     <ClCompile Include="XCannonTestUnit.cpp" />
     <ClCompile Include="XFunctionTestUnit.cpp" />
@@ -181,6 +182,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestData\NonUniformProblemInitGuess.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestData\solution_double_precision.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

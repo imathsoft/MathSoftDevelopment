@@ -81,7 +81,7 @@ namespace auxutils
 
 	///Method to write vector of knots into a text file
 	template <class T>
-	void SaveToFile(const std::vector<T> mesh, const char* filename)
+	void SaveToFile(const std::vector<T>& mesh, const char* filename)
 	{
 		 std::ofstream file;
 		 file.open (filename);
@@ -114,7 +114,7 @@ namespace auxutils
 
 	///Method to write vector of knots into a "Maple"-compatible text file
 	template <class T>
-	void SaveToMapleFile(const std::vector<InitCondition<T>> mesh, const char* filename, 
+	void SaveToMapleFile(const std::vector<InitCondition<T>>& mesh, const char* filename, 
 		bool saveDerivatives = false)
 	{
 		 std::ofstream file;
@@ -129,6 +129,19 @@ namespace auxutils
 			 file << endl;
 		 }
          file.close();
+	}
+
+	template <bool Deriv, class T>
+	void SaveFunction(const char* argument_name, const char* function_name, const char* filename, const std::vector<InitCondition<T>>& solution)
+	{
+		 std::ofstream file;
+		 file.precision(std::numeric_limits<T>::digits10);
+		 file.open (filename);
+		 file << argument_name << " " << function_name << std::endl;
+		 for (const auto ic : solution)
+			 file << ic.Argument << " " << (Deriv ? ic.Derivative : ic.Value) << std::endl;
+
+		 file.close();
 	}
 
 };

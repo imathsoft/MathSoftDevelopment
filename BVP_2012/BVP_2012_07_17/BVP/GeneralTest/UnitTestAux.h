@@ -78,7 +78,7 @@ namespace UnitTestAux
 			iter = std::next(knots.begin()); iter!= knots.end(); ++iter)
 		{
 			nextKnot = (*iter);
-			maxDistance = max(maxDistance, (prevKnot-nextKnot).NormSquaredNaive());
+			maxDistance = max(maxDistance, (prevKnot-nextKnot).NormSquaredPartial<false>());
 			prevKnot = nextKnot;
 		}
 

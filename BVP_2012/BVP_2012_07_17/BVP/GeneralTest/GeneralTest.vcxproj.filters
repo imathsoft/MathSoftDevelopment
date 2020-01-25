@@ -65,6 +65,9 @@
     <ClCompile Include="bvp_t_21_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SimplificationTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TestData\OscillatingTestProblemMSInitGuess.txt">
@@ -73,5 +76,10 @@
     <None Include="TestData\NonUniformProblemInitGuess.txt">
       <Filter>TestData</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TestData\solution_double_precision.txt">
+      <Filter>TestData</Filter>
+    </Text>
   </ItemGroup>
 </Project>

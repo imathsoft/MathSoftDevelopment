@@ -149,6 +149,20 @@ namespace GeneralTest
 
 		auxutils::SaveToFile(init_guess, "E:\\Research\\final_mesh.txt");
 
+		//std::vector<InitCondition<double>> solution_double_precision(init_guess.size());
+
+		//for (int point_id = 0; point_id < solution_double_precision.size(); point_id++)
+		//{
+		//	solution_double_precision[point_id].Argument      = init_guess[point_id].Argument.convert_to<double>();
+		//	solution_double_precision[point_id].Value         = init_guess[point_id].Value.convert_to<double>();
+		//	solution_double_precision[point_id].Derivative    = init_guess[point_id].Derivative.convert_to<double>();
+		//	solution_double_precision[point_id].SecDerivative = init_guess[point_id].SecDerivative.convert_to<double>();
+		//}
+
+		//const auto solution_simplified = auxutils::simplify_polyline(init_guess, 0.1);
+
+		//auxutils::SaveToFile(solution_double_precision, "E:\\Research\\solution_double_precision.txt");
+
 
 		//const auto diff_deriv_initial = abs(result.begin()->Derivative - deriv_initial_reference);
 		//const auto diff_deriv_final = abs(result.rbegin()->Derivative - deriv_final_reference);

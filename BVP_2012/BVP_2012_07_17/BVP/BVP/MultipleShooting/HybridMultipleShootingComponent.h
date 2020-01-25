@@ -44,9 +44,9 @@ private:
 
 			InitCondition<T> vect = nextKnot - prevKnot;
 
-			if (vect.NormSquaredNaive() >= maxSquaredDist)
+			if (vect.NormSquaredPartial<false>() >= maxSquaredDist)
 			{
-				T naiveNorm = auxutils::Sqrt(vect.NormSquaredNaive()); //TODO : avoid using the sruare root function 
+				T naiveNorm = auxutils::Sqrt(vect.NormSquaredPartial<false>()); //TODO : avoid using the square root function 
 				vect = vect / naiveNorm;
 				T tau = step;
 
