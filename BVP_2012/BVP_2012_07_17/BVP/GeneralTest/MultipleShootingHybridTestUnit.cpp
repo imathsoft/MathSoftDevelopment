@@ -1,4 +1,3 @@
-#include <mpreal.h>
 #include "CppUnitTest.h"
 #include "UnitTestAux.h"
 #include "../BVP/Utils/AuxUtils.h"
@@ -11,7 +10,6 @@
 
 using namespace auxutils;
 
-using namespace mpfr;
 using namespace UnitTestAux;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

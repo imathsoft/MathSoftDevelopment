@@ -2,21 +2,14 @@
 
 namespace auxutils
 {
-    void WriteToStream(std::ofstream& stream, mpfr::mpreal value )
-	{
-		stream << value.toString() << " ";
-	}
-
 	void WriteToStream(std::ofstream& stream, float value )
 	{
-		mpfr::mpreal imv = value;
-		WriteToStream(stream, imv);
+		stream << ToString(value);
 	}
 
 	void WriteToStream(std::ofstream& stream, double value )
 	{
-		mpfr::mpreal imv = value;
-		WriteToStream(stream, imv);
+		stream << ToString(value);
 	}
 
 	void WriteToStream(std::ofstream& stream, float_50_noet value )

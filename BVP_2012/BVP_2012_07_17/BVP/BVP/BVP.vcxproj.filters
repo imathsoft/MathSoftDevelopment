@@ -51,9 +51,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Misc\BVP_PC_T.cpp">
-      <Filter>Source Files\Misc</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\AuxUtils.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
@@ -73,9 +70,6 @@
     </ClInclude>
     <ClInclude Include="FunctionApproximation\X_Function.h">
       <Filter>Header Files\FunctionApproximation</Filter>
-    </ClInclude>
-    <ClInclude Include="Misc\BVP_PC_T.h">
-      <Filter>Header Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="ShootingSimple\BisectionComponent.h">
       <Filter>Header Files\ShootingSimple</Filter>

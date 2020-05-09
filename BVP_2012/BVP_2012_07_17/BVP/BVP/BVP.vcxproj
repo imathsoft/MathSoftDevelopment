@@ -104,20 +104,20 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpfr.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Release\mpfr.dll"  "..\Win32\Debug\mpfr.dll"
-copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release\mpir.dll"  "..\Win32\Debug\mpir.dll"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -130,19 +130,19 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release\
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpfr.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release\mpfr.dll"  "..\x64\Debug\mpfr.dll"
-copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mpir.dll"  "..\x64\Debug\mpir.dll"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -153,13 +153,13 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpfr.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -168,8 +168,8 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
       <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\Win32\Release\mpfr.dll"  "..\Win32\Release\mpfr.dll"
-copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release\mpir.dll"  "..\Win32\Release\mpir.dll"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -180,13 +180,13 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release\
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr;..\..\..\..\Math_C++\mpfrc++-3.5.9;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_59_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpfr.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -194,18 +194,12 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\Win32\Release\
       <AdditionalLibraryDirectories>..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release;..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpfr\dll\x64\Release\mpfr.dll"  "..\x64\Release\mpfr.dll"
-copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mpIr.dll"  "..\x64\Release\mpir.dll"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Misc\BVP_PC_T.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h" />
     <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
@@ -220,12 +214,6 @@ copy /Y "..\..\..\..\Math_C++\mpfr_mpir_x86_x64_msvc2010\mpir\dll\x64\Release\mp
     <ClInclude Include="FunctionApproximation\InitialCondition.h" />
     <ClInclude Include="FunctionApproximation\PointSimple.h" />
     <ClInclude Include="FunctionApproximation\X_Function.h" />
-    <ClInclude Include="Misc\BVP_PC_T.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h" />
     <ClInclude Include="Problems\AutonomousGeneralDiagnosticsProblem.h" />
     <ClInclude Include="Problems\AutonomousNonUniformProblem.h" />

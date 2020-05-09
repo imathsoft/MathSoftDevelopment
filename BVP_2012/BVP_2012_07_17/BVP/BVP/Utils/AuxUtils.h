@@ -1,7 +1,6 @@
 #ifndef GUARD_AUXUTILS
 #define GUARD_AUXUTILS
 
-#include <mpreal.h>
 #include <fstream>
 #include <strstream>
 #include "..\FunctionApproximation\InitialCondition.h"
@@ -9,8 +8,10 @@
 #include <boost\multiprecision\cpp_dec_float.hpp>
 #include <boost/multiprecision/debug_adaptor.hpp> 
 
+using namespace boost::multiprecision;
+
 //typedef boost::multiprecision::number<boost::multiprecision::debug_adaptor<boost::multiprecision::cpp_dec_float<30>>, boost::multiprecision::et_off> float_50_noet;
-typedef boost::multiprecision::number<boost::multiprecision::cpp_dec_float<30>, boost::multiprecision::et_off> float_50_noet;
+typedef number<cpp_dec_float<30>, et_off> float_50_noet;
 
 namespace auxutils
 {
@@ -19,14 +20,10 @@ namespace auxutils
 		return std::sqrt((double)d);
 	}
 
-	inline mpfr::mpreal Sqrt(mpfr::mpreal mpr)
+	template <unsigned Digits10>
+	inline number<cpp_dec_float<Digits10>, et_off> Sqrt(number<cpp_dec_float<Digits10>, et_off>& val)
 	{
-		return mpfr::sqrt(mpr);
-	}
-
-	inline float_50_noet Sqrt(float_50_noet mpr)
-	{
-		return boost::multiprecision::sqrt(mpr);
+		return boost::multiprecision::sqrt(val);
 	}
 
 	template <class T>
@@ -71,9 +68,11 @@ namespace auxutils
 		return curVal;
 	}
 
-    void WriteToStream(std::ofstream& stream, mpfr::mpreal value );
-
-	void WriteToStream(std::ofstream& stream, float_50_noet value );
+	template <unsigned Digits10>
+	void WriteToStream(std::ofstream& stream, number<cpp_dec_float<Digits10>, et_off>& value )
+	{
+		stream << value << " ";
+	}
 
 	void WriteToStream(std::ofstream& stream, float value );
 
