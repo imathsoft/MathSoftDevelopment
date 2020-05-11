@@ -367,13 +367,13 @@ public :
 	template <class P>
 	static inline typename X_Func_Gradient<T> X3_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& E, const T& F, const T& h, const P& precision)
 	{
-		GVTypes<T>::OptimalGradientVectorExtended EH; EH << h << 0 << 0 << 0 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVectorExtended EA; EA << A << 1 << 0 << 0 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVectorExtended EB; EB << B << 0 << 1 << 0 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVectorExtended EC; EC << C << 0 << 0 << 1 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVectorExtended ED; ED << D << 0 << 0 << 0 << 1 << 0 << 0;
-		GVTypes<T>::OptimalGradientVectorExtended EE; EE << E << 0 << 0 << 0 << 0 << 1 << 0;
-		GVTypes<T>::OptimalGradientVectorExtended EF; EF << F << 0 << 0 << 0 << 0 << 0 << 1;
+		GVTypes<T>::OptimalGradientVectorExtended EH(h, 0);
+		GVTypes<T>::OptimalGradientVectorExtended EA(A, 1);
+		GVTypes<T>::OptimalGradientVectorExtended EB(B, 2);
+		GVTypes<T>::OptimalGradientVectorExtended EC(C, 3);
+		GVTypes<T>::OptimalGradientVectorExtended ED(D, 4);
+		GVTypes<T>::OptimalGradientVectorExtended EE(E, 5);
+		GVTypes<T>::OptimalGradientVectorExtended EF(F, 6);
 
 		X_Func_Gradient<T> result;
 
@@ -384,11 +384,11 @@ public :
 	template <class P>
 	static inline typename X_Func_Gradient<T> XI_Func_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision)
 	{
-		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EB; EB << B << 0 << 1 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EC; EC << C << 0 << 0 << 1 << 0;
-		GVTypes<T>::OptimalGradientVector ED; ED << D << 0 << 0 << 0 << 1;
+		GVTypes<T>::OptimalGradientVector EH(h, 0);
+		GVTypes<T>::OptimalGradientVector EA(A, 1);
+		GVTypes<T>::OptimalGradientVector EB(B, 2);
+		GVTypes<T>::OptimalGradientVector EC(C, 3);
+		GVTypes<T>::OptimalGradientVector ED(D, 4);
 
 		X_Func_Gradient<T> result;
 
@@ -399,11 +399,11 @@ public :
 	template <class P>
 	static inline typename X_Func_Gradient<T> XI_Func_Bernoulli_Gradient(const T& A, const T& B, const T& C, const T& D, const T& h, const P& precision)
 	{
-		GVTypes<T>::OptimalGradientVector EH; EH << h << 0 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EA; EA << A << 1 << 0 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EB; EB << B << 0 << 1 << 0 << 0;
-		GVTypes<T>::OptimalGradientVector EC; EC << C << 0 << 0 << 1 << 0;
-		GVTypes<T>::OptimalGradientVector ED; ED << D << 0 << 0 << 0 << 1;
+		GVTypes<T>::OptimalGradientVector EH(h, 0);
+		GVTypes<T>::OptimalGradientVector EA(A, 1);
+		GVTypes<T>::OptimalGradientVector EB(B, 2);
+		GVTypes<T>::OptimalGradientVector EC(C, 3);
+		GVTypes<T>::OptimalGradientVector ED(D, 4);
 
 		X_Func_Gradient<T> result;
 

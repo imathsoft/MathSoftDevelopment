@@ -16,22 +16,23 @@ public:
 
 	GradientVector(const T& initVal)
 	{
-		for (int i = 0; i < _Cols; ++i)
-			 _body[i] = initVal;
+		_body[0] = initVal;
+		for (int i = 1; i < _Cols; ++i)
+			 _body[i] = T(0);
+	}
+
+	GradientVector(const T val, const int deriv_place_holder_id)
+	{
+		for (int i = 1; i < _Cols; i++)
+			_body[i] = T(0);
+
+		_body[deriv_place_holder_id] = T(1);
+		_body[0] = val;
 	}
 
 	//Destructor
-	~GradientVector()
+	~GradientVector() 
 	{};
-
-	///Assignment operator
-	inline GradientVector<T, _Cols>& operator=(const GradientVector<T, _Cols>& gv)
-	{
-		for (int i = 0; i < _Cols; ++i)
-			 (*this)[i] = gv[i];
-
-		return *this;
-	}
 
 	//Subscript operator
 	inline T operator[](const int index) const
@@ -46,38 +47,91 @@ public:
 	}
 
 	///Multipication operator
-	inline GradientVector<T, _Cols>  operator*(const GradientVector<T, _Cols>& gv) const
+	inline GradientVector<T, _Cols>  operator*=(const GradientVector<T, _Cols>& gv)
 	{
-		GradientVector<T, _Cols> result;
-		result[0] = (*this)[0]*gv[0];
 		for (int i = 1; i< _Cols; ++i)
-			result[i] = (*this)[0]*gv[i] + (*this)[i]*gv[0];
-		return result;
+			_body[i] = _body[0]*gv._body[i] + _body[i]*gv._body[0];
+
+		_body[0] = _body[0]*gv._body[0];
+		return *this;
 	}
 
-	///Addition operator
-	inline GradientVector<T, _Cols>  operator+(const GradientVector<T, _Cols>& gv) const
+	///Multipication operator
+	inline GradientVector<T, _Cols>  operator*(const GradientVector<T, _Cols>& gv) const
 	{
-		GradientVector<T, _Cols> result;
-		for (int i = 0; i < _Cols; ++i)
-			result[i] = (*this)[i] + gv[i];
-		return result;
+		GradientVector<T, _Cols> result = *this;
+		return result *= gv;
 	}
 
 	inline GradientVector<T, _Cols>&  operator+=(const GradientVector<T, _Cols>& gv) 
 	{
 		for (int i = 0; i < _Cols; ++i)
-			(*this)[i] += gv[i];
+			_body[i] += gv._body[i];
 		return *this;
 	}
 
-	inline GradientVector<T, _Cols>  operator/(const double d) const
+	///Addition operator
+	inline GradientVector<T, _Cols>  operator+(const GradientVector<T, _Cols>& gv) const
 	{
-		GradientVector<T, _Cols> result;
-		T multiplicant = T(1.0)/d;
+		GradientVector<T, _Cols> result = *this;
+		return result += gv;
+	}
+
+	inline GradientVector<T, _Cols>&  operator-=(const GradientVector<T, _Cols>& gv) 
+	{
 		for (int i = 0; i < _Cols; ++i)
-			result[i] = (*this)[i]*multiplicant;
-		return result;
+			_body[i] -= gv._body[i];
+		return *this;
+	}
+
+	///Subtraction operator
+	inline GradientVector<T, _Cols>  operator-(const GradientVector<T, _Cols>& gv) const
+	{
+		GradientVector<T, _Cols> result = *this;
+		return result -= gv;
+	}
+
+	inline GradientVector<T, _Cols>  operator*=(const T d)
+	{
+		for (int i = 0; i < _Cols; ++i)
+			_body[i] *= d;
+		return *this;
+	}
+
+	inline GradientVector<T, _Cols>  operator*(const T d) const
+	{
+		auto result = *this;
+		return result *= d;
+	}
+
+	inline GradientVector<T, _Cols>  operator/=(const T d)
+	{
+		T multiplicant = T(1.0)/d;
+		return (*this) *= multiplicant;
+	}
+
+	inline GradientVector<T, _Cols>  operator/(const T d) const
+	{
+		GradientVector<T, _Cols> result = *this;
+		return result /= d;
+	}
+
+	inline GradientVector<T, _Cols>  operator/=(const GradientVector<T, _Cols>& gv)
+	{
+		GradientVector<T, _Cols> inverse;
+		inverse._body[0] = T(1)/gv._body[0];
+		T one_over_denominator_squared = inverse._body[0]*inverse._body[0];
+
+		for (int i = 1; i < _Cols; i++)
+			inverse._body[i] = -gv._body[i]*one_over_denominator_squared;
+
+		return *this *= inverse;
+	}
+
+	inline GradientVector<T, _Cols>  operator/(const GradientVector<T, _Cols>& gv) const
+	{
+		auto result = *this;
+		return result /= gv;
 	}
 
 	inline GradientVector<T, _Cols>& operator<<(const T& value)
@@ -95,6 +149,12 @@ public:
 	template<class U, int Size>
 	friend inline U abs(const GradientVector<U, Size>& gv);
 };
+
+	template<class T, int Size>
+	inline GradientVector<T, Size>  operator/(const T numerator, const GradientVector<T, Size>& denominator)
+	{
+		return GradientVector<T, Size>(numerator) / denominator;
+	}
 
 	template<class U, int Size>
 	inline std::ostream& operator << (std::ostream& out, const GradientVector<U, Size>& gv)

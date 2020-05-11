@@ -4,6 +4,7 @@
 #include <fstream>
 #include <strstream>
 #include "..\FunctionApproximation\InitialCondition.h"
+#include "..\FunctionApproximation\GradientVector.h"
 
 #include <boost\multiprecision\cpp_dec_float.hpp>
 #include <boost/multiprecision/debug_adaptor.hpp> 
@@ -15,15 +16,115 @@ typedef number<cpp_dec_float<30>, et_off> float_50_noet;
 
 namespace auxutils
 {
-	inline double Sqrt(double d)
+	inline double Sqrt(const double d)
 	{
-		return std::sqrt((double)d);
+		return std::sqrt(d);
+	}
+
+	inline float Sqrt(const float d)
+	{
+		return std::sqrtf(d);
 	}
 
 	template <unsigned Digits10>
-	inline number<cpp_dec_float<Digits10>, et_off> Sqrt(number<cpp_dec_float<Digits10>, et_off>& val)
+	inline number<cpp_dec_float<Digits10>, et_off> Sqrt(const number<cpp_dec_float<Digits10>, et_off>& val)
 	{
 		return boost::multiprecision::sqrt(val);
+	}
+
+	template<class U, int Size>
+	inline GradientVector<U, Size> Sqrt(const GradientVector<U, Size>& gv)
+	{
+		GradientVector<U, Size> result;
+		result[0] = Sqrt(gv[0]);
+		auto factor = U(1)/(2*result[0]);
+		for (int i = 1; i < Size; i++)
+			result[i] = result[i]*factor;
+
+		return result;
+	}
+
+	inline double Exp(const double d)
+	{
+		return std::exp(d);
+	}
+
+	inline float Exp(const float d)
+	{
+		return std::expf(d);
+	}
+
+	template <unsigned Digits10>
+	inline number<cpp_dec_float<Digits10>, et_off> Exp(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return boost::multiprecision::exp(val);
+	}
+
+	template<class U, int Size>
+	inline GradientVector<U, Size> Exp(const GradientVector<U, Size>& gv)
+	{
+		GradientVector<U, Size> result;
+		result[0] = Exp(gv[0]);
+		for (int i = 1; i < Size; i++)
+			result[i] = result[i]*result[0];
+
+		return result;
+	}
+
+	inline double Sin(const double d)
+	{
+		return std::sin(d);
+	}
+
+	inline float Sin(const float d)
+	{
+		return std::sinf(d);
+	}
+
+	template <unsigned Digits10>
+	inline number<cpp_dec_float<Digits10>, et_off> Sin(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return boost::multiprecision::sin(val);
+	}
+
+	inline double Cos(const double d)
+	{
+		return std::cos(d);
+	}
+
+	inline float Cos(const float d)
+	{
+		return std::cosf(d);
+	}
+
+	template <unsigned Digits10>
+	inline number<cpp_dec_float<Digits10>, et_off> Cos(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return boost::multiprecision::cos(val);
+	}
+
+	template<class U, int Size>
+	inline GradientVector<U, Size> Sin(const GradientVector<U, Size>& gv)
+	{
+		GradientVector<U, Size> result;
+		result[0] = Sin(gv[0]);
+		auto deriv = Cos(gv[0]);
+		for (int i = 1; i < Size; i++)
+			result[i] = result[i]*deriv;
+
+		return result;
+	}
+
+	template<class U, int Size>
+	inline GradientVector<U, Size> Cos(const GradientVector<U, Size>& gv)
+	{
+		GradientVector<U, Size> result;
+		result[0] = Cos(gv[0]);
+		auto deriv = -Sin(gv[0]);
+		for (int i = 1; i < Size; i++)
+			result[i] = result[i]*deriv;
+
+		return result;
 	}
 
 	template <class T>

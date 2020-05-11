@@ -76,10 +76,8 @@
     <None Include="TestData\NonUniformProblemInitGuess.txt">
       <Filter>TestData</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="TestData\solution_double_precision.txt">
+    <None Include="TestData\solution_double_precision.txt">
       <Filter>TestData</Filter>
-    </Text>
+    </None>
   </ItemGroup>
 </Project>
