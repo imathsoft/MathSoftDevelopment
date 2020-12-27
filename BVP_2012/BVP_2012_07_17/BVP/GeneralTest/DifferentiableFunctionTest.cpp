@@ -16,7 +16,6 @@ namespace GeneralTest
 		template <class T>
 		T operator () (const T& x)
 		{
-			//return (9 - (6/(x*x*x))/7 - 11);
 			return (4 + 2*x*x*4 + 6)*(7.0 + 3.0*x*x*5.0 + 10.0)*(9 - (6/(x*x*x))/7 - 11)*(2.0 - (3.0/(x*x))/4.0 - 1.0)/(1.2*x*x*x*x - 3.5*x*x*x + 7.7*x*x + 6.8*x + 9.5);
 		}
 	};

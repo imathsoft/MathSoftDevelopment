@@ -176,8 +176,8 @@ public:
 		return result;
 	}
 
-    template <class T1, int Size1>
-	friend JordanBlock<T1, Size1> operator /(const T1& factor, const JordanBlock<T1, Size1>& anotherBlock);
+    template <class T1, class T2, int Size1>
+	friend JordanBlock<T1, Size1> operator /(const T2& factor, const JordanBlock<T1, Size1>& anotherBlock);
 };
 
     template <class T, int Size>
@@ -216,14 +216,8 @@ public:
 		return anotherBlock*factor;
 	}
 
-    template <class T, int Size>
-	JordanBlock<T, Size> operator /(const T& factor, const JordanBlock<T, Size>& anotherBlock)
-	{
-		return anotherBlock.GetInverse()*factor;
-	}
-
-    template <class T, int Size>
-	JordanBlock<T, Size> operator /(const int& factor, const JordanBlock<T, Size>& anotherBlock)
+    template <class T, class T1, int Size>
+	JordanBlock<T, Size> operator /(const T1& factor, const JordanBlock<T, Size>& anotherBlock)
 	{
 		return anotherBlock.GetInverse()*factor;
 	}
