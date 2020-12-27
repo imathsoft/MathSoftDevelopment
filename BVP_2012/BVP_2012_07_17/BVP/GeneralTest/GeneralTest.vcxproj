@@ -168,6 +168,7 @@
     <ClCompile Include="bvp_t_30_test.cpp" />
     <ClCompile Include="bvp_t_x_test.cpp" />
     <ClCompile Include="DifferentiableFunctionTest.cpp" />
+    <ClCompile Include="DualNumberTest.cpp" />
     <ClCompile Include="MultipleShootingHybridTestUnit.cpp" />
     <ClCompile Include="NonAutonomousProblemsTest.cpp" />
     <ClCompile Include="NonUniformProblemTest.cpp" />

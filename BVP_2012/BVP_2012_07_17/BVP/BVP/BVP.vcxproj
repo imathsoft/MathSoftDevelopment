@@ -209,6 +209,7 @@
     <ClInclude Include="Cannon\XCannonAbstract.h" />
     <ClInclude Include="Cannon\XCannonInverse.h" />
     <ClInclude Include="FunctionApproximation\DerivativeEvaluator\DifferentiableFunction.h" />
+    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\Dual.h" />
     <ClInclude Include="FunctionApproximation\DerivativeEvaluator\JordanBlock.h" />
     <ClInclude Include="FunctionApproximation\GradientVector.h" />
     <ClInclude Include="FunctionApproximation\InitialCondition.h" />

@@ -244,6 +244,17 @@ namespace auxutils
 		 file.close();
 	}
 
+	/// <summary>
+	/// Converts given value to string with the given number of digits
+	/// </summary>
+	template <typename T>
+	std::string to_string_with_precision(const T a_value, const int n = 8)
+	{
+		std::ostringstream out;
+		out.precision(n);
+		out << std::fixed << a_value;
+		return out.str();
+	}
 };
 
 #endif

@@ -161,5 +161,8 @@
     <ClInclude Include="Utils\SolutionUtils.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\Dual.h">
+      <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

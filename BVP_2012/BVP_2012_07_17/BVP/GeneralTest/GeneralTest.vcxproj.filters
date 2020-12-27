@@ -68,6 +68,9 @@
     <ClCompile Include="SimplificationTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DualNumberTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TestData\OscillatingTestProblemMSInitGuess.txt">
