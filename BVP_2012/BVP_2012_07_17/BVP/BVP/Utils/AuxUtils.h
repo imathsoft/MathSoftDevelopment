@@ -71,6 +71,38 @@ namespace auxutils
 		return result;
 	}
 
+	inline double Sinh(const double d)
+	{
+		return std::sinh(d);
+	}
+
+	inline float Sinh(const float d)
+	{
+		return std::sinhf(d);
+	}
+
+	template <unsigned Digits10>
+	inline number<cpp_dec_float<Digits10>, et_off> Sinh(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return boost::multiprecision::sinh(val);
+	}
+
+	inline double Cosh(const double d)
+	{
+		return std::cosh(d);
+	}
+
+	inline float Cosh(const float d)
+	{
+		return std::coshf(d);
+	}
+
+	template <unsigned Digits10>
+	inline number<cpp_dec_float<Digits10>, et_off> Cosh(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return boost::multiprecision::cosh(val);
+	}
+
 	inline double Sin(const double d)
 	{
 		return std::sin(d);

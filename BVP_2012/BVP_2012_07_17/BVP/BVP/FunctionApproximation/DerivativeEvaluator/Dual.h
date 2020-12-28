@@ -189,13 +189,35 @@ public:
 		return arg;
 	}
 
-	/// <summary>
+	/// <sumary>
 	/// Exponent function
 	/// </summary>
 	friend dual<R, Dim> Exp(dual<R, Dim> arg)
 	{
 		arg.x = Exp(arg.x);
 		arg.scale_dual_part(arg.x);
+
+		return arg;
+	}
+
+	///<summary>
+	/// Hyperbolic sine function
+	/// </summary>
+	friend dual<R, Dim> Sinh(dual<R, Dim> arg)
+	{
+		arg.scale_dual_part(Cosh(arg.x));
+		arg.x = Sinh(arg.x);
+
+		return arg;
+	}
+
+	///<summary>
+	/// Hyperbolic cosine function
+	/// </summary>
+	friend dual<R, Dim> Cosh(dual<R, Dim> arg)
+	{
+		arg.scale_dual_part(Sinh(arg.x));
+		arg.x = Cosh(arg.x);
 
 		return arg;
 	}

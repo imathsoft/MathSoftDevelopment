@@ -48,7 +48,7 @@ namespace GeneralTest
 		template <class R>
 		static R exponent_func(const R& x, const R& y, const R& z)
 		{
-			return (Exp(1.3 * x) + Exp(y / 2) + Exp(z * 1.5) + 1) / (Exp(x) + Exp(y) + Exp(z));
+			return (Exp(1.3 * x) + Exp(y / 2) + Exp(z * 1.5) + 1) / (Exp(x) + Exp(y) + Exp(z)) + (Sinh(x) + Cosh(y))/Sinh(x + y + z);
 		}
 
 		/// <summary>

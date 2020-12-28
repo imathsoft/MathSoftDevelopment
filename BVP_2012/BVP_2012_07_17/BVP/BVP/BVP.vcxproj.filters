@@ -46,6 +46,9 @@
     <Filter Include="Header Files\FunctionApproximation\DerivativeEvaluator">
       <UniqueIdentifier>{bf16bb53-6446-4647-85f3-d67d6ca80591}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\BVP">
+      <UniqueIdentifier>{61109be8-8b72-45c8-95f3-94aff4743295}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -163,6 +166,12 @@
     </ClInclude>
     <ClInclude Include="FunctionApproximation\DerivativeEvaluator\Dual.h">
       <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="BVP\bvp_system.h">
+      <Filter>Header Files\BVP</Filter>
+    </ClInclude>
+    <ClInclude Include="BVP\bvp_sys_factory.h">
+      <Filter>Header Files\BVP</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

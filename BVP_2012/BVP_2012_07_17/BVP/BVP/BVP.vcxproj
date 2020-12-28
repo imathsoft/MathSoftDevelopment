@@ -204,6 +204,8 @@
     <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BVP\bvp_system.h" />
+    <ClInclude Include="BVP\bvp_sys_factory.h" />
     <ClInclude Include="Cannon\HybridCannon.h" />
     <ClInclude Include="Cannon\XCannon.h" />
     <ClInclude Include="Cannon\XCannonAbstract.h" />
