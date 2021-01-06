@@ -217,6 +217,7 @@
     <ClInclude Include="FunctionApproximation\InitialCondition.h" />
     <ClInclude Include="FunctionApproximation\PointSimple.h" />
     <ClInclude Include="FunctionApproximation\X_Function.h" />
+    <ClInclude Include="LinearAlgebra\Matrix.h" />
     <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h" />
     <ClInclude Include="Problems\AutonomousGeneralDiagnosticsProblem.h" />
     <ClInclude Include="Problems\AutonomousNonUniformProblem.h" />
