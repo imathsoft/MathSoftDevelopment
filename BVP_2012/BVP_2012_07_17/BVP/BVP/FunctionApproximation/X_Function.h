@@ -34,7 +34,7 @@ inline int EstimateIterationsSingle(const T& numerator, const T& precision)
 	while (t > precision)
 	{
 		t = t*numerator/(i+1);
-		i=i++;
+		i++;
 	};
 	return i;
 };
