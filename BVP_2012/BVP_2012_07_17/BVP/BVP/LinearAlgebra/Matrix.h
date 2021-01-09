@@ -107,8 +107,14 @@ namespace LinAlg
 
 			const auto one_over_determinant = R(1) / Determinant();
 
-			return  std::array<std::array<R, ColDim>, RowDim>{ { {  one_over_determinant* data[1][1], -one_over_determinant * data[0][1]},
-				{ -one_over_determinant * data[1][0],   one_over_determinant * data[0][0] }}};
+			Matrix<R, RowDim, ColDim> result;
+
+			result[0][0] =  one_over_determinant * data[1][1];
+			result[0][1] = -one_over_determinant * data[0][1];
+			result[1][0] = -one_over_determinant * data[1][0];
+			result[1][1] =  one_over_determinant * data[0][0];
+
+			return result;
 		}
 
 		/// <summary>
@@ -247,4 +253,16 @@ namespace LinAlg
 		return result;
 	}
 
+	/// <summary>
+	/// unary "-" operator
+	/// </summary>
+	template <class R, int RowDim, int ColDim>
+	Matrix<R, RowDim, ColDim> operator -(Matrix<R, RowDim, ColDim> m)
+	{
+		for (int i = 0; i < RowDim; i++)
+			for (int j = 0; j < ColDim; j++)
+				m[i][j] = -m[i][j];
+
+		return m;
+	}
 }

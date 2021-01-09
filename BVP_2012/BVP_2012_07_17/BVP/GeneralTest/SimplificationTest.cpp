@@ -13,7 +13,7 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace GeneralTest
 {
-TEST_CLASS(simplificatio_test)
+TEST_CLASS(simplification_test)
 {
 public:
 	template <bool Deriv>

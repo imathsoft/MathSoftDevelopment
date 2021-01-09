@@ -46,8 +46,14 @@
     <Filter Include="Header Files\FunctionApproximation\DerivativeEvaluator">
       <UniqueIdentifier>{bf16bb53-6446-4647-85f3-d67d6ca80591}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\BVP">
+    <Filter Include="Header Files\Systems">
       <UniqueIdentifier>{61109be8-8b72-45c8-95f3-94aff4743295}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Systems\FiniteDifferenceSolver">
+      <UniqueIdentifier>{88c276c1-30eb-49b2-b85f-d8abbe367552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\LinearAlgebra">
+      <UniqueIdentifier>{f5c52374-22d5-418a-bce9-a2e0a702bd6e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -167,11 +173,20 @@
     <ClInclude Include="FunctionApproximation\DerivativeEvaluator\Dual.h">
       <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
     </ClInclude>
-    <ClInclude Include="BVP\bvp_system.h">
-      <Filter>Header Files\BVP</Filter>
+    <ClInclude Include="Systems\bvp_sys_factory.h">
+      <Filter>Header Files\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="BVP\bvp_sys_factory.h">
-      <Filter>Header Files\BVP</Filter>
+    <ClInclude Include="Systems\FiniteDifferenceSolver\trapezoidal_solver.h">
+      <Filter>Header Files\Systems\FiniteDifferenceSolver</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\simple_bvp.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\ode_system.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearAlgebra\Matrix.h">
+      <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

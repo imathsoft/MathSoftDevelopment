@@ -174,11 +174,13 @@
     <ClCompile Include="bvp_t_x_test.cpp" />
     <ClCompile Include="DifferentiableFunctionTest.cpp" />
     <ClCompile Include="DualNumberTest.cpp" />
+    <ClCompile Include="MatrixTest.cpp" />
     <ClCompile Include="MultipleShootingHybridTestUnit.cpp" />
     <ClCompile Include="NonAutonomousProblemsTest.cpp" />
     <ClCompile Include="NonUniformProblemTest.cpp" />
     <ClCompile Include="OscillatingProblemTestUnit.cpp" />
     <ClCompile Include="SimplificationTest.cpp" />
+    <ClCompile Include="TrapezoidalSolverTest.cpp" />
     <ClCompile Include="TroeschProblemTestUnit.cpp" />
     <ClCompile Include="XCannonTestUnit.cpp" />
     <ClCompile Include="XFunctionTestUnit.cpp" />

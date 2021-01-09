@@ -209,8 +209,6 @@
     <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BVP\bvp_system.h" />
-    <ClInclude Include="BVP\bvp_sys_factory.h" />
     <ClInclude Include="Cannon\HybridCannon.h" />
     <ClInclude Include="Cannon\XCannon.h" />
     <ClInclude Include="Cannon\XCannonAbstract.h" />
@@ -244,6 +242,10 @@
     <ClInclude Include="Problems\TroeschProblem.h" />
     <ClInclude Include="ShootingSimple\BisectionComponent.h" />
     <ClInclude Include="SpecialFunctions\Sinhc.h" />
+    <ClInclude Include="Systems\simple_bvp.h" />
+    <ClInclude Include="Systems\ode_system.h" />
+    <ClInclude Include="Systems\bvp_sys_factory.h" />
+    <ClInclude Include="Systems\FiniteDifferenceSolver\trapezoidal_solver.h" />
     <ClInclude Include="Utils\AuxUtils.h" />
     <ClInclude Include="Utils\Exceptions.h" />
     <ClInclude Include="Utils\SolutionUtils.h" />

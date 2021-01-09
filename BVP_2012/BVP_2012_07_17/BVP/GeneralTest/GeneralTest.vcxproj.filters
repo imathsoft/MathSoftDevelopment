@@ -71,6 +71,12 @@
     <ClCompile Include="DualNumberTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MatrixTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TrapezoidalSolverTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TestData\OscillatingTestProblemMSInitGuess.txt">

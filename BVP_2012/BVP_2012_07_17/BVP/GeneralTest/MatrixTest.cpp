@@ -164,5 +164,18 @@ namespace GeneralTest
 			Assert::IsTrue(MatricesAreEqual(Matrix<double, 2, 2>::Identity(), m * m.Inverse()), L"Matrices are not equal");
 			Assert::IsTrue(MatricesAreEqual(Matrix<double, 2, 2>::Identity(), m.Inverse() * m), L"Matrices are not equal");
 		}
+
+		TEST_METHOD(UnaryMinusOperatorTest)
+		{
+			const auto m = Matrix<double, RowDim, ColDim>::Random();
+			const auto zero = Matrix<double, RowDim, ColDim>{};
+
+			Assert::IsFalse(IsZeroMatrix(m), L"The matrix is expected to be non-zero");
+			Assert::IsTrue(IsZeroMatrix(zero), L"The matrix is expected to be zero");
+
+			const auto minus_m = -m;
+
+			Assert::IsTrue(MatricesAreEqual(m + minus_m, zero), L"The result is expected to be zero");
+		}
 	};
 }
