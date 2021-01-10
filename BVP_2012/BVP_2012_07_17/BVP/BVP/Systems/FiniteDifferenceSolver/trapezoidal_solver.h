@@ -22,7 +22,7 @@ struct bc_marker
 	/// <summary>
 	/// It is supposed that the number of defined values for both endpoints should be equal to number of equations
 	/// </summary>
-	bool is_valid()
+	bool is_valid() const
 	{
 		return eqCnt == std::count(left_marker.begin(), left_marker.end(), true) + std::count(right_marker.begin(), right_marker.end(), true);
 	}
@@ -140,8 +140,8 @@ class trapezoidal_solver
 	/// as on the input "boundary conditions marker" (see summary of the corresponding data struct).
 	/// Without boundary conditions, the system that we are working with is underdetermined 
 	/// (eqCnt equations with 2*eqCnt unknowns) and its extended matrix looks like this:
-	/// [m,I|b], where "I" is the identity matrix of the corresponding dimension.
-	/// Boundary marker allows us to "discard" those columns of [m.I] that correspond to unknowns 
+	/// [-m,-I|b], where "I" is the identity matrix of the corresponding dimension.
+	/// Boundary marker allows us to "discard" those columns of -[m.I] that correspond to unknowns 
 	/// specified via the boundary conditions, so that eventually we end up with a
 	/// system of eqCnt equations with eqCnt unknowns
 	/// </summary>
@@ -172,7 +172,7 @@ class trapezoidal_solver
 			if (bcm.right_marker[m_id])
 				continue;
 
-			temp[col_id][col_id] = R(1);
+			temp[m_id][col_id] = R(1);
 
 			col_id++;
 		}
@@ -266,6 +266,9 @@ public:
 	/// </summary>
 	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm, const R& precision)
 	{
+		if (!bcm.is_valid())
+			throw std::exception("Invalid boundary condition marker");
+
 		auto solution = init_guess;
 		correction_magnitudes.clear();
 

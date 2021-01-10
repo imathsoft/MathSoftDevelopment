@@ -55,13 +55,28 @@ private:
 	/// </summary>
 	ode_system<R, eqCnt> system;
 
+	/// <summary>
+	/// "Exact" solution of the bvp (if known)
+	/// </summary>
+	std::array<std::function<R(R)>, eqCnt> solution;
+
 public:
 
 	/// <summary>
 	/// Constructor
 	/// </summary>
-	simple_bvp(ode_system<R, eqCnt> sys, const bnd_cond_simple<R> bc) : system{ sys }, boundary_conditions{bc}
+	simple_bvp(const ode_system<R, eqCnt>& sys, const bnd_cond_simple<R>& bc, const std::array<std::function<R(R)>, eqCnt>& sol = {})
+		: system{ sys }, boundary_conditions{ bc }, solution{sol}
 	{}
+
+	/// <summary>
+	/// Gives access to the solution or throws an exception if the solution is not defined
+	/// It is responsibility of a caller to make sure that the corresponding functions are not "empty"
+	/// </summary>
+	const std::array<std::function<R(R)>, eqCnt>& get_solution() const
+	{
+		return solution;
+	}
 
 	/// <summary>
 	/// Getter for the boundary conditions field

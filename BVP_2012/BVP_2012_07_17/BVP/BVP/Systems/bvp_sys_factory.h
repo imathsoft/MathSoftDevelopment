@@ -22,4 +22,19 @@ public:
 			{ {0, 0}, {1, 1} });
 	}
 
+	/// <summary>
+	/// Test boundary value problem #1
+	/// Exact solution [sin(t), cos(t)]
+	/// </summary>
+	static simple_bvp<R, 2> BVP_1()
+	{
+		return simple_bvp<R, 2>(
+			{ {
+				[](const auto& args) { return args[0]* args[1] + args[1] - Cos(args[2])*Sin(args[2]); },
+				[](const auto& args) { return args[0] * args[0] + args[1] * args[1] + 2*args[0] - R(1) - 3*Sin(args[2]); },
+			} },
+			{ {0, Sin(R(0))}, {1, Sin(R(1))} },
+			{ [](const auto t) { return Sin(t); },
+			  [](const auto t) { return Cos(t); } });
+	}
 };
