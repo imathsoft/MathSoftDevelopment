@@ -47,6 +47,7 @@ class trapezoidal_solver
 	{
 		LinAlg::Matrix<R, eqCnt, eqCnt> m;
 		LinAlg::Matrix<R, eqCnt, 1> b;
+		int independent_var_id;
 	};
 
 	/// <summary>
@@ -71,42 +72,129 @@ class trapezoidal_solver
 	bool succeeded{true};
 
 	/// <summary>
+	/// A data struct to hold evaluation result transformed via a "pivot" transformation
+	/// </summary>
+	struct eval_result_transformed
+	{
+		/// <summary>
+		/// Transformed result
+		/// </summary>
+		typename ode_system<R, eqCnt>::eval_result res;
+
+		/// <summary>
+		/// Index of the "pivot" unknown
+		/// </summary>
+		int pivot_id;
+	};
+
+	/// <summary>
+	/// Performs transformation of the system evalueation result according to the given "pivot" variable
+	/// </summary>
+	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res_to_transform, const int independent_var_id)
+	{
+		if (independent_var_id < 0 || independent_var_id >= eqCnt)
+			return { res_to_transform,  eqCnt }; // identity transformation
+
+		const auto& pivot_eq_data = res_to_transform[independent_var_id];
+
+		const auto denominator = R(1) / (pivot_eq_data.v * pivot_eq_data.v);
+
+		ode_system<R, eqCnt>::eval_result res_transformed{};
+
+		for (int eq_id = 0; eq_id < eqCnt; eq_id++)
+		{
+			auto& data = res_transformed[eq_id];
+
+			if (eq_id == independent_var_id)
+			{
+				data.v = R(1) / pivot_eq_data.v;
+
+				for (int var_id = 0; var_id < eqCnt + 1; var_id++)
+					data.grad[var_id] = - pivot_eq_data.grad[var_id] / denominator;
+
+				continue;
+			}
+
+			const auto& curr_eq_data = res_to_transform[eq_id];
+
+			data.v = curr_eq_data.v / pivot_eq_data.v;
+
+			for (int var_id = 0; var_id <= eqCnt; var_id++)
+				data.grad[var_id] = (curr_eq_data.grad[var_id] * pivot_eq_data.v - curr_eq_data.v * pivot_eq_data.grad[var_id]) / denominator;
+		}
+
+		return { res_transformed, independent_var_id };
+	}
+
+	/// <summary>
+	/// Performs transformation of the system evaluation result based on the transformation map and the value of the corresponding derivatives
+	/// Transformation map defines what unknownc can be chosen as "pivot" ones (to be swaped with the independent variable via inverting)
+	/// Returns intex of the chosen pivot variable
+	/// </summary>
+	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res, const std::array<bool, eqCnt>& transform_map, const R& derivative_threshold = R(1))
+	{
+		int independent_var_id = eqCnt;
+
+		for (int var_id = 0; var_id < eqCnt; var_id++)
+		{
+			if (!transform_map[var_id])
+				continue;
+
+			if (std::abs<R>(res[var_id].v) > derivative_threshold &&
+				(independent_var_id == eqCnt || std::abs<R>(res[var_id].v) > std::abs<R>(res[independent_var_id].v)))
+				independent_var_id = var_id;
+		}
+
+		return transform(res, independent_var_id);
+	}
+
+	/// <summary>
 	/// Constructs the extended gradient matrix, which is essentially
 	/// [F'(s_{i}) | F(s_{i})],
 	/// where F(s) = 0 is the system of nonliner equations that we get applying the trapezoidal scheme to the given system of ODEs 
 	/// s_{i} is the "initial guess"
 	/// </summary>
-	static block_matrix construst_extended_gradient_matrix(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess)
+	static block_matrix construst_extended_gradient_matrix(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const std::array<bool, eqCnt>& transform_map)
 	{
 		if (init_guess.size() <= 1)
 			throw std::exception("Invalid input");
 
 		block_matrix result(init_guess.size() - 1);
 
-		auto evaluate_result_current = system.Evaluate(init_guess[0]);
+		auto evaluate_result_prev = system.Evaluate(init_guess[0]);
+		int independent_var_id_prev = -1;
 		for (int pt_id = 0; pt_id < init_guess.size() - 1; pt_id++)
 		{
+			const auto res_prev_transformed = transform(evaluate_result_prev, transform_map);
+			const int independent_var_id_next = res_prev_transformed.pivot_id;
+			if (independent_var_id_prev < 0 || independent_var_id_prev >= eqCnt)
+				independent_var_id_prev = independent_var_id_next;
+
 			const auto evaluate_result_next = system.Evaluate(init_guess[pt_id + 1]);
+			const auto res_next_transformed = transform(evaluate_result_next, independent_var_id_next);
 
 			const auto pt_diff = init_guess[pt_id + 1] - init_guess[pt_id];
-			const auto one_over_h = R(1) / pt_diff.pt[eqCnt];
+			const auto one_over_h = R(1) / pt_diff.pt[independent_var_id_next];
 			const auto divided_diff = one_over_h * pt_diff;
 
 			auto& current_stripe = result[pt_id];
+			current_stripe.independent_var_id = independent_var_id_next;
 			LinAlg::Matrix<R, eqCnt, eqCnt> temp;
 
 			for (int row_id = 0; row_id < eqCnt; row_id++)
 			{
 				for (int col_id = 0; col_id < eqCnt; col_id++)
 				{
-					current_stripe.m[row_id][col_id] = -OneHalf * evaluate_result_current[row_id].grad[col_id];
-					temp[row_id][col_id] = -OneHalf * evaluate_result_next[row_id].grad[col_id];
+					current_stripe.m[row_id][col_id] = -OneHalf * res_prev_transformed.res[row_id].grad[col_id != independent_var_id_prev ? col_id : eqCnt];
+					temp[row_id][col_id] = -OneHalf * res_next_transformed.res[row_id].grad[col_id != independent_var_id_next ? col_id : eqCnt];
 				}
 
-				current_stripe.m[row_id][row_id] -= one_over_h;
+				const int actual_var_id = row_id != independent_var_id_next ? row_id : eqCnt;
+
+				current_stripe.m[row_id][row_id] -= actual_var_id != independent_var_id_prev ? one_over_h : R(0);
 				temp[row_id][row_id] += one_over_h;
 
-				current_stripe.b[row_id][0] = divided_diff[row_id] - OneHalf * (evaluate_result_current[row_id].v + evaluate_result_next[row_id].v);
+				current_stripe.b[row_id][0] = divided_diff[actual_var_id] - OneHalf * (res_prev_transformed.res[row_id].v + res_next_transformed.res[row_id].v);
 			}
 
 			const auto det = temp.Determinant();
@@ -119,7 +207,7 @@ class trapezoidal_solver
 			current_stripe.m = -temp_inverted * current_stripe.m;//inverse sign so that now matrix "m" and vector "b" are on the "same side"
 			current_stripe.b = temp_inverted * current_stripe.b;
 
-			evaluate_result_current = evaluate_result_next;
+			evaluate_result_prev = evaluate_result_next;
 		}
 
 		return result;
@@ -128,10 +216,10 @@ class trapezoidal_solver
 	/// <summary>
 	/// A helper method to copy result from vector-column to the mesh point
 	/// </summary>
-	static void copy(mesh_point<R, eqCnt + 1>& dest, const LinAlg::Matrix<R, eqCnt, 1>& source)
+	static void copy(mesh_point<R, eqCnt + 1>& dest, const LinAlg::Matrix<R, eqCnt, 1>& source, const int independent_var_id)
 	{
 		for (int i = 0; i < eqCnt; i++)
-			dest[i] = source[i][0];
+			dest[independent_var_id != i ? i : eqCnt] = source[i][0];
 	}
 
 	/// <summary>
@@ -215,10 +303,10 @@ class trapezoidal_solver
 
 		std::vector<mesh_point<R, eqCnt + 1>> result(gradient_matrix.size() + 1);
 
-		copy(result[0], u_0);
+		copy(result[0], u_0, gradient_matrix[0].independent_var_id);
 
 		for (int block_id = 0; block_id < gradient_matrix.size(); block_id++)
-			copy(result[block_id + 1], gradient_matrix[block_id].m * u_0 + gradient_matrix[block_id].b);
+			copy(result[block_id + 1], gradient_matrix[block_id].m * u_0 + gradient_matrix[block_id].b, gradient_matrix[block_id].independent_var_id);
 
 		return result;
 	}
@@ -264,7 +352,7 @@ public:
 	/// <summary>
 	/// The main solving method
 	/// </summary>
-	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm, const R& precision)
+	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm, const std::array<bool, eqCnt>& transform_map, const R& precision)
 	{
 		if (!bcm.is_valid())
 			throw std::exception("Invalid boundary condition marker");
@@ -277,7 +365,7 @@ public:
 		int iter_count = 0;
 		while (correction_magnitude > precision && iter_count < max_iterations_count)
 		{
-			auto g_matrix = construst_extended_gradient_matrix(system, solution);
+			auto g_matrix = construst_extended_gradient_matrix(system, solution, transform_map);
 			const auto correction = get_newton_correction(g_matrix, bcm);
 			correction_magnitude = std::max_element(correction.begin(), correction.end(),
 				[](const auto& a, const auto& b) { return a.max_abs() < b.max_abs(); })->max_abs();

@@ -97,7 +97,7 @@ namespace GeneralTest
 
 			trapezoidal_solver<double> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {true, false},{ true, false} }, 1e-12);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {true, false},{ true, false} }, {false, false}, 1e-12);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
 
@@ -139,7 +139,7 @@ namespace GeneralTest
 
 			trapezoidal_solver<double> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, 1e-12);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, {false, false}, 1e-12);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve decired precision");
 

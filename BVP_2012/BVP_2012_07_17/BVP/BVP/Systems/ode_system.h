@@ -195,6 +195,8 @@ private:
 
 public:
 
+	typedef std::array<func_value_with_gradient<R, varCnt>, eqCnt> eval_result;
+
 	/// <summary>
 	/// Returns number of variables involved (number of equations + 1)
 	/// </summary>
@@ -213,7 +215,7 @@ public:
 	/// <summary>
 	/// Evaluates right hand side functions together with their gradient at the given set of arguments
 	/// </summary>
-	std::array<func_value_with_gradient<R, varCnt>, eqCnt> Evaluate(const mesh_point<R, varCnt>& pt) const
+	eval_result Evaluate(const mesh_point<R, varCnt>& pt) const
 	{
 		std::array<dual<R, varCnt>, varCnt> arguments_dual;
 		std::array<R, varCnt> temp{};
@@ -225,7 +227,7 @@ public:
 			temp[i] = 0;
 		}
 
-		std::array<func_value_with_gradient<R, varCnt>, eqCnt> result;
+		eval_result result;
 		for (int eq_id = 0; eq_id < eqCnt; eq_id++)
 		{
 			const auto result_dual = rhs_functions[eq_id](arguments_dual);
