@@ -1,6 +1,8 @@
 #pragma once
 #include <array>
 #include <functional>
+#include <iostream>
+#include <fstream>
 #include "../FunctionApproximation/DerivativeEvaluator/Dual.h"
 
 
@@ -69,7 +71,27 @@ struct mesh_point
 
 		return *this;
 	}
+
+	friend std::ostream& operator<<(std::ostream& os, const mesh_point<R, varCnt>& pt)
+	{
+		for (int varId = 0; varId < varCnt; varId++)
+			os << pt[varId] << " ";
+
+		return os;
+	}
 };
+
+template <class R, int Dim >
+void SaveMeshPoints(const char* filename, const std::vector<mesh_point<R, Dim>>& pts)
+{
+	std::ofstream file;
+	file.precision(std::numeric_limits<R>::digits10);
+	file.open(filename);
+	for (int ptId = 0; ptId < pts.size(); ptId++)
+		file << ptId << " " << pts[ptId] << std::endl;
+
+	file.close();
+}
 
 template <class R, int varCnt>
 mesh_point<R, varCnt> operator + (mesh_point<R, varCnt> lhs, const mesh_point<R, varCnt>& rhs)

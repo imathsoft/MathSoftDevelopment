@@ -82,10 +82,11 @@ namespace GeneralTest
 			return result;
 		}
 
-		TEST_METHOD(TroeschProblemTest)
+		/// <summary>
+		/// Generic mathod to perform test with the Troesch's problem
+		/// </summary>
+		void perform_Troesch_test(const bool use_reparametrization, const int discretization = 1000)
 		{
-			const int discretization = 1000;
-
 			const auto lambda = 3.0;
 			const auto pr = bvp_sys_factory<double>::Troesch(lambda);
 			const auto init_guess = GenerateInitialGuess<double, 3>(0.0, 1.0, [](const auto& t)
@@ -97,7 +98,7 @@ namespace GeneralTest
 
 			trapezoidal_solver<double> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {true, false},{ true, false} }, {false, false}, 1e-12);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {true, false},{ true, false} }, 1e-12, step, use_reparametrization);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
 
@@ -105,11 +106,21 @@ namespace GeneralTest
 
 			const auto init_slope_diff = std::abs(solution[0][1] - 0.25560421);
 			//check initial slope
-			Assert::IsTrue(init_slope_diff < 2*step * step, L"Too big deviation from the referance initial slope value");
+			Assert::IsTrue(init_slope_diff < 2 * step * step, L"Too big deviation from the referance initial slope value");
 
 			const auto final_slope_diff = std::abs((*solution.rbegin())[1] - 4.266223);
 			//check final slope
 			Assert::IsTrue(final_slope_diff < 15 * step * step, L"Too big deviation from the referance final slope value");
+		}
+
+		TEST_METHOD(TroeschProblemTest)
+		{
+			perform_Troesch_test(false);
+		}
+
+		TEST_METHOD(TroeschProblemReparamTest)
+		{
+			perform_Troesch_test(true);
 		}
 
 		/// <summary>
@@ -139,7 +150,7 @@ namespace GeneralTest
 
 			trapezoidal_solver<double> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, {false, false}, 1e-12);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, 1e-12, 0.01, false);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve decired precision");
 
