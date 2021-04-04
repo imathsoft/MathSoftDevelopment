@@ -217,7 +217,37 @@ private:
 
 public:
 
-	typedef std::array<func_value_with_gradient<R, varCnt>, eqCnt> eval_result;
+	/// <summary>
+	/// Right hand side of the system ant its gradients evaluated at some point 
+	/// </summary>
+	struct eval_result
+	{
+	private:
+		std::array<func_value_with_gradient<R, varCnt>, eqCnt> _values_and_gradients;
+
+	public:
+
+		/// <summary>
+		/// The point (set of arguments) at which the right hand side of the system was evaluated
+		/// </summary>
+		mesh_point<R, varCnt> pt;
+
+		/// <summary>
+		/// Subscript operator
+		/// </summary>
+		func_value_with_gradient<R, varCnt>& operator[](const int i)
+		{
+			return _values_and_gradients[i];
+		}
+
+		/// <summary>
+		/// Subscript operator (const version)
+		/// </summary>
+		const func_value_with_gradient<R, varCnt>& operator[](const int i) const
+		{
+			return _values_and_gradients[i];
+		}
+	};
 
 	/// <summary>
 	/// Returns number of variables involved (number of equations + 1)
@@ -255,6 +285,8 @@ public:
 			const auto result_dual = rhs_functions[eq_id](arguments_dual);
 			result[eq_id] = { result_dual.Real(), result_dual.Dual() };
 		}
+
+		result.pt = pt;
 
 		return result;
 	}

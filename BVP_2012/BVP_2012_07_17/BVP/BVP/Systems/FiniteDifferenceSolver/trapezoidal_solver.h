@@ -40,6 +40,22 @@ class trapezoidal_solver
 	typedef ode_system<R, eqCnt> sys;
 
 	/// <summary>
+	/// Data describing a transformation that was applied to the system in question on one of the discretization intervals
+	/// </summary>
+	struct transformation_maker
+	{
+		/// <summary>
+		/// Index of the "pivot" unknown
+		/// </summary>
+		int pivot_id{};
+
+		/// <summary>
+		/// The map defining which unknowns have been inverted during the transformation
+		/// </summary>
+		std::array<bool, eqCnt> inversion_map{};
+	};
+
+	/// <summary>
 	/// A struct representing extended atrix of the form [m|b], where "m"
 	/// is a square matrix and "b" is a column-vector of the corresponding size
 	/// </summary>
@@ -47,7 +63,7 @@ class trapezoidal_solver
 	{
 		LinAlg::Matrix<R, eqCnt, eqCnt> m;
 		LinAlg::Matrix<R, eqCnt, 1> b;
-		int independent_var_id;
+		transformation_maker trans_marker{};
 	};
 
 	/// <summary>
@@ -79,27 +95,27 @@ class trapezoidal_solver
 		/// <summary>
 		/// Transformed result
 		/// </summary>
-		typename ode_system<R, eqCnt>::eval_result res;
+		typename ode_system<R, eqCnt>::eval_result res{};
 
 		/// <summary>
-		/// Index of the "pivot" unknown
+		/// Marker defining a transformation
 		/// </summary>
-		int pivot_id;
+		transformation_maker trans_marker{};
 	};
 
 	/// <summary>
-	/// Performs transformation of the system evalueation result according to the given "pivot" variable
+	/// Performs transformation by proper change of independent variable
 	/// </summary>
-	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res_to_transform, const int independent_var_id)
+	static typename ode_system<R, eqCnt>::eval_result transform_independent_var(const typename ode_system<R, eqCnt>::eval_result& res_to_transform, const int independent_var_id)
 	{
 		if (independent_var_id < 0 || independent_var_id >= eqCnt)
-			return { res_to_transform,  eqCnt }; // identity transformation
+			return res_to_transform; // identity transformation
 
 		const auto& pivot_eq_data = res_to_transform[independent_var_id];
 
 		const auto one_over_denominator = R(1) / (pivot_eq_data.v * pivot_eq_data.v);
 
-		ode_system<R, eqCnt>::eval_result res_transformed{};
+		auto res_transformed = res_to_transform;
 
 		for (int eq_id = 0; eq_id < eqCnt; eq_id++)
 		{
@@ -110,7 +126,7 @@ class trapezoidal_solver
 				data.v = R(1) / pivot_eq_data.v;
 
 				for (int var_id = 0; var_id <= eqCnt; var_id++)
-					data.grad[var_id] = - pivot_eq_data.grad[var_id] * one_over_denominator;
+					data.grad[var_id] = -pivot_eq_data.grad[var_id] * one_over_denominator;
 
 				continue;
 			}
@@ -123,7 +139,67 @@ class trapezoidal_solver
 				data.grad[var_id] = (curr_eq_data.grad[var_id] * pivot_eq_data.v - curr_eq_data.v * pivot_eq_data.grad[var_id]) * one_over_denominator;
 		}
 
-		return { res_transformed, independent_var_id };
+		return res_transformed;
+	}
+
+	/// <summary>
+	/// Performs transformation by inversing unknown variables according to the given inversion map
+	/// </summary>
+	static typename ode_system<R, eqCnt>::eval_result invert_unknowns(const typename ode_system<R, eqCnt>::eval_result& res_to_transform, std::array<bool, eqCnt> inversion_map)
+	{
+		auto res_transformed = res_to_transform;
+		const auto& pt = res_to_transform.pt;
+
+		//Iterate through the derivatives of unknown functions (i.e., equations) 
+		for (int eq_id = 0; eq_id < eqCnt; eq_id++)
+		{
+			if (!inversion_map[eq_id])
+				continue; //skip those equations that do not correspond to inverted unknown functions
+
+			auto& eq_data = res_transformed[eq_id];
+			const auto factor = R(1) / pt[eq_id];
+			const auto minus_factor_squared = -factor * factor;
+
+			eq_data.v *= minus_factor_squared;
+			for (int var_id = 0; var_id < eqCnt; var_id++)
+			{
+				if (eq_id != var_id)
+					eq_data.grad[var_id] *= minus_factor_squared;
+				else
+					eq_data.grad[var_id] -= 2 * res_to_transform[eq_id].v * factor;
+			}
+		}
+
+		//Iterate though the unknown functions
+		for (int var_id = 0; var_id < eqCnt; var_id++)
+		{
+			if (!inversion_map[var_id])
+				continue; //skip those that are not inverted
+
+			const auto factor = - pt[var_id] * pt[var_id];
+
+			for (int eq_id = 0; eq_id < eqCnt; eq_id++)
+			{
+				if (eq_id == var_id)
+					continue; //skip the equation that corresponds to the current inverted unknown function, since all of them have been already processed above
+
+				res_transformed[eq_id].grad[var_id] *= factor;
+			}
+		}
+
+		return res_transformed;
+	}
+
+	/// <summary>
+	/// Performs transformation of the system evalueation result according to the given "pivot" variable
+	/// </summary>
+	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res_to_transform, const transformation_maker& trans_marker)
+	{
+		const auto res_independent_var_transformed = transform_independent_var(res_to_transform, trans_marker.pivot_id);
+
+		const auto res_unknowns_inverted = invert_unknowns(res_independent_var_transformed, trans_marker.inversion_map);
+
+		return { res_unknowns_inverted, trans_marker };
 	}
 
 	/// <summary>
@@ -134,24 +210,79 @@ class trapezoidal_solver
 	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res, const std::array<bool, eqCnt>& transform_map, const R& derivative_threshold = R(1))
 	{
 		int independent_var_id = eqCnt;
+		std::array<bool, eqCnt> inversion_map{};
+		const auto& pt = res.pt;
 
 		R max_abs_val = derivative_threshold;
 
 		for (int var_id = 0; var_id < eqCnt; var_id++)
 		{
-			if (!transform_map[var_id])
-				continue;
-
 			const auto trial_abs_val = std::abs<R>(res[var_id].v);
 
-			if (trial_abs_val > max_abs_val)
+			if (trial_abs_val > max_abs_val && transform_map[var_id])//only variable that is "marked" in the transformation map can serve as "independent"
 			{
 				independent_var_id = var_id;
 				max_abs_val = trial_abs_val;
+			} else if (!transform_map[var_id] && trial_abs_val > derivative_threshold && (std::abs<R>(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
+																				  //value of the corresponding variavle is less or equal to 1
+			{
+				//inversion_map[var_id] = true;
 			}
 		}
 
-		return transform(res, independent_var_id);
+		return transform(res, {independent_var_id, inversion_map});
+	}
+
+	/// <summary>
+	/// Calculates difference of the two mesh points according to the given inversion map
+	/// </summary>
+	static mesh_point<R, eqCnt + 1> get_mesh_point_diff(const mesh_point<R, eqCnt + 1>& pt_prev, const mesh_point<R, eqCnt + 1>& pt_next, const std::array<bool, eqCnt>& inversion_map)
+	{
+		mesh_point<R, eqCnt + 1> result{};
+
+		for (int unknown_id = 0; unknown_id < eqCnt; unknown_id++)
+		{
+			result[unknown_id] = inversion_map[unknown_id] ?
+				(R(1) / pt_next[unknown_id] - R(1) / pt_prev[unknown_id]) :
+				(pt_next[unknown_id] - pt_prev[unknown_id]);
+		}
+
+		result[eqCnt] = pt_next[eqCnt] - pt_prev[eqCnt];
+
+		return result;
+	}
+
+	/// <summary>
+	/// Calculates "agreement factor" that is aimed to handle the "transition" situatuion, when inversion transformation is applied on the current interval
+	/// but was not applied on the previous interval (or vise versa). This transitions state requires us to still work with not transformed variable 
+	/// despite of the fact that equations that we built correspond to the transformed one.
+	/// In the other words, we have calculated partial derivative that corresponds to the transformed variable `w = 1/v`, however we need to have 
+	/// the partial derivative with respect to `v`. This can be handled by multiplying the partial derivative with respect to `w` by `-1/v^2`.
+	/// The latter is actually the "agreement" factor that the function calculates with respect to each unknown
+	/// </summary>
+	static std::array<R, eqCnt> calc_inversion_agreement_factor(const std::array<bool, eqCnt>& inversion_map_prev,
+		const std::array<bool, eqCnt>& inversion_map_next,
+		const mesh_point<R, eqCnt + 1>& current_pt)
+	{
+		std::array<R, eqCnt> result{};
+
+		for (int unknown_id = 0; unknown_id < eqCnt; unknown_id++)
+		{
+			if (inversion_map_prev[unknown_id] == inversion_map_next[unknown_id])
+			{
+				result[unknown_id] = R(1);
+				continue;
+			}
+
+			if (inversion_map_prev[unknown_id])
+				result[unknown_id] = -current_pt[unknown_id] * current_pt[unknown_id];
+			else {
+				const auto temp = R(1) / current_pt[unknown_id];
+				result[unknown_id] = -temp * temp;
+			}
+		}
+
+		return result;
 	}
 
 	/// <summary>
@@ -168,36 +299,44 @@ class trapezoidal_solver
 		block_matrix result(init_guess.size() - 1);
 
 		auto res_prev = system.Evaluate(init_guess[0]);
-		int independent_var_id_prev = -1;
+		transformation_maker trans_marker_prev{ -1 };
 		for (int pt_id = 0; pt_id < init_guess.size() - 1; pt_id++)
 		{
 			const auto res_prev_transformed = transform(res_prev, transform_map);
-			const int independent_var_id_next = res_prev_transformed.pivot_id;
-			if (independent_var_id_prev < 0)
-				independent_var_id_prev = independent_var_id_next;
+			const auto trans_marker_next = res_prev_transformed.trans_marker;
+			if (trans_marker_prev.pivot_id < 0)
+				trans_marker_prev = trans_marker_next;
 
 			const auto res_next = system.Evaluate(init_guess[pt_id + 1]);
-			const auto res_next_transformed = transform(res_next, independent_var_id_next);
+			const auto res_next_transformed = transform(res_next, trans_marker_next);
 
-			const auto pt_diff = init_guess[pt_id + 1] - init_guess[pt_id];
+			const auto independent_var_id_next = trans_marker_next.pivot_id;
+			const auto& inversion_map_next = trans_marker_next.inversion_map;
+
+			const auto independent_var_id_prev = trans_marker_prev.pivot_id;
+			const auto& inversion_map_prev = trans_marker_prev.inversion_map;
+
+			const auto pt_diff = get_mesh_point_diff(init_guess[pt_id], init_guess[pt_id + 1], inversion_map_next);
 			const auto one_over_h = R(1) / pt_diff.pt[independent_var_id_next];
 			const auto divided_diff = one_over_h * pt_diff;
 
+			const auto agreement_factor = calc_inversion_agreement_factor(inversion_map_prev, inversion_map_next, init_guess[pt_id]);
+
 			auto& current_stripe = result[pt_id];
-			current_stripe.independent_var_id = independent_var_id_next;
+			current_stripe.trans_marker = trans_marker_next;
 			LinAlg::Matrix<R, eqCnt, eqCnt> temp;
 
 			for (int row_id = 0; row_id < eqCnt; row_id++)
 			{
 				for (int col_id = 0; col_id < eqCnt; col_id++)
 				{
-					current_stripe.m[row_id][col_id] = -OneHalf * res_prev_transformed.res[row_id].grad[col_id != independent_var_id_prev ? col_id : eqCnt];
+					current_stripe.m[row_id][col_id] = -OneHalf * agreement_factor[col_id] * res_prev_transformed.res[row_id].grad[col_id != independent_var_id_prev ? col_id : eqCnt];
 					temp[row_id][col_id] = -OneHalf * res_next_transformed.res[row_id].grad[col_id != independent_var_id_next ? col_id : eqCnt];
 				}
 
 				const int actual_var_id = row_id != independent_var_id_next ? row_id : eqCnt;
 
-				current_stripe.m[row_id][row_id] -= actual_var_id != independent_var_id_prev ? one_over_h : R(0);
+				current_stripe.m[row_id][row_id] -= actual_var_id != independent_var_id_prev ? agreement_factor[row_id] * one_over_h : R(0);
 				temp[row_id][row_id] += one_over_h;
 
 				current_stripe.b[row_id][0] = divided_diff[actual_var_id] - OneHalf * (res_prev_transformed.res[row_id].v + res_next_transformed.res[row_id].v);
@@ -224,7 +363,7 @@ class trapezoidal_solver
 			current_stripe.b = temp_inverted * current_stripe.b;
 
 			res_prev = res_next;
-			independent_var_id_prev = independent_var_id_next;
+			trans_marker_prev = trans_marker_next;
 		}
 
 		return result;
@@ -241,14 +380,13 @@ class trapezoidal_solver
 		mesh_point<R, eqCnt + 1> point;
 
 		/// <summary>
-		/// Index of independent variable used on the interval to the right
+		/// Transformation marker
 		/// </summary>
-		int independent_var_id;
+		transformation_maker trans_marker{};
 
 		/// <summary>
 		/// Correction magnitude
 		/// </summary>
-		/// <returns></returns>
 		R magnitude() const
 		{
 			return point.max_abs();
@@ -258,12 +396,12 @@ class trapezoidal_solver
 	/// <summary>
 	/// A helper method to copy result from vector-column to the mesh point
 	/// </summary>
-	static void copy(correction& dest, const LinAlg::Matrix<R, eqCnt, 1>& source, const int independent_var_id)
+	static void copy(correction& dest, const LinAlg::Matrix<R, eqCnt, 1>& source, const transformation_maker& trans_marker)
 	{
-		dest.independent_var_id = independent_var_id;
+		dest.trans_marker = trans_marker;
 		for (int i = 0; i < eqCnt; i++)
 		{
-			dest.point[independent_var_id != i ? i : eqCnt] = source[i][0];
+			dest.point[trans_marker.pivot_id != i ? i : eqCnt] = trans_marker.inversion_map[i] ?  R(1) / source[i][0] : source[i][0];
 		}
 	}
 
@@ -348,10 +486,10 @@ class trapezoidal_solver
 
 		std::vector<correction> result(gradient_matrix.size() + 1);
 
-		copy(result[0], u_0, gradient_matrix[0].independent_var_id);
+		copy(result[0], u_0, gradient_matrix[0].trans_marker);
 
 		for (int block_id = 0; block_id < gradient_matrix.size(); block_id++)
-			copy(result[block_id + 1], gradient_matrix[block_id].m * u_0 + gradient_matrix[block_id].b, gradient_matrix[block_id].independent_var_id);
+			copy(result[block_id + 1], gradient_matrix[block_id].m * u_0 + gradient_matrix[block_id].b, gradient_matrix[block_id].trans_marker);
 
 		return result;
 	}
@@ -368,12 +506,13 @@ class trapezoidal_solver
 			solution[pt_id] -= correction[pt_id].point;
 
 		std::vector<mesh_point<R, eqCnt + 1>> solution_refined;
+
 		solution_refined.reserve(solution.size());
 
 		for (int pt_id = 0; pt_id < solution.size() - 1; pt_id++)
 		{
 			solution_refined.push_back(solution[pt_id]);
-			const auto ind_var_id = correction[pt_id + 1].independent_var_id;
+			const auto ind_var_id = correction[pt_id + 1].trans_marker.pivot_id;
 			const auto actual_step = std::abs(solution[pt_id][ind_var_id] - solution[pt_id + 1][ind_var_id]);
 			if (actual_step < R(1.5) * desired_step_size)
 				continue;

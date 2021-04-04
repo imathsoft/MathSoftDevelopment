@@ -10,7 +10,7 @@ namespace GeneralTest
 	constexpr int RowDim = 5;
 	constexpr int ColDim = 7;
 
-	constexpr double TOLL = 10*std::numeric_limits<double>::epsilon();
+	constexpr double TOLL = 20*std::numeric_limits<double>::epsilon();
 
 	TEST_CLASS(MatrixTest)
 	{
