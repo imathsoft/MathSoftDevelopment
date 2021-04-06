@@ -207,7 +207,7 @@ class trapezoidal_solver
 	/// Transformation map defines what unknownc can be chosen as "pivot" ones (to be swaped with the independent variable via inverting)
 	/// Returns intex of the chosen pivot variable
 	/// </summary>
-	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res, const std::array<bool, eqCnt>& transform_map, const R& derivative_threshold = R(1))
+	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res, const std::array<bool, eqCnt>& transform_map, const bool use_inversion, const R& derivative_threshold = R(1))
 	{
 		int independent_var_id = eqCnt;
 		std::array<bool, eqCnt> inversion_map{};
@@ -223,10 +223,11 @@ class trapezoidal_solver
 			{
 				independent_var_id = var_id;
 				max_abs_val = trial_abs_val;
-			} else if (!transform_map[var_id] && trial_abs_val > derivative_threshold && (std::abs<R>(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
-																				  //value of the corresponding variavle is less or equal to 1
+			} else if (use_inversion && !transform_map[var_id] &&
+				trial_abs_val > derivative_threshold && (std::abs<R>(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
+																						 //value of the corresponding variavle is less or equal to 1
 			{
-				//inversion_map[var_id] = true;
+				inversion_map[var_id] = true;
 			}
 		}
 
@@ -291,7 +292,8 @@ class trapezoidal_solver
 	/// where F(s) = 0 is the system of nonliner equations that we get applying the trapezoidal scheme to the given system of ODEs 
 	/// s_{i} is the "initial guess"
 	/// </summary>
-	static block_matrix construct_extended_gradient_matrix(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const std::array<bool, eqCnt>& transform_map)
+	static block_matrix construct_extended_gradient_matrix(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess,
+		const std::array<bool, eqCnt>& transform_map, const bool use_inversion)
 	{
 		if (init_guess.size() <= 1)
 			throw std::exception("Invalid input");
@@ -300,9 +302,9 @@ class trapezoidal_solver
 
 		auto res_prev = system.Evaluate(init_guess[0]);
 		transformation_maker trans_marker_prev{ -1 };
-		for (int pt_id = 0; pt_id < init_guess.size() - 1; pt_id++)
+		for (auto pt_id = 0; pt_id < init_guess.size() - 1; pt_id++)
 		{
-			const auto res_prev_transformed = transform(res_prev, transform_map);
+			const auto res_prev_transformed = transform(res_prev, transform_map, use_inversion);
 			const auto trans_marker_next = res_prev_transformed.trans_marker;
 			if (trans_marker_prev.pivot_id < 0)
 				trans_marker_prev = trans_marker_next;
@@ -400,9 +402,7 @@ class trapezoidal_solver
 	{
 		dest.trans_marker = trans_marker;
 		for (int i = 0; i < eqCnt; i++)
-		{
-			dest.point[trans_marker.pivot_id != i ? i : eqCnt] = trans_marker.inversion_map[i] ?  R(1) / source[i][0] : source[i][0];
-		}
+			dest.point[trans_marker.pivot_id != i ? i : eqCnt] = source[i][0];
 	}
 
 	/// <summary>
@@ -473,7 +473,7 @@ class trapezoidal_solver
 	/// </summary>
 	static std::vector<correction> get_newton_correction(block_matrix& gradient_matrix, const bc_marker<eqCnt>& bcm)
 	{
-		for (int block_id = 1; block_id < gradient_matrix.size(); block_id++)
+		for (auto block_id = 1; block_id < gradient_matrix.size(); block_id++)
 		{
 			gradient_matrix[block_id].b += gradient_matrix[block_id].m * gradient_matrix[block_id - 1].b;
 			gradient_matrix[block_id].m = gradient_matrix[block_id].m * gradient_matrix[block_id - 1].m;
@@ -488,7 +488,7 @@ class trapezoidal_solver
 
 		copy(result[0], u_0, gradient_matrix[0].trans_marker);
 
-		for (int block_id = 0; block_id < gradient_matrix.size(); block_id++)
+		for (auto block_id = 0; block_id < gradient_matrix.size(); block_id++)
 			copy(result[block_id + 1], gradient_matrix[block_id].m * u_0 + gradient_matrix[block_id].b, gradient_matrix[block_id].trans_marker);
 
 		return result;
@@ -502,18 +502,28 @@ class trapezoidal_solver
 		if (solution.size() != correction.size())
 			throw std::exception("Invalid input");
 
-		for (int pt_id = 0; pt_id < correction.size(); pt_id++)
-			solution[pt_id] -= correction[pt_id].point;
+		for (auto pt_id = 0; pt_id < correction.size(); pt_id++)
+		{
+			const auto& marker = correction[pt_id].trans_marker;
+			for (int var_id = 0; var_id < eqCnt; var_id++)
+			{
+				if (marker.inversion_map[var_id])
+					solution[pt_id][var_id] = solution[pt_id][var_id] /(R(1) - solution[pt_id][var_id] * correction[pt_id].point[var_id]);
+				else
+					solution[pt_id][var_id] -= correction[pt_id].point[var_id];
+			}
+			solution[pt_id][eqCnt] -= correction[pt_id].point[eqCnt];
+		}
 
 		std::vector<mesh_point<R, eqCnt + 1>> solution_refined;
 
 		solution_refined.reserve(solution.size());
 
-		for (int pt_id = 0; pt_id < solution.size() - 1; pt_id++)
+		for (auto pt_id = 0; pt_id < solution.size() - 1; pt_id++)
 		{
 			solution_refined.push_back(solution[pt_id]);
 			const auto ind_var_id = correction[pt_id + 1].trans_marker.pivot_id;
-			const auto actual_step = std::abs(solution[pt_id][ind_var_id] - solution[pt_id + 1][ind_var_id]);
+			const auto actual_step = std::abs<R>(solution[pt_id][ind_var_id] - solution[pt_id + 1][ind_var_id]);
 			if (actual_step < R(1.5) * desired_step_size)
 				continue;
 
@@ -564,7 +574,7 @@ public:
 	/// The main solving method
 	/// </summary>
 	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm,
-		const R& precision, const R& desired_step, const bool use_reparametrization)
+		const R& precision, const R& desired_step, const bool use_reparametrization, const bool use_inversion)
 	{
 		if (!bcm.is_valid())
 			throw std::exception("Invalid boundary condition marker");
@@ -583,7 +593,7 @@ public:
 		int iter_count = 0;
 		while (correction_magnitude > precision && iter_count < max_iterations_count)
 		{
-			auto g_matrix = construct_extended_gradient_matrix(system, solution, transform_map);
+			auto g_matrix = construct_extended_gradient_matrix(system, solution, transform_map, use_inversion);
 			const auto correction = get_newton_correction(g_matrix, bcm);
 			correction_magnitude = std::max_element(correction.begin(), correction.end(),
 				[](const auto& a, const auto& b) { return a.magnitude() < b.magnitude(); })->magnitude();

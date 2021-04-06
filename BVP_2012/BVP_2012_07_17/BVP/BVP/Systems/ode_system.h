@@ -36,7 +36,7 @@ struct mesh_point
 	/// </summary>
 	R max_abs() const
 	{
-		return std::abs(*std::max_element(pt.begin(), pt.end(), [](const auto& a, const auto& b) { return std::abs<R>(a) < std::abs<R>(b); }));
+		return std::abs<R>(*std::max_element(pt.begin(), pt.end(), [](const auto& a, const auto& b) { return std::abs<R>(a) < std::abs<R>(b); }));
 	}
 
 	/// <summary>

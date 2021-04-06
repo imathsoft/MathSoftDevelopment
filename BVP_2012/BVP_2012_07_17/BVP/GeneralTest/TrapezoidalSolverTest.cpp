@@ -85,42 +85,43 @@ namespace GeneralTest
 		/// <summary>
 		/// Generic mathod to perform test with the Troesch's problem
 		/// </summary>
-		void perform_Troesch_test(const bool use_reparametrization, const int discretization = 1000)
+		template <class R = double>
+		void perform_Troesch_test(const bool use_reparametrization, const bool use_inversion, const int discretization = 1000,
+			const simple_bvp<R, 2>& pr = bvp_sys_factory<R>::Troesch(3.0))
 		{
-			const auto lambda = 3.0;
-			const auto pr = bvp_sys_factory<double>::Troesch(lambda);
-			const auto init_guess = GenerateInitialGuess<double, 3>(0.0, 1.0, [](const auto& t)
+			const auto init_guess = GenerateInitialGuess<R, 3>(R(0.0), R(1.0), [](const auto& t)
 				{
-					return mesh_point<double, 3>{ t, 1, t };
+					return mesh_point<R, 3>{ t, 1, t };
 				}, discretization);
 
 			const auto step = 1.0 / discretization;
 
-			trapezoidal_solver<double> solver{};
+			trapezoidal_solver<R> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {true, false},{ true, false} }, 1e-12, step, use_reparametrization);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
+				step, use_reparametrization, use_inversion);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
 
 			CheckQuadraticConvergence(solver);
 
-			const auto init_slope_diff = std::abs(solution[0][1] - 0.25560421);
+			const auto init_slope_diff = std::abs<R>(solution[0][1] - 0.25560421);
 			//check initial slope
 			Assert::IsTrue(init_slope_diff < 2 * step * step, L"Too big deviation from the referance initial slope value");
 
-			const auto final_slope_diff = std::abs((*solution.rbegin())[1] - 4.266223);
+			const auto final_slope_diff = std::abs<R>((*solution.rbegin())[1] - 4.266223);
 			//check final slope
 			Assert::IsTrue(final_slope_diff < 15 * step * step, L"Too big deviation from the referance final slope value");
 		}
 
 		TEST_METHOD(TroeschProblemTest)
 		{
-			perform_Troesch_test(false);
+			perform_Troesch_test(false, false);
 		}
 
 		TEST_METHOD(TroeschProblemReparamTest)
 		{
-			perform_Troesch_test(true);
+			perform_Troesch_test(true, false);
 		}
 
 		/// <summary>
@@ -150,7 +151,7 @@ namespace GeneralTest
 
 			trapezoidal_solver<double> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, 1e-12, 0.01, false);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, 1e-12, 0.01, false, false);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve decired precision");
 

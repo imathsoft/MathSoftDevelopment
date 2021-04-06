@@ -16,8 +16,21 @@ public:
 	{
 		return simple_bvp<R, 2>(
 			{ {
-				[](const auto& args) { return args[1]; }, // v_{0}^{'}(t) = v_{i}(t)
+				[](const auto& args) { return args[1]; }, // v_{0}^{'}(t) = v_{1}(t)
 				[lambda](const auto& args) { return lambda * Sinh(lambda * args[0]); }, // v_{1}^{'} = \lambda Sinh(lambda v_{0})
+			} },
+			{ {0, 0}, {1, 1} });
+	}
+
+	/// <summary>
+	/// The Troesch's problem with inverted derivative of the unknown function
+	/// </summary>
+	static simple_bvp<R, 2> Troesch_deriv_inverted(const R lambda)
+	{
+		return simple_bvp<R, 2>(
+			{ {
+				[](const auto& args) { return R(1)/args[1]; }, // v_{0}^{'}(t) = 1/v_{1}(t)
+				[lambda](const auto& args) { return  - lambda * Sinh(lambda * args[0]) * args[1] * args[1]; }, // v_{1}^{'} = = \lambda Sinh(lambda v_{0}) * v_{1}^{2}
 			} },
 			{ {0, 0}, {1, 1} });
 	}
