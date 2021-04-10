@@ -36,7 +36,7 @@ struct mesh_point
 	/// </summary>
 	R max_abs() const
 	{
-		return std::abs<R>(*std::max_element(pt.begin(), pt.end(), [](const auto& a, const auto& b) { return std::abs<R>(a) < std::abs<R>(b); }));
+		return auxutils::Abs(*std::max_element(pt.begin(), pt.end(), [](const auto& a, const auto& b) { return auxutils::Abs(a) < auxutils::Abs(b); }));
 	}
 
 	/// <summary>
@@ -82,7 +82,7 @@ struct mesh_point
 };
 
 template <class R, int Dim >
-void SaveMeshPoints(const char* filename, const std::vector<mesh_point<R, Dim>>& pts)
+void SaveMeshPoints(const std::vector<mesh_point<R, Dim>>& pts, const char* filename)
 {
 	std::ofstream file;
 	file.precision(std::numeric_limits<R>::digits10);

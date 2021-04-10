@@ -29,6 +29,23 @@ struct bc_marker
 };
 
 /// <summary>
+/// Data structure to contain information needed to diagnose problems in the convergence rate of the Newton's method
+/// </summary>
+template <class R>
+struct ConvergenceInfo
+{
+	/// <summary>
+	/// Magnitude of Newtn's correction on the given iteration
+	/// </summary>
+	R CorrectionMagnitude;
+
+	/// <summary>
+	/// Indicates whether mesh refinement was applied on the given iteration
+	/// </summary>
+	bool RefinementApplied;
+};
+
+/// <summary>
 /// Finite difference solver implementing the trapezoidal scheme for systems of nonlinear 
 /// first order ordinary differential euations
 /// </summary>
@@ -78,7 +95,7 @@ class trapezoidal_solver
 	///  and contains magnitudes of each Newton's correction
 	/// Setves diagnostic purposes (if the iteration process is properly implemented then the corrctions should exhibit quadratic decay)
 	/// </summary>
-	std::vector<R> correction_magnitudes{};
+	std::vector<ConvergenceInfo<R>> correction_magnitudes{};
 
 	int max_iterations_count{ 15 };
 
@@ -217,14 +234,14 @@ class trapezoidal_solver
 
 		for (int var_id = 0; var_id < eqCnt; var_id++)
 		{
-			const auto trial_abs_val = std::abs<R>(res[var_id].v);
+			const auto trial_abs_val = auxutils::Abs(res[var_id].v);
 
 			if (trial_abs_val > max_abs_val && transform_map[var_id])//only variable that is "marked" in the transformation map can serve as "independent"
 			{
 				independent_var_id = var_id;
 				max_abs_val = trial_abs_val;
 			} else if (use_inversion && !transform_map[var_id] &&
-				trial_abs_val > derivative_threshold && (std::abs<R>(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
+				trial_abs_val > derivative_threshold && (auxutils::Abs(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
 																						 //value of the corresponding variavle is less or equal to 1
 			{
 				inversion_map[var_id] = true;
@@ -356,7 +373,7 @@ class trapezoidal_solver
 
 			const auto det = temp.Determinant();
 
-			if (std::abs<R>(det) < 1e3 * std::numeric_limits<R>::epsilon())
+			if (auxutils::Abs(det) < 1e3 * std::numeric_limits<R>::epsilon())
 				throw std::exception("Singular block");
 
 			const auto temp_inverted = temp.Inverse();
@@ -453,7 +470,7 @@ class trapezoidal_solver
 
 		const auto det = temp.Determinant();
 
-		if (std::abs<R>(det) < 100 * std::numeric_limits<R>::epsilon())
+		if (auxutils::Abs(det) < 100 * std::numeric_limits<R>::epsilon())
 			throw std::exception("Singular system");
 
 		const auto temp_inverted = temp.Inverse();
@@ -496,8 +513,9 @@ class trapezoidal_solver
 
 	/// <summary>
 	/// Applies correction to the given solution
+	/// Returns true if actual refinement was applied to the corrected solution
 	/// </summary>
-	static void apply_correction(std::vector<mesh_point<R, eqCnt + 1>>& solution, const std::vector<correction>& correction, const R desired_step_size)
+	static bool apply_correction_and_refine_solution(std::vector<mesh_point<R, eqCnt + 1>>& solution, const std::vector<correction>& correction, const R desired_step_size)
 	{
 		if (solution.size() != correction.size())
 			throw std::exception("Invalid input");
@@ -519,13 +537,17 @@ class trapezoidal_solver
 
 		solution_refined.reserve(solution.size());
 
+		bool refinement_applied = false;
+
 		for (auto pt_id = 0; pt_id < solution.size() - 1; pt_id++)
 		{
 			solution_refined.push_back(solution[pt_id]);
 			const auto ind_var_id = correction[pt_id + 1].trans_marker.pivot_id;
-			const auto actual_step = std::abs<R>(solution[pt_id][ind_var_id] - solution[pt_id + 1][ind_var_id]);
+			const auto actual_step = auxutils::Abs(solution[pt_id][ind_var_id] - solution[pt_id + 1][ind_var_id]);
 			if (actual_step < R(1.5) * desired_step_size)
 				continue;
+
+			refinement_applied = true;
 
 			const int points_to_add = static_cast<int>(actual_step / desired_step_size);
 			const auto h = R(1) / (points_to_add + 1);
@@ -542,6 +564,8 @@ class trapezoidal_solver
 		solution_refined.push_back(*(solution.rbegin()));//put the last point to the refined collection
 
 		solution = solution_refined;
+
+		return refinement_applied;
 	}
 
 public:
@@ -565,7 +589,7 @@ public:
 	/// <summary>
 	/// Getter for the collection of correction magnitudes
 	/// </summary>
-	std::vector<R> get_correcion_magnitudes() const
+	std::vector<ConvergenceInfo<R>> get_correcion_magnitudes() const
 	{
 		return correction_magnitudes;
 	}
@@ -598,9 +622,9 @@ public:
 			correction_magnitude = std::max_element(correction.begin(), correction.end(),
 				[](const auto& a, const auto& b) { return a.magnitude() < b.magnitude(); })->magnitude();
 
-			correction_magnitudes.push_back(correction_magnitude);
+			const auto refinement_applied = apply_correction_and_refine_solution(solution, correction, desired_step);
 
-			apply_correction(solution, correction, desired_step);
+			correction_magnitudes.emplace_back( ConvergenceInfo<R>{ correction_magnitude, refinement_applied });
 
 			iter_count++;
 		}

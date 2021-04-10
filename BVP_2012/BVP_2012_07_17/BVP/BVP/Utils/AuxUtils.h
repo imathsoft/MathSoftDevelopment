@@ -11,11 +11,20 @@
 
 using namespace boost::multiprecision;
 
-//typedef boost::multiprecision::number<boost::multiprecision::debug_adaptor<boost::multiprecision::cpp_dec_float<30>>, boost::multiprecision::et_off> float_50_noet;
+typedef number<debug_adaptor<cpp_dec_float<30>>, et_off> float_50_noet_debug;
 typedef number<cpp_dec_float<30>, et_off> float_50_noet;
 
 namespace auxutils
 {
+	/*
+	* Absolute value function (generic implementation) 
+	*/
+	template <class R>
+	R Abs(const R& val)
+	{
+		return val >= R(0) ? val : -val;
+	}
+
 	inline double Sqrt(const double d)
 	{
 		return std::sqrt(d);
@@ -159,6 +168,22 @@ namespace auxutils
 		return result;
 	}
 
+	template<unsigned Digits10> 
+	number<cpp_dec_float<Digits10>, et_off> Log(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return boost::multiprecision::log(val);
+	}
+
+	inline float Log(const float& val)
+	{
+		return std::logf(val);
+	}
+
+	inline double Log(const double& val)
+	{
+		return std::log(val);
+	}
+
 	template <class T>
 	inline T sqr(const T& d)
 	{
@@ -213,16 +238,15 @@ namespace auxutils
 
 	///Method to write vector of knots into a text file
 	template <class T>
-	void SaveToFile(const std::vector<T>& mesh, const char* filename)
+	void SaveToFile(const std::vector<T>& collection, const char* filename)
 	{
 		 std::ofstream file;
-		 file.open (filename);
-		 file.precision(std::numeric_limits<T>::digits10 + 2);
-		 for (std::vector<T>::const_iterator m = mesh.begin(); m != mesh.end(); ++m)
-		 {
-			 file << std::endl << (*m);
-		 }
-         file.close();
+		 file.precision(std::numeric_limits<T>::digits10);
+		 file.open(filename);
+		 for (auto item_id = 0; item_id < collection.size(); item_id++)
+			 file << collection[item_id] << std::endl;
+
+		 file.close();
 	}
 
 	///Method to write vector of knots into a text file

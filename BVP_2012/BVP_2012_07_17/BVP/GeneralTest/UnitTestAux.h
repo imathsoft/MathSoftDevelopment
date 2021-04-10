@@ -6,6 +6,7 @@
 #include <vector>
 #include "../BVP/FunctionApproximation/InitialCondition.h"
 #include "../BVP/Problems/ProblemAbstract.h"
+#include "../BVP/LinearAlgebra/Matrix.h"
 
 namespace UnitTestAux
 {
@@ -118,6 +119,49 @@ namespace UnitTestAux
 		Assert::IsTrue(solution.size() > targetArgument/finalH, 
 			Message("Too few knot in the solution vector, " + 
 			auxutils::ToString(solution.size())));
+	}
+
+	/*
+	* Assuming that each element of the given sequence can be approximately represented as M*q^{2^{n}}, 
+	* the method calculates the "M" and "q" parameters via the least squares fitting approach as well as the maximal 
+	* relative error of the approximation 
+	*/
+	template <class R>
+	void ApproximateParametersOfQuadraticallyDecayingSequence(const std::vector<R>& sequence, R& M, R& q, R& max_rel_error)
+	{
+		LinAlg::Matrix<R, 2, 2> A{}; //Matrix of the linear system to solve
+		LinAlg::Matrix<R, 2, 1> b{}; //The right hand side of the system to solve
+
+		R power_of_two = R(1);
+		for (auto val_id = 0; val_id < sequence.size(); val_id++)
+		{
+			A[0][0] += R(1);
+			A[0][1] += power_of_two;
+
+			A[1][1] += power_of_two * power_of_two;
+
+			const auto log_val = auxutils::Log(sequence[val_id]);
+
+			b[0][0] += log_val;
+			b[1][0] += log_val * power_of_two;
+
+			power_of_two *= R(2);
+		}
+
+		A[1][0] = A[0][1];
+
+		const auto x = A.Inverse() * b;
+
+		M = auxutils::Exp(x[0][0]);
+		q = auxutils::Exp(x[1][0]);
+
+		R power_of_q = q;
+		max_rel_error = R(0);
+		for (auto val_id = 0; val_id < sequence.size(); val_id++)
+		{
+			max_rel_error = std::max<R>(max_rel_error, auxutils::Abs((sequence[val_id] - M * power_of_q)/sequence[val_id]));
+			power_of_q *= power_of_q;
+		}
 	}
 
 	static wchar_t* Message(const char* text)

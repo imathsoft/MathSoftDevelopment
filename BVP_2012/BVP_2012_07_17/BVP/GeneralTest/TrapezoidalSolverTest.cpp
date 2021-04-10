@@ -5,6 +5,7 @@
 #include "../BVP/Systems/bvp_sys_factory.h"
 #include "../BVP/Systems/FiniteDifferenceSolver/trapezoidal_solver.h"
 #include "../BVP/Utils/AuxUtils.h"
+#include "UnitTestAux.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace LinAlg;
@@ -30,16 +31,22 @@ namespace GeneralTest
 		/// Method to check that the convergence rate of the iteration process is quadratic
 		/// </summary>
 		template <class R>
-		void CheckQuadraticConvergence(const trapezoidal_solver<R>& solver)
+		void CheckQuadraticConvergence(const trapezoidal_solver<R>& solver, const R& acceptable_approximation_error)
 		{
 			const auto corrections = solver.get_correcion_magnitudes();
 
-			Assert::IsTrue(corrections.size() >= 4, L"Too few iterations to detect quadratic convergence rate");
+			std::vector<R> chosen_corrections;
 
-			for (int corr_id = 0; corr_id < corrections.size() - 2; corr_id++)
-			{
-				Assert::IsTrue(corrections[corr_id] * corrections[corr_id] > 0.5 * corrections[corr_id + 1], L"The convergence rate is not quadratic");
-			}
+			for (int corr_id = corrections.size() - 2; corr_id >= 1 && !corrections[corr_id].RefinementApplied; corr_id--)
+				chosen_corrections.insert(chosen_corrections.begin(), corrections[corr_id].CorrectionMagnitude);
+
+			Assert::IsTrue(chosen_corrections.size() >= 3, L"Too few corrections to detect quadratic convergence rate");
+
+			R M, q, max_rel_error;
+
+			UnitTestAux::ApproximateParametersOfQuadraticallyDecayingSequence(chosen_corrections, M, q, max_rel_error);
+
+			Assert::IsTrue(max_rel_error <= acceptable_approximation_error, L"Too high approximation error");
 		}
 
 		/// <summary>
@@ -54,7 +61,7 @@ namespace GeneralTest
 			for (int func_id = 0; func_id < eqCnt; func_id++)
 			{
 				for (int pt_id = 0; pt_id < solution.size(); pt_id++)
-					result[func_id] = std::max<R>(result[func_id], std::abs<R>(reference[func_id](solution[pt_id][eqCnt]) - solution[pt_id][func_id]));
+					result[func_id] = std::max<R>(result[func_id], auxutils::Abs(reference[func_id](solution[pt_id][eqCnt]) - solution[pt_id][func_id]));
 			}
 
 			return result;
@@ -73,7 +80,7 @@ namespace GeneralTest
 			{
 				result[func_id] = std::accumulate(solution.begin(), solution.end(), R(0.0), [func_id, &reference](const R sum, const auto pt)
 					{
-						return std::abs<R>(reference[func_id](pt[eqCnt]) - pt[func_id]) + sum;
+						return auxutils::Abs(reference[func_id](pt[eqCnt]) - pt[func_id]) + sum;
 					});
 
 				result[func_id] /= solution.size();
@@ -87,7 +94,7 @@ namespace GeneralTest
 		/// </summary>
 		template <class R = double>
 		void perform_Troesch_test(const bool use_reparametrization, const bool use_inversion, const int discretization = 1000,
-			const simple_bvp<R, 2>& pr = bvp_sys_factory<R>::Troesch(3.0))
+			const simple_bvp<R, 2>& pr = bvp_sys_factory<R>::Troesch(3.0), const R& quadratic_convergence_tolerance = R(0.3))
 		{
 			const auto init_guess = GenerateInitialGuess<R, 3>(R(0.0), R(1.0), [](const auto& t)
 				{
@@ -103,13 +110,13 @@ namespace GeneralTest
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
 
-			CheckQuadraticConvergence(solver);
+			CheckQuadraticConvergence(solver, quadratic_convergence_tolerance);
 
-			const auto init_slope_diff = std::abs<R>(solution[0][1] - 0.25560421);
+			const auto init_slope_diff = auxutils::Abs(solution[0][1] - 0.25560421);
 			//check initial slope
 			Assert::IsTrue(init_slope_diff < 2 * step * step, L"Too big deviation from the referance initial slope value");
 
-			const auto final_slope_diff = std::abs<R>((*solution.rbegin())[1] - 4.266223);
+			const auto final_slope_diff =auxutils::Abs((*solution.rbegin())[1] - 4.266223);
 			//check final slope
 			Assert::IsTrue(final_slope_diff < 15 * step * step, L"Too big deviation from the referance final slope value");
 		}
@@ -121,7 +128,7 @@ namespace GeneralTest
 
 		TEST_METHOD(TroeschProblemReparamTest)
 		{
-			perform_Troesch_test(true, false);
+			perform_Troesch_test<number<cpp_dec_float<50>, et_off>>(true, true);
 		}
 
 		/// <summary>
@@ -129,7 +136,7 @@ namespace GeneralTest
 		/// </summary>
 		template <class R>
 		void perform_test(const simple_bvp<R, 2>& pr, const bool first_func_bc, const R tolerance_factor,
-			const int discretization = 100, const R t0 = R(0), const R t1 = R(3))
+			const int discretization = 100, const R t0 = R(0), const R t1 = R(3), const R& quadratic_convergence_tolerance = R(0.2))
 		{
 			const auto reference_solution = pr.get_solution();
 
@@ -155,7 +162,7 @@ namespace GeneralTest
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve decired precision");
 
-			CheckQuadraticConvergence(solver);
+			CheckQuadraticConvergence(solver, quadratic_convergence_tolerance);
 
 			const auto max_deviations = get_max_deviations(reference_solution, solution);
 
