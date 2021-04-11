@@ -14,6 +14,9 @@ namespace GeneralTest
 {
 	TEST_CLASS(TrapezoidalSolverTest)
 	{
+		/// <summary>
+		/// Method to generate initial guess for an iterative process of solving boundary value problem
+		/// </summary>
 		template <class R, int varCnt>
 		std::vector<mesh_point<R, varCnt>> GenerateInitialGuess(const R& t0, const R& t1, std::function<mesh_point<R, varCnt>(const R& t)> generator, const int intervalCnt)
 		{
@@ -26,6 +29,43 @@ namespace GeneralTest
 			return result;
 		}
 
+		/// <summary>
+		/// Returns randomly a value equals to either magnitude or -magnitude
+		/// </summary>
+		static double rand_perturbation(double magnitude)
+		{
+			return std::rand() % 2 == 0 ? magnitude : -magnitude;
+		}
+
+		/// <summary>
+		/// Introduces random perturbation into the given initial guess
+		/// </summary>
+		template <class R, int varCnt>
+		std::vector<mesh_point<R, varCnt>> perturbate(const std::vector<mesh_point<R, varCnt>>& init_guess, const R max_perturbation_magnitude, const bool first_func_bc)
+		{
+			std::srand(1);
+
+			std::vector<mesh_point<R, varCnt>> result = init_guess;
+
+			for (int pt_id = 1; pt_id < result.size() - 1; pt_id++)
+			{
+				result[pt_id][0] += R(rand_perturbation(max_perturbation_magnitude));
+				result[pt_id][1] += R(rand_perturbation(max_perturbation_magnitude));
+			}
+
+			if (first_func_bc)
+			{
+				result[0][1] += R(rand_perturbation(max_perturbation_magnitude));
+				result[result.size() - 1][1] += R(rand_perturbation(max_perturbation_magnitude));
+			}
+			else
+			{
+				result[0][0] += R(rand_perturbation(max_perturbation_magnitude));
+				result[result.size() - 1][0] += R(rand_perturbation(max_perturbation_magnitude));
+			}
+
+			return result;
+		}
 
 		/// <summary>
 		/// Method to check that the convergence rate of the iteration process is quadratic
@@ -37,7 +77,9 @@ namespace GeneralTest
 
 			std::vector<R> chosen_corrections;
 
-			for (int corr_id = corrections.size() - 2; corr_id >= 1 && !corrections[corr_id].RefinementApplied; corr_id--)
+			for (int corr_id = corrections.size() - 2; corr_id >= 1 &&
+				!corrections[corr_id].RefinementApplied &&
+				corrections[corr_id].CorrectionMagnitude < R(0.1); corr_id--)
 				chosen_corrections.insert(chosen_corrections.begin(), corrections[corr_id].CorrectionMagnitude);
 
 			Assert::IsTrue(chosen_corrections.size() >= 3, L"Too few corrections to detect quadratic convergence rate");
@@ -136,29 +178,30 @@ namespace GeneralTest
 		/// </summary>
 		template <class R>
 		void perform_test(const simple_bvp<R, 2>& pr, const bool first_func_bc, const R tolerance_factor,
-			const int discretization = 100, const R t0 = R(0), const R t1 = R(3), const R& quadratic_convergence_tolerance = R(0.2))
+			const bool use_reparametrization = false, const bool use_inversion = false,
+			const int discretization = 100, const R t0 = R(0), const R t1 = R(3), const R& quadratic_convergence_tolerance = R(0.5))
 		{
 			const auto reference_solution = pr.get_solution();
 
 			Assert::IsTrue(std::all_of(reference_solution.begin(), reference_solution.end(), [](const auto f) { return f != nullptr; }), L"Exact solution is unknown");
 
-			const auto init_guess = GenerateInitialGuess<double, 3>(t0, t1, [t0, t1, &reference_solution, first_func_bc](const auto& t)
+			auto init_guess = GenerateInitialGuess<double, 3>(t0, t1, [t0, t1, &reference_solution, first_func_bc](const auto& t)
 				{
-					return mesh_point<double, 3>{ 
-						first_func_bc*(reference_solution[0](t0) + (t - t0) * (reference_solution[0](t1) - reference_solution[0](t0)) / (t1 - t0)) + 2.0* !first_func_bc,
-						(!first_func_bc)* (reference_solution[1](t0) + (t - t0) * (reference_solution[1](t1) - reference_solution[1](t0)) / (t1 - t0)), t };
+					return mesh_point<double, 3>{reference_solution[0](t),	reference_solution[1](t), t};
 				}, discretization);
+
+			init_guess = perturbate(init_guess, 1.0, first_func_bc);
 
 			const auto init_guess_average_deviation = get_average_deviations(reference_solution, init_guess);
 
-			Assert::IsTrue(std::any_of(init_guess_average_deviation.begin(), init_guess_average_deviation.end(), [](const auto x) { return x > 0.6; }),
+			Assert::IsTrue(std::all_of(init_guess_average_deviation.begin(), init_guess_average_deviation.end(), [](const auto x) { return x > 0.9; }),
 				L"Unexpectedly low deviation for the initial guess");
 
 			const auto step = (t1 - t0) / discretization;
 
 			trapezoidal_solver<double> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, 1e-12, 0.01, false, false);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, 1e-14, step, use_reparametrization, use_inversion);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve decired precision");
 
@@ -176,12 +219,12 @@ namespace GeneralTest
 
 		TEST_METHOD(BVP_1_FirstFuncBCTest)
 		{
-			perform_test(bvp_sys_factory<double>::BVP_1(), true, 1e-1);
+			perform_test(bvp_sys_factory<double>::BVP_1(), true, 4.0);
 		}
 
 		TEST_METHOD(BVP_1_SecondFuncBCTest)
 		{
-			perform_test(bvp_sys_factory<double>::BVP_1(), false, 1e-1);
+			perform_test(bvp_sys_factory<double>::BVP_1(), false, 4.0);
 		}
 	};
 }
