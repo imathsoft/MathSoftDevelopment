@@ -72,6 +72,9 @@ struct mesh_point
 		return *this;
 	}
 
+	/// <summary>
+	/// Write to stream
+	/// </summary>
 	friend std::ostream& operator<<(std::ostream& os, const mesh_point<R, varCnt>& pt)
 	{
 		for (int varId = 0; varId < varCnt; varId++)

@@ -50,4 +50,21 @@ public:
 			{ [](const auto t) { return R(4) * Sin(t); },
 			  [](const auto t) { return R(4) * Cos(t); } });
 	}
+
+	/// <summary>
+	/// Test boundary value problem #1
+	/// Exact solution [t^{3}, t^{2} + 1]
+	/// </summary>
+	static simple_bvp<R, 2> BVP_2()
+	{
+		return simple_bvp<R, 2>(
+			{ {
+				[](const auto& args) { return R(3) * args[1] - R(3) + Sin(args[0] + args[1]) - Sin(args[2]* args[2] * (args[2]+ R(1)) + R(1)); },
+				[](const auto& args) { return R(2) * (args[0] + args[2]) / args[1] + Cos(args[0]/ args[1]) - Cos(args[2] * args[2] * args[2] /(args[2] * args[2] + R(1))); },
+			} },
+			{ {0, R(0) }, {1, R(1) } },
+			{ [](const auto t) { return t * t * t; },
+			  [](const auto t) { return t * t + R(1); } });
+	}
+
 };

@@ -32,7 +32,8 @@ namespace GeneralTest
 		/// <summary>
 		/// Returns randomly a value equals to either magnitude or -magnitude
 		/// </summary>
-		static double rand_perturbation(double magnitude)
+		template <class R>
+		static R rand_perturbation(const R& magnitude)
 		{
 			return std::rand() % 2 == 0 ? magnitude : -magnitude;
 		}
@@ -47,21 +48,28 @@ namespace GeneralTest
 
 			std::vector<mesh_point<R, varCnt>> result = init_guess;
 
-			for (int pt_id = 1; pt_id < result.size() - 1; pt_id++)
+			for (int pt_id = 0; pt_id < result.size(); pt_id++)
 			{
 				result[pt_id][0] += R(rand_perturbation(max_perturbation_magnitude));
 				result[pt_id][1] += R(rand_perturbation(max_perturbation_magnitude));
 			}
 
+			for (int iter = 0; iter < 5; iter++)
+				for (int pt_id = 1; pt_id < result.size() - 1; pt_id++)
+				{
+					result[pt_id][0] = (result[pt_id - 1][0] + result[pt_id][0] + result[pt_id + 1][0])/R(3);
+					result[pt_id][1] = (result[pt_id - 1][1] + result[pt_id][1] + result[pt_id + 1][1]) / R(3);
+				}
+
 			if (first_func_bc)
 			{
-				result[0][1] += R(rand_perturbation(max_perturbation_magnitude));
-				result[result.size() - 1][1] += R(rand_perturbation(max_perturbation_magnitude));
+				result[0][0] = init_guess[0][0];
+				result[result.size() - 1][0] = init_guess[result.size() - 1][0];
 			}
 			else
 			{
-				result[0][0] += R(rand_perturbation(max_perturbation_magnitude));
-				result[result.size() - 1][0] += R(rand_perturbation(max_perturbation_magnitude));
+				result[0][1] = init_guess[0][1];
+				result[result.size() - 1][1] = init_guess[result.size() - 1][1];
 			}
 
 			return result;
@@ -179,33 +187,51 @@ namespace GeneralTest
 		template <class R>
 		void perform_test(const simple_bvp<R, 2>& pr, const bool first_func_bc, const R tolerance_factor,
 			const bool use_reparametrization = false, const bool use_inversion = false,
-			const int discretization = 100, const R t0 = R(0), const R t1 = R(3), const R& quadratic_convergence_tolerance = R(0.5))
+			const int discretization = 100, const R t0 = R(0), const R t1 = R(3),
+			const R& quadratic_convergence_tolerance = R(0.5), const R& perturbationMagnitude = R(0.2))
 		{
 			const auto reference_solution = pr.get_solution();
 
 			Assert::IsTrue(std::all_of(reference_solution.begin(), reference_solution.end(), [](const auto f) { return f != nullptr; }), L"Exact solution is unknown");
 
-			auto init_guess = GenerateInitialGuess<double, 3>(t0, t1, [t0, t1, &reference_solution, first_func_bc](const auto& t)
+			const auto reference = GenerateInitialGuess<R, 3>(t0, t1, [t0, t1, &reference_solution, first_func_bc](const auto& t)
 				{
-					return mesh_point<double, 3>{reference_solution[0](t),	reference_solution[1](t), t};
+					return mesh_point<R, 3>{reference_solution[0](t),	reference_solution[1](t), t};
 				}, discretization);
 
-			init_guess = perturbate(init_guess, 1.0, first_func_bc);
+			const auto init_guess = perturbate(reference, perturbationMagnitude, first_func_bc);
 
 			const auto init_guess_average_deviation = get_average_deviations(reference_solution, init_guess);
 
-			Assert::IsTrue(std::all_of(init_guess_average_deviation.begin(), init_guess_average_deviation.end(), [](const auto x) { return x > 0.9; }),
+			Assert::IsTrue(std::all_of(init_guess_average_deviation.begin(), init_guess_average_deviation.end(),
+				[perturbationMagnitude](const auto x) { return x > perturbationMagnitude/R(4); }),
 				L"Unexpectedly low deviation for the initial guess");
 
 			const auto step = (t1 - t0) / discretization;
 
-			trapezoidal_solver<double> solver{};
+			trapezoidal_solver<R> solver{};
 
-			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} }, 1e-14, step, use_reparametrization, use_inversion);
+			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} },
+				100*std::numeric_limits<R>::epsilon(), step, use_reparametrization, use_inversion);
 
 			Assert::IsTrue(solver.success(), L"Failed to achieve decired precision");
 
+			const auto correction_magnitudes = solver.get_correcion_magnitudes();
+			Assert::IsTrue(use_reparametrization || std::all_of(correction_magnitudes.begin(), correction_magnitudes.end(),
+				[](const auto m) { return !m.RefinementApplied; }), L"Mesh refinement was applied unexpectedly");
+
 			CheckQuadraticConvergence(solver, quadratic_convergence_tolerance);
+
+			const auto diff = auxutils::Abs((*solution.rbegin())[1] - (*reference.rbegin())[1]);
+
+			if (first_func_bc)
+				Assert::IsTrue(auxutils::Abs(solution[0][0] - reference[0][0]) < 4e4 * std::numeric_limits<R>::epsilon() &&
+					auxutils::Abs((*solution.rbegin())[0] - (*reference.rbegin())[0]) < 4e4 * std::numeric_limits<R>::epsilon(),
+					L"The first function violates boundary conditions.");
+			else
+				Assert::IsTrue(auxutils::Abs(solution[0][1] - reference[0][1]) < 4e4 * std::numeric_limits<R>::epsilon() &&
+					auxutils::Abs((*solution.rbegin())[1] - (*reference.rbegin())[1]) < 4e4 * std::numeric_limits<R>::epsilon(),
+					L"The second function violates boundary conditions.");
 
 			const auto max_deviations = get_max_deviations(reference_solution, solution);
 
@@ -219,12 +245,52 @@ namespace GeneralTest
 
 		TEST_METHOD(BVP_1_FirstFuncBCTest)
 		{
-			perform_test(bvp_sys_factory<double>::BVP_1(), true, 4.0);
+			perform_test(bvp_sys_factory<double>::BVP_1(), true, 4.0, false, false, 100, 0.0, 3.0, 0.05, 1.0);
 		}
 
 		TEST_METHOD(BVP_1_SecondFuncBCTest)
 		{
-			perform_test(bvp_sys_factory<double>::BVP_1(), false, 4.0);
+			perform_test(bvp_sys_factory<double>::BVP_1(), false, 1.0, false, false, 100, 0.0, 3.0, 0.05, 1.0);
+		}
+
+		TEST_METHOD(BVP_2_ReparamAndInversionFirstFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.5, true, true, 100, -3, 3, 0.6, 0.2);
+		}
+
+		TEST_METHOD(BVP_2_ReparamAndInversionSecondFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, true, 100, -3, 3, 0.25, 0.2);
+		}
+
+		TEST_METHOD(BVP_2_ReparamOnlyFirtsFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.5, true, false, 100, -3, 3, 0.3, 0.2);
+		}
+
+		TEST_METHOD(BVP_2_ReparamOnlySecondFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, false, 100, -3, 3, 0.9, 0.2);
+		}
+
+		TEST_METHOD(BVP_2_InversionOnlyFirstFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 3.0, false, true, 300, -3, 3, 0.08, 0.2);
+		}
+
+		TEST_METHOD(BVP_2_InversionOnlySecondFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 3.1, false, true, 300, -3, 3, 0.08, 0.2);
+		}
+
+		TEST_METHOD(BVP_2_PureTrapezoidalFirstFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.25, false, false, 100, -3, 3, 0.35, 0.2);
+		}
+
+		TEST_METHOD(BVP_2_PureTrapezoidalSecondFuncBCTest)
+		{
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.25, false, false, 100, -3, 3, 0.35, 0.2);
 		}
 	};
 }
