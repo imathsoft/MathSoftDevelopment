@@ -3,7 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <fstream>
-#include "../FunctionApproximation/DerivativeEvaluator/Dual.h"
+#include "poly_function.h"
 
 
 /// <summary>
@@ -37,6 +37,22 @@ struct mesh_point
 	R max_abs() const
 	{
 		return auxutils::Abs(*std::max_element(pt.begin(), pt.end(), [](const auto& a, const auto& b) { return auxutils::Abs(a) < auxutils::Abs(b); }));
+	}
+
+	/// <summary>
+	/// Conditional version of the max abs function, where maximum is taken between the variables that correspond to "true" items in the given map
+	/// </summary>
+	R max_abs(const std::array<bool, varCnt>& map)
+	{
+		R result = -std::numeric_limits<R>::max();
+
+		for (int var_id = 0; var_id < varCnt; var_id++)
+		{
+			if (map[var_id])
+				result = std::max<R>(result, auxutils::Abs(pt[var_id]));
+		}
+
+		return result;
 	}
 
 	/// <summary>
@@ -120,18 +136,25 @@ mesh_point<R, varCnt> operator * (const R& lhs, mesh_point<R, varCnt> rhs)
 	return rhs *= lhs;
 }
 
-
 /// <summary>
-/// Dara structure to contain value of a scalar function together with its gradient at some point
+/// Value of a scalar function of multiple scalarar arguments
 /// </summary>
-template <class R, int varCnt>
-struct func_value_with_gradient
+template <class R>
+struct func_value
 {
 	/// <summary>
 	/// Value of the function at the current point
 	/// </summary>
 	R v;
+};
 
+
+/// <summary>
+/// Dara structure to contain value of a scalar function together with its gradient at some point
+/// </summary>
+template <class R, int varCnt>
+struct func_value_with_gradient : public func_value<R>
+{
 	/// <summary>
 	/// Gradient of the function at the current point
 	/// </summary>
@@ -209,24 +232,29 @@ private:
 	const static int varCnt = eqCnt + 1;
 
 	/// <summary>
-	/// The type for right hand side functions
-	/// </summary>
-	typedef std::function < dual<R, varCnt>(std::array<dual<R, varCnt>, varCnt >)> TFunc;
-
-	/// <summary>
 	/// Right hand side functions
 	/// </summary>
-	std::array<TFunc, eqCnt> rhs_functions;
+	std::array<poly_func<R, varCnt>, eqCnt> rhs_functions;
 
 public:
 
 	/// <summary>
+	/// A factory to produce the "poly-functions" 
+	/// </summary>
+	template <class F>
+	poly_func<R, varCnt> static create_func(const F& func)
+	{
+		return poly_func<R, varCnt>::create(func);
+	}
+
+	/// <summary>
 	/// Right hand side of the system ant its gradients evaluated at some point 
 	/// </summary>
-	struct eval_result
+	template <class V>
+	struct eval_result_base
 	{
 	private:
-		std::array<func_value_with_gradient<R, varCnt>, eqCnt> _values_and_gradients;
+		std::array<V, eqCnt> _values;
 
 	public:
 
@@ -238,19 +266,23 @@ public:
 		/// <summary>
 		/// Subscript operator
 		/// </summary>
-		func_value_with_gradient<R, varCnt>& operator[](const int i)
+		V& operator[](const int i)
 		{
-			return _values_and_gradients[i];
+			return _values[i];
 		}
 
 		/// <summary>
 		/// Subscript operator (const version)
 		/// </summary>
-		const func_value_with_gradient<R, varCnt>& operator[](const int i) const
+		const V& operator[](const int i) const
 		{
-			return _values_and_gradients[i];
+			return _values[i];
 		}
 	};
+
+	using eval_result = eval_result_base<func_value_with_gradient<R, varCnt>>;
+
+	using eval_result_minimal = eval_result_base<func_value<R>>;
 
 	/// <summary>
 	/// Returns number of variables involved (number of equations + 1)
@@ -264,22 +296,22 @@ public:
 	/// <summary>
 	/// Constructor
 	/// </summary>
-	ode_system(const std::array<TFunc, eqCnt>& functions) : rhs_functions{ functions }
+	ode_system(const std::array<poly_func<R, varCnt>, eqCnt>& functions) : rhs_functions{ functions }
 	{}
 
 	/// <summary>
 	/// Evaluates right hand side functions together with their gradient at the given set of arguments
 	/// </summary>
-	eval_result Evaluate(const mesh_point<R, varCnt>& pt) const
+	eval_result evaluate(const mesh_point<R, varCnt>& pt) const
 	{
 		std::array<dual<R, varCnt>, varCnt> arguments_dual;
 		std::array<R, varCnt> temp{};
 
 		for (int i = 0; i < varCnt; i++)
 		{
-			temp[i] = 1;
+			temp[i] = R(1);
 			arguments_dual[i] = dual<R, varCnt>(pt.pt[i], temp);
-			temp[i] = 0;
+			temp[i] = R(0);
 		}
 
 		eval_result result;
@@ -288,6 +320,20 @@ public:
 			const auto result_dual = rhs_functions[eq_id](arguments_dual);
 			result[eq_id] = { result_dual.Real(), result_dual.Dual() };
 		}
+
+		result.pt = pt;
+
+		return result;
+	}
+
+	/// <summary>
+	/// Evaluates right hand side functions together with their gradient at the given set of arguments
+	/// </summary>
+	eval_result_minimal evaluate_minimal(const mesh_point<R, varCnt>& pt) const
+	{
+		eval_result_minimal result;
+		for (int eq_id = 0; eq_id < eqCnt; eq_id++)
+			result[eq_id] = { rhs_functions[eq_id].get_func()(pt.pt) };
 
 		result.pt = pt;
 

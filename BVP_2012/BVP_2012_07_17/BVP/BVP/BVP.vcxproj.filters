@@ -66,6 +66,9 @@
     <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h">
       <Filter>Header Files\MultipleShooting</Filter>
     </ClCompile>
+    <ClCompile Include="Systems\poly_function.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Problems\TroeschProblem.h">

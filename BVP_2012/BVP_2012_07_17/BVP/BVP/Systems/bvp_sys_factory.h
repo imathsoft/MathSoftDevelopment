@@ -16,8 +16,8 @@ public:
 	{
 		return simple_bvp<R, 2>(
 			{ {
-				[](const auto& args) { return args[1]; }, // v_{0}^{'}(t) = v_{1}(t)
-				[lambda](const auto& args) { return lambda * Sinh(lambda * args[0]); }, // v_{1}^{'} = \lambda Sinh(lambda v_{0})
+				ode_system<R, 2>::create_func([](const auto& args) { return args[1]; }), // v_{0}^{'}(t) = v_{1}(t)
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return lambda * Sinh(lambda * args[0]); }), // v_{1}^{'} = \lambda Sinh(lambda v_{0})
 			} },
 			{ {0, 0}, {1, 1} });
 	}
@@ -29,8 +29,10 @@ public:
 	{
 		return simple_bvp<R, 2>(
 			{ {
-				[](const auto& args) { return R(1)/args[1]; }, // v_{0}^{'}(t) = 1/v_{1}(t)
-				[lambda](const auto& args) { return  - lambda * Sinh(lambda * args[0]) * args[1] * args[1]; }, // v_{1}^{'} = = \lambda Sinh(lambda v_{0}) * v_{1}^{2}
+				// v_{0}^{'}(t) = 1/v_{1}(t)
+				ode_system<R, 2>::create_func([](const auto& args) { return R(1)/args[1]; }),
+				// v_{1}^{'} = = \lambda Sinh(lambda v_{0}) * v_{1}^{2}
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return  - lambda * Sinh(lambda * args[0]) * args[1] * args[1]; }),
 			} },
 			{ {0, 0}, {1, 1} });
 	}
@@ -43,8 +45,8 @@ public:
 	{
 		return simple_bvp<R, 2>(
 			{ {
-				[](const auto& args) { return args[0]* args[1] + args[1] - R(16) * Cos(args[2])*Sin(args[2]); },
-				[](const auto& args) { return args[0] * args[0] + args[1] * args[1] + args[0] - R(16) - R(8) * Sin(args[2]); },
+				ode_system<R, 2>::create_func([](const auto& args) { return args[0]* args[1] + args[1] - R(16) * Cos(args[2])*Sin(args[2]); }),
+				ode_system<R, 2>::create_func([](const auto& args) { return args[0] * args[0] + args[1] * args[1] + args[0] - R(16) - R(8) * Sin(args[2]); }),
 			} },
 			{ {0, R(4) * Sin(R(0))}, {1, R(4) * Sin(R(1))} },
 			{ [](const auto t) { return R(4) * Sin(t); },
@@ -59,12 +61,41 @@ public:
 	{
 		return simple_bvp<R, 2>(
 			{ {
-				[](const auto& args) { return R(3) * args[1] - R(3) + Sin(args[0] + args[1]) - Sin(args[2]* args[2] * (args[2]+ R(1)) + R(1)); },
-				[](const auto& args) { return R(2) * (args[0] + args[2]) / args[1] + Cos(args[0]/ args[1]) - Cos(args[2] * args[2] * args[2] /(args[2] * args[2] + R(1))); },
+				ode_system<R, 2>::create_func([](const auto& args) { return R(3) * args[1] - R(3) + Sin(args[0] + args[1]) - Sin(args[2] * args[2] * (args[2] + R(1)) + R(1)); }),
+				ode_system<R, 2>::create_func([](const auto& args) { return R(2) * (args[0] + args[2]) / args[1] + Cos(args[0] / args[1]) - Cos(args[2] * args[2] * args[2] / (args[2] * args[2] + R(1))); }),
 			} },
 			{ {0, R(0) }, {1, R(1) } },
 			{ [](const auto t) { return t * t * t; },
 			  [](const auto t) { return t * t + R(1); } });
 	}
 
+	/// <summary>
+	/// Test boundary value problem bvp_t_30
+	/// </summary>
+	static simple_bvp<R, 2> BVP_T30(const R lambda)
+	{
+		return simple_bvp<R, 2>(
+			{ {
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return args[1]; }),
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return lambda * args[0] * (R(1) - args[1]); }),
+			} },
+			{ {0, -R(7)/R(6) }, {1, R(3)/R(2) } },
+			{ [](const auto t) { return std::numeric_limits<R>::quiet_NaN(); },
+			  [](const auto t) { return std::numeric_limits<R>::quiet_NaN(); } });
+	}
+
+	/// <summary>
+	/// Test boundary value problem bvp_t_30
+	/// </summary>
+	static simple_bvp<R, 2> BVP_T30_1(const R lambda)
+	{
+		return simple_bvp<R, 2>(
+			{ {
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return args[1]; }),
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return - lambda * (args[0] + args[2]) * args[1]; }),
+			} },
+			{ {0, -R(7) / R(6) }, {1, R(3) / R(2) - R(1) } },
+			{ [](const auto t) { return std::numeric_limits<R>::quiet_NaN(); },
+			  [](const auto t) { return std::numeric_limits<R>::quiet_NaN(); } });
+	}
 };

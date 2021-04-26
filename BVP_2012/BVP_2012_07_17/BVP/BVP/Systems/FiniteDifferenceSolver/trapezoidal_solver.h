@@ -329,7 +329,7 @@ class trapezoidal_solver
 
 		block_matrix result(init_guess.size() - 1);
 
-		auto res_prev = system.Evaluate(init_guess[0]);
+		auto res_prev = system.evaluate(init_guess[0]);
 		transformation_maker trans_marker_prev{ -1 };
 		for (auto pt_id = 0; pt_id < init_guess.size() - 1; pt_id++)
 		{
@@ -338,7 +338,7 @@ class trapezoidal_solver
 			if (trans_marker_prev.pivot_id < 0)
 				trans_marker_prev = trans_marker_next;
 
-			const auto res_next = system.Evaluate(init_guess[pt_id + 1]);
+			const auto res_next = system.evaluate(init_guess[pt_id + 1]);
 			const auto res_next_transformed = transform(res_next, trans_marker_next);
 
 			const auto independent_var_id_next = trans_marker_next.pivot_id;

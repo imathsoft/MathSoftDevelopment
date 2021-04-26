@@ -5,17 +5,17 @@
 /// A structure to represet an argument-value pair of a scalar function of scalar argument
 /// </summary>
 template <class R>
-struct func_value
+struct boundary_value
 {
 	/// <summary>
 	/// Function argument
 	/// </summary>
-	R x;
+	R t;
 
 	/// <summary>
 	/// Function value
 	/// </summary>
-	R v;
+	R u;
 };
 
 /// <summary>
@@ -27,12 +27,12 @@ struct bnd_cond_simple
 	/// <summary>
 	/// Boundary condition at the "left" argument point
 	/// </summary>
-	func_value<R> left;
+	boundary_value<R> left;
 
 	/// <summary>
 	/// Boundary condition ar the "right" argument point
 	/// </summary>
-	func_value<R> right;
+	boundary_value<R> right;
 };
 
 /// <summary>

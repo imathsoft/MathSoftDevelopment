@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h" />
+    <ClCompile Include="Systems\poly_function.h" />
     <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
