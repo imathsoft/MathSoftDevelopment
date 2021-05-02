@@ -117,18 +117,62 @@ class trapezoidal_solver
 	/// <summary>
 	/// A data struct to hold evaluation result transformed via a "pivot" transformation
 	/// </summary>
-	struct eval_result_transformed
+	template <class V>
+	struct eval_result_transformed_base
 	{
 		/// <summary>
 		/// Transformed result
 		/// </summary>
-		typename ode_system<R, eqCnt>::eval_result res{};
+		V res{};
 
 		/// <summary>
 		/// Marker defining a transformation
 		/// </summary>
 		transformation_maker trans_marker{};
+
+		/// <summary>
+		/// Returns values of the righ hand side vector together with the value of the independent variable used in the transformation
+		/// </summary>
+		mesh_point<R, eqCnt + 1> values_to_mesh_point() const
+		{
+			mesh_point<R, eqCnt + 1> result;
+
+			for (auto eq_id = 0; eq_id < eqCnt; eq_id++)
+				result[eq_id] = res[eq_id].v;
+
+			result[eqCnt] = res.pt[trans_marker.pivot_id];
+
+			return result;
+		}
 	};
+
+	using eval_result_transformed = eval_result_transformed_base<typename ode_system<R, eqCnt>::eval_result>;
+	using eval_result_transformed_minimal = eval_result_transformed_base<typename ode_system<R, eqCnt>::eval_result_minimal>;
+
+	/// <summary>
+	/// Applies intependent variable transformation to the given result of the right hand side avaluation according to the given index of independent variable
+	/// Affects only values of the right hand side fucntions and not their gradients 
+	/// </summary>
+	template <class V>
+	static typename ode_system<R, eqCnt>::eval_result_base<V> transform_independent_var_values_only(
+		const typename ode_system<R, eqCnt>::eval_result_base<V>& res, const int& independent_var_id)
+	{
+		auto result_transformed = res;
+
+		if (independent_var_id != eqCnt)
+		{
+			const auto denominator_inverted = R(1) / res[independent_var_id].v;
+			for (auto eq_id = 0; eq_id < eqCnt; eq_id++)
+			{
+				if (independent_var_id == eq_id)
+					result_transformed[eq_id].v = denominator_inverted;
+				else
+					result_transformed[eq_id].v *= denominator_inverted;
+			}
+		}
+
+		return result_transformed;
+	}
 
 	/// <summary>
 	/// Performs transformation by proper change of independent variable
@@ -167,6 +211,28 @@ class trapezoidal_solver
 		}
 
 		return res_transformed;
+	}
+
+	/// <summary>
+	/// Applies unknowns inversion transformation to the result of the right hand side evaluation according to the given inversion map
+	/// Affects only values of the right hand side fucntions and not their gradients
+	/// </summary>
+	template<class V>
+	static typename ode_system<R, eqCnt>::eval_result_base<V> invert_unknowns_values_only(const typename ode_system<R, eqCnt>::eval_result_base<V>& res,
+		std::array<bool, eqCnt> inversion_map)
+	{
+		auto result_transformed = res;
+
+		for (auto eq_id = 0; eq_id < eqCnt; eq_id++)
+		{
+			if (!inversion_map[eq_id])
+				continue;
+
+			const auto factor = R(-1) / (res.pt[eq_id] * res.pt[eq_id]);
+			result_transformed[eq_id].v *= factor;
+		}
+
+		return result_transformed;
 	}
 
 	/// <summary>
@@ -230,36 +296,86 @@ class trapezoidal_solver
 	}
 
 	/// <summary>
-	/// Performs transformation of the system evaluation result based on the transformation map and the value of the corresponding derivatives
-	/// Transformation map defines what unknownc can be chosen as "pivot" ones (to be swaped with the independent variable via inverting)
-	/// Returns intex of the chosen pivot variable
+	/// Restrictions which are to be teken into account when deciding about transformation to be applied
 	/// </summary>
-	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res,
-		const std::array<bool, eqCnt>& transform_map, const bool use_inversion, const R& derivative_threshold)
+	struct transform_restrictions
+	{
+		/// <summary>
+		/// A map defining what variables van be considered as independent when doing a transformation
+		/// </summary>
+		std::array<bool, eqCnt> transform_map{};
+
+		/// <summary>
+		/// A flag defining wheather to use inversion of unknowns or not
+		/// </summary>
+		bool use_inversion{};
+
+		/// <summary>
+		/// Derivative threshold using to make a decision about what variable should be treated as "inrependent"
+		/// </summary>
+		R derivative_threshold{};
+	};
+
+	/// <summary>
+	/// Returns transformations parameters, i.e. independent variable id and map of unknowns to be inverted
+	/// </summary>
+	template <class V>
+	static transformation_maker get_transform_marker(const typename ode_system<R, eqCnt>::eval_result_base<V>& res, const transform_restrictions& trans_restrict)
 	{
 		int independent_var_id = eqCnt;
 		std::array<bool, eqCnt> inversion_map{};
 		const auto& pt = res.pt;
 
-		R max_abs_val = derivative_threshold;
+		R max_abs_val = trans_restrict.derivative_threshold;
 
 		for (int var_id = 0; var_id < eqCnt; var_id++)
 		{
 			const auto trial_abs_val = auxutils::Abs(res[var_id].v);
 
-			if (trial_abs_val > max_abs_val && transform_map[var_id])//only variable that is "marked" in the transformation map can serve as "independent"
+			if (trial_abs_val > max_abs_val && trans_restrict.transform_map[var_id])//only variable that is "marked" in the transformation map can serve as "independent"
 			{
 				independent_var_id = var_id;
 				max_abs_val = trial_abs_val;
-			} else if (use_inversion && !transform_map[var_id] &&
-				trial_abs_val > derivative_threshold && (auxutils::Abs(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
-																						 //value of the corresponding variavle is less or equal to 1
+			}
+			else if (trans_restrict.use_inversion && !trans_restrict.transform_map[var_id] &&
+				(auxutils::Abs(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
+												   //value of the corresponding variavle is less or equal to 1
 			{
 				inversion_map[var_id] = true;
 			}
 		}
 
-		return transform(res, {independent_var_id, inversion_map});
+		return { independent_var_id, inversion_map };
+	}
+
+	/// <summary>
+	/// Performs transformation of the system evaluation result based on the transformation map and the value of the corresponding derivatives
+	/// Transformation map defines what unknownc can be chosen as "pivot" ones (to be swaped with the independent variable via inverting)
+	/// </summary>
+	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res,	const transform_restrictions& trans_restrict)
+	{
+		const auto trans_marker = get_transform_marker(res, trans_restrict);
+
+		return transform(res, trans_marker);
+	}
+
+	/// <summary>
+	/// Subroutine to perform transformation of a minimal result of evaluation (only values of right hand side functions)
+	/// </summary>
+	static eval_result_transformed_minimal transform_values_only(const typename ode_system<R, eqCnt>::eval_result_minimal& res, const transformation_maker& trans_marker)
+	{
+		const auto independent_var_transform_result = transform_independent_var_values_only(res, trans_marker.pivot_id);
+		const auto result_final = invert_unknowns_values_only(independent_var_transform_result, trans_marker.inversion_map);
+		return { result_final, trans_marker };
+	}
+
+	/// <summary>
+	/// Subroutine to perform transformation of a minimal result of evaluation (only values of right hand side functions)
+	/// </summary>
+	static eval_result_transformed_minimal transform_values_only(const typename ode_system<R, eqCnt>::eval_result_minimal& res, const transform_restrictions& trans_restrict)
+	{
+		const auto trans_marker = get_transform_marker(res, trans_restrict);
+		return transform_values_only(res, trans_marker);
 	}
 
 	/// <summary>
@@ -321,8 +437,9 @@ class trapezoidal_solver
 	/// where F(s) = 0 is the system of nonliner equations that we get applying the trapezoidal scheme to the given system of ODEs 
 	/// s_{i} is the "initial guess"
 	/// </summary>
-	static block_matrix construct_extended_gradient_matrix(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess,
-		const std::array<bool, eqCnt>& transform_map, const bool use_inversion, const R& derivative_threshold)
+	static block_matrix construct_extended_gradient_matrix(const sys& system,
+		const std::vector<mesh_point<R, eqCnt + 1>>& init_guess,
+		const transform_restrictions& trans_restrict)
 	{
 		if (init_guess.size() <= 1)
 			throw std::exception("Invalid input");
@@ -333,7 +450,7 @@ class trapezoidal_solver
 		transformation_maker trans_marker_prev{ -1 };
 		for (auto pt_id = 0; pt_id < init_guess.size() - 1; pt_id++)
 		{
-			const auto res_prev_transformed = transform(res_prev, transform_map, use_inversion, derivative_threshold);
+			const auto res_prev_transformed = transform(res_prev, trans_restrict);
 			const auto trans_marker_next = res_prev_transformed.trans_marker;
 			if (trans_marker_prev.pivot_id < 0)
 				trans_marker_prev = trans_marker_next;
@@ -524,10 +641,86 @@ class trapezoidal_solver
 	}
 
 	/// <summary>
+	/// Performs clean up and refinement of the solution
+	/// </summary>
+	static bool cleanup_and_refine_solution(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& solution,
+		const transform_restrictions& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold)
+	{
+		std::vector<mesh_point<R, eqCnt + 1>> solution_cleaned;
+		solution_cleaned.reserve(solution.size());
+
+		const auto& argument_min = solution[0][2];
+		const auto& argument_max = solution[solution.size() - 1][2];
+
+		bool refinement_applied = false;
+
+		solution_cleaned.push_back(solution[0]);
+
+		for (auto pt_id = 1; pt_id < solution.size(); pt_id++)
+		{
+			const auto prev_pt = *solution_cleaned.rbegin();
+
+			if (solution[pt_id][2] < argument_min || solution[pt_id][2] > argument_max || prev_pt[2] >= solution[pt_id][2])
+			{
+				refinement_applied = true;
+				continue;
+			}
+			else
+			{
+				solution_cleaned.push_back(solution[pt_id]);
+			}
+		}
+
+		solution.clear();
+		auto pt_prev = solution_cleaned[0];
+		auto eval_res_prev = system.evaluate_minimal(pt_prev);
+		solution.push_back(pt_prev);
+
+		const auto independent_var_scale_factor = second_deriv_threshold / desired_step_size;
+
+		for (auto pt_id = 1; pt_id < solution_cleaned.size(); pt_id++)
+		{
+			const auto pt_next = solution_cleaned[pt_id];
+			const auto eval_res_next = system.evaluate_minimal(pt_next);
+
+			const auto eval_res_transformed_prev = transform_values_only(eval_res_prev, trans_restrict);
+			const auto eval_res_transformed_next = transform_values_only(eval_res_next, eval_res_transformed_prev.trans_marker);
+
+			auto diff = (eval_res_transformed_prev.values_to_mesh_point() - eval_res_transformed_next.values_to_mesh_point());
+			diff[eqCnt] *= independent_var_scale_factor;
+			const auto actual_step = diff.max_abs();
+
+			if (actual_step < second_deriv_threshold * R(0.1))
+				continue; //the point is too close to the previous one, so that we can skip it
+
+			const int points_to_add = static_cast<int>(actual_step / second_deriv_threshold);
+
+			const auto h = R(1) / (points_to_add + 1);
+			const auto position_increment = (pt_next - pt_prev) * h;
+
+			auto temp = pt_prev;
+			for (int extra_pt_id = 0; extra_pt_id < points_to_add; extra_pt_id++)
+			{
+				temp += position_increment;
+				solution.push_back(temp);
+				refinement_applied = true;
+			}
+
+			solution.push_back(pt_next);
+
+			pt_prev = pt_next;
+			eval_res_prev = eval_res_next;
+		}
+
+		return refinement_applied;
+
+	}
+
+	/// <summary>
 	/// Applies correction to the given solution
 	/// Returns true if actual refinement was applied to the corrected solution
 	/// </summary>
-	static bool apply_correction_and_refine_solution(std::vector<mesh_point<R, eqCnt + 1>>& solution, const std::vector<correction>& correction, const R desired_step_size)
+	static bool apply_correction(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& solution, const std::vector<correction>& correction)
 	{
 		if (solution.size() != correction.size())
 			throw std::exception("Invalid input");
@@ -544,58 +737,6 @@ class trapezoidal_solver
 			}
 			solution[pt_id][eqCnt] -= correction[pt_id].point[eqCnt];
 		}
-
-		std::vector<mesh_point<R, eqCnt + 1>> solution_refined;
-		solution_refined.reserve(solution.size());
-
-		const auto& argument_min = solution[0][2];
-		const auto& argument_max = solution[solution.size() - 1][2];
-
-		bool refinement_applied = false;
-
-		solution_refined.push_back(solution[0]);
-
-		for (auto pt_id = 1; pt_id < solution.size(); pt_id++)
-		{
-			const auto prev_pt = *solution_refined.rbegin();
-
-			if (solution[pt_id][2] < argument_min || solution[pt_id][2] > argument_max || prev_pt[2] >= solution[pt_id][2])
-			{
-				refinement_applied = true;
-				continue;
-			}
-
-			const auto ind_var_id = correction[pt_id].trans_marker.pivot_id;
-			const auto actual_step = auxutils::Abs(prev_pt[ind_var_id] - solution[pt_id][ind_var_id]);
-			if (actual_step < R(2) * desired_step_size)
-			{
-				if (actual_step > R(0.1) * desired_step_size)
-					solution_refined.push_back(solution[pt_id]);
-				else
-					refinement_applied = true;
-
-				continue;
-			}
-
-			refinement_applied = true;
-
-			const int points_to_add = static_cast<int>(actual_step / desired_step_size);
-			const auto h = R(1) / (points_to_add + 1);
-			const auto position_increment = (solution[pt_id] - prev_pt)*h;
-
-			auto temp = prev_pt;
-			for (int extra_pt_id = 0; extra_pt_id < points_to_add; extra_pt_id++)
-			{
-				temp += position_increment;
-				solution_refined.push_back(temp);
-			}
-
-			solution_refined.push_back(solution[pt_id]);
-		}
-
-		solution = solution_refined;
-
-		return refinement_applied;
 	}
 
 public:
@@ -628,7 +769,8 @@ public:
 	/// The main solving method
 	/// </summary>
 	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm,
-		const R& precision, const R& desired_step, const bool use_reparametrization, const bool use_inversion, const R& derivative_threshold = R(1))
+		const R& precision, const R& desired_step, const bool use_reparametrization, const bool use_inversion, const R& derivative_threshold = R(1),
+		const R& second_deriv_refinement_threshold = R(20))
 	{
 		if (!bcm.is_valid())
 			throw std::exception("Invalid boundary condition marker");
@@ -639,6 +781,9 @@ public:
 			for (int var_id = 0; var_id < eqCnt; var_id++)
 				transform_map[var_id] = bcm.left_marker[var_id] && bcm.right_marker[var_id];
 
+
+		const transform_restrictions trans_restrict{ transform_map , use_inversion, derivative_threshold };
+
 		auto solution = init_guess;
 		correction_magnitudes.clear();
 
@@ -647,12 +792,15 @@ public:
 		int iter_count = 0;
 		while (correction_magnitude > precision && iter_count < max_iterations_count)
 		{
-			auto g_matrix = construct_extended_gradient_matrix(system, solution, transform_map, use_inversion, derivative_threshold);
+			auto g_matrix = construct_extended_gradient_matrix(system, solution, trans_restrict);
 			const auto correction = get_newton_correction(g_matrix, bcm);
 			correction_magnitude = std::max_element(correction.begin(), correction.end(),
 				[](const auto& a, const auto& b) { return a.magnitude() < b.magnitude(); })->magnitude();
 
-			const auto refinement_applied = apply_correction_and_refine_solution(solution, correction, desired_step);
+			apply_correction(system, solution, correction);
+
+			const auto refinement_applied = use_reparametrization ?
+				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step, second_deriv_refinement_threshold) : false;
 
 			correction_magnitudes.emplace_back( ConvergenceInfo<R>{ correction_magnitude, refinement_applied });
 

@@ -96,6 +96,9 @@ namespace GeneralTest
 
 			UnitTestAux::ApproximateParametersOfQuadraticallyDecayingSequence(chosen_corrections, M, q, max_rel_error);
 
+			Logger::WriteMessage((std::string("Actual divergnce of the convergence rate from the quadratic one is ") +
+				auxutils::ToString(max_rel_error) + "\n").c_str());
+
 			Assert::IsTrue(max_rel_error <= acceptable_approximation_error, L"Too high approximation error");
 		}
 
@@ -144,7 +147,7 @@ namespace GeneralTest
 		/// </summary>
 		template <class R = double>
 		void perform_Troesch_test(const bool use_reparametrization, const bool use_inversion, const int discretization = 1000,
-			const simple_bvp<R, 2>& pr = bvp_sys_factory<R>::Troesch(3.0), const R& quadratic_convergence_tolerance = R(0.3))
+			const simple_bvp<R, 2>& pr = bvp_sys_factory<R>::Troesch(3.0), const R& quadratic_convergence_tolerance = R(0.2))
 		{
 			const auto init_guess = GenerateInitialGuess<R, 3>(R(0.0), R(1.0), [](const auto& t)
 				{
@@ -255,27 +258,27 @@ namespace GeneralTest
 
 		TEST_METHOD(BVP_2_ReparamAndInversionFirstFuncBCTest)
 		{
-			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.5, true, true, 100, -3, 3, 0.6, 0.2);
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.55, true, true, 100, -3, 3, 0.64, 0.2);
 		}
 
 		TEST_METHOD(BVP_2_ReparamAndInversionSecondFuncBCTest)
 		{
-			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, true, 100, -3, 3, 0.25, 0.2);
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, true, 100, -3, 3, 0.46, 0.2);
 		}
 
 		TEST_METHOD(BVP_2_ReparamOnlyFirtsFuncBCTest)
 		{
-			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.5, true, false, 100, -3, 3, 0.3, 0.2);
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.5, true, false, 100, -3, 3, 0.03, 0.2);
 		}
 
 		TEST_METHOD(BVP_2_ReparamOnlySecondFuncBCTest)
 		{
-			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, false, 100, -3, 3, 0.9, 0.2);
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, false, 100, -3, 3, 1.4, 0.2);
 		}
 
 		TEST_METHOD(BVP_2_InversionOnlyFirstFuncBCTest)
 		{
-			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 3.0, false, true, 300, -3, 3, 0.08, 0.2);
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 3.0, false, true, 300, -3, 3, 0.09, 0.2);
 		}
 
 		TEST_METHOD(BVP_2_InversionOnlySecondFuncBCTest)
