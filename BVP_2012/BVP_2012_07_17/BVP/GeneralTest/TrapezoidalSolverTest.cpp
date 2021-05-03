@@ -295,5 +295,68 @@ namespace GeneralTest
 		{
 			perform_test<double>(bvp_sys_factory<double>::BVP_2(), true, 0.25, false, false, 100, -3, 3, 0.35, 0.2);
 		}
+
+		template <class R>
+		void perform_BVP_T30_1_test(const R lambda, const int discretization = 100,
+			const bool use_reparametrization = false, const bool use_inversion = false,
+			const R& derivative_threshold = R(1), const R& quadratic_convergence_tolerance = 1.75)
+		{
+			const auto pr = bvp_sys_factory<R>::BVP_T30_1(lambda);
+
+			const auto t0 = pr.get_bc().left.t;
+			const auto u0 = pr.get_bc().left.u;
+
+			const auto t1 = pr.get_bc().right.t;
+			const auto u1 = pr.get_bc().right.u;
+			const auto tangent = (u1 - u0) / (t1 - t0);
+
+			auto init_guess = GenerateInitialGuess<R, 3>(t0, t1, [u0, u1, t0, t1, tangent](const auto& t)
+				{
+					return mesh_point<R, 3>{ u0 + (t - t0) * (u1 - u0) / (t1 - t0), tangent, t };
+				}, discretization);
+
+			const auto step = R(1.0) / discretization;
+
+			const auto lambdas = std::vector<R>({R(2), R(5),  R(10), R(20), R(40), R(60), R(80), R(100), R(140),
+				R(180), R(200), R(220), R(260), R(300), R(350), R(400), R(450), R(500), R(550), R(600), R(700), R(800), R(900), R(1000)
+				, R(1100) , R(1200) , R(1300) , R(1400) , R(1500) , R(1600) , R(1700) , R(1800) , R(1900), R(2000)
+				, R(2100) , R(2200) , R(2300) , R(2400) , R(2500) , R(2600) , R(2700) , R(2800) , R(2900), R(3000) 
+				, R(3100) , R(3200) , R(3300) , R(3400) , R(3500) , R(3600) , R(3700) , R(3800) , R(3900), R(4000)
+				//, R(4100) , R(4200) , R(4300) , R(4400) , R(4500), R(4600) , R(4700) , R(4800) , R(4900), R(5000)
+				//, R(5100) , R(5200) , R(5300) , R(5400) , R(5500) , R(5600) , R(5700) , R(5800) , R(5900), R(6000) 
+				//, R(6100) , R(6200) , R(6300) , R(6400) , R(6500) , R(6600) , R(6700) , R(6800) , R(6900), R(7000) 
+				});
+
+			for (const auto l : lambdas)
+			{
+
+				trapezoidal_solver<R> solver{};
+
+				init_guess = solver.solve(bvp_sys_factory<R>::BVP_T30_1(l).get_system(), init_guess,
+					{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
+					step, use_reparametrization, use_inversion, derivative_threshold);
+
+				Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
+
+				Assert::IsTrue(auxutils::Abs((*init_guess.begin())[0] - u0) < std::numeric_limits<R>::epsilon(),
+					L"Too big deviation form the left boundary condition");
+				Assert::IsTrue(auxutils::Abs((*init_guess.rbegin())[0] - u1) < 300 * std::numeric_limits<R>::epsilon(),
+					L"Too big deviation form the right boundary condition");
+
+				Assert::IsTrue(l < 110 || auxutils::Abs((*init_guess.begin())[1]) < std::numeric_limits<R>::epsilon(),
+					L"Unexpected slope at the left boundary point");
+				Assert::IsTrue(l < 110 || auxutils::Abs((*init_guess.rbegin())[1]) < std::numeric_limits<R>::epsilon(),
+					L"Unexpected slope at the right boundary point");
+			}
+		}
+
+		TEST_METHOD(BVP_T30_1_Test)
+		{
+			//typedef number<cpp_dec_float<30>, et_off> R;
+			typedef double R;
+
+			perform_BVP_T30_1_test<R>(R(100.0), 100, true, true, R(1.0));
+		}
+
 	};
 }
