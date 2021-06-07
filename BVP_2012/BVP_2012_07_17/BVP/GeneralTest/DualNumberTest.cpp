@@ -117,7 +117,7 @@ namespace GeneralTest
 
 		TEST_METHOD(ExponentTest)
 		{
-			PerformTest<double>(exponent_func<double>, exponent_func<dual <double, 3>>, 2e-5);
+			PerformTest<double>(exponent_func<double>, exponent_func<dual <double, 3>>, 6e-5);
 		}
 
 		TEST_METHOD(SquareRootTest)

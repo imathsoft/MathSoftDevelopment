@@ -500,11 +500,6 @@ class trapezoidal_solver
 				}
 			}
 
-			const auto det = temp.Determinant();
-
-			if (auxutils::Abs(det) < 1e3 * std::numeric_limits<R>::epsilon())
-				throw std::exception("Singular block");
-
 			const auto temp_inverted = temp.Inverse();
 
 			current_stripe.m = -temp_inverted * current_stripe.m;//inverse sign so that now matrix "m" and vector "b" are on the "same side"
@@ -597,14 +592,7 @@ class trapezoidal_solver
 		if (col_id != eqCnt)//sanity check
 			throw std::exception("Something went wrong");
 
-		const auto det = temp.Determinant();
-
-		if (auxutils::Abs(det) < 100 * std::numeric_limits<R>::epsilon())
-			throw std::exception("Singular system");
-
-		const auto temp_inverted = temp.Inverse();
-
-		const auto solution = - temp_inverted * final_block.b;
+		const auto solution = - temp.Inverse() * final_block.b;
 
 		for (int i = 0; i < map.size(); i++)
 			*map[i] = solution[i][0];

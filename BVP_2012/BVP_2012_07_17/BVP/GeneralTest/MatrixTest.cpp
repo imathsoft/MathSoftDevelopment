@@ -157,12 +157,49 @@ namespace GeneralTest
 			Assert::IsTrue(MatricesAreEqual(i * m, m), L"Matrices are not equal");
 		}
 
-		TEST_METHOD(InverseMatrixTest)
+		/// <summary>
+		/// Generic method to run "standard" test of the matrix inversion functionality
+		/// </summary>
+		template<int Dim>
+		void RunStandardInverseMatrixTest()
 		{
-			const auto m = Matrix<double, 2, 2>::Random() + Matrix<double, 2, 2>::Identity();
+			const auto m = Matrix<double, Dim, Dim>::Random() + Matrix<double, Dim, Dim>::Identity();
 
-			Assert::IsTrue(MatricesAreEqual(Matrix<double, 2, 2>::Identity(), m * m.Inverse()), L"Matrices are not equal");
-			Assert::IsTrue(MatricesAreEqual(Matrix<double, 2, 2>::Identity(), m.Inverse() * m), L"Matrices are not equal");
+			const auto  m_inverse = m.Inverse();
+
+			Assert::IsTrue(MatricesAreEqual(Matrix<double, Dim, Dim>::Identity(), m * m_inverse), L"Matrices are not equal");
+			Assert::IsTrue(MatricesAreEqual(Matrix<double, Dim, Dim>::Identity(), m_inverse * m), L"Matrices are not equal");
+		}
+
+		TEST_METHOD(InverseMatrix1x1Test)
+		{
+			RunStandardInverseMatrixTest<1>();
+		}
+
+		TEST_METHOD(InverseMatrix2x2Test)
+		{
+			RunStandardInverseMatrixTest<2>();
+		}
+
+		TEST_METHOD(Inverse_general_test)
+		{
+			auto m = Matrix<double, ColDim, ColDim>::Random();
+
+			//make sure that the random matrix is nonsingular
+			//by adding ones. On purpose we do that not to the main diagonal,
+			//to exercise the row swapping inside the generic inversion implementation
+			for (int row_id = 0; row_id < ColDim; row_id++)
+			{
+				const auto col_id = ColDim - 1 - row_id;
+				m[row_id][col_id] += 1.0;
+			}
+
+			const auto  inv = m.Inverse();
+			const auto check_diff = (inv * m - Matrix<double, ColDim, ColDim>::Identity()).Norm();
+
+			Logger::WriteMessage((std::string("check_diff = ") + auxutils::ToString(check_diff)).c_str());
+
+			Assert::IsTrue(check_diff < 10 * std::numeric_limits<double>::epsilon(), L"Too high deviation");
 		}
 
 		TEST_METHOD(UnaryMinusOperatorTest)

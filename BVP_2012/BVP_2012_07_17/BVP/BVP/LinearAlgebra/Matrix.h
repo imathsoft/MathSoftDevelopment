@@ -2,6 +2,7 @@
 #include <array>
 #include <stdlib.h>
 #include <time.h>
+#include <limits>
 #include "../Utils/AuxUtils.h"
 
 namespace LinAlg
@@ -15,6 +16,17 @@ namespace LinAlg
 		static_assert(RowDim > 0 && ColDim > 0, "Invalid matrix dimensions");
 	private:
 		std::array<std::array<R, ColDim>, RowDim> data{};
+		std::array<int, RowDim> row_map{};
+
+		/// <summary>
+		/// Initializes row map
+		/// </summary>
+		void initialize_row_map()
+		{
+			for (int row_id = 0; row_id < RowDim; row_id++)
+				row_map[row_id] = row_id;
+		}
+
 	public:
 
 		/// <summary>
@@ -22,19 +34,24 @@ namespace LinAlg
 		/// </summary>
 		/// <param name="d"></param>
 		Matrix(const std::array<std::array<R, ColDim>, RowDim>& d) : data{d}
-		{}
+		{
+			initialize_row_map();
+		}
 
 		/// <summary>
 		/// Default constructor
 		/// </summary>
-		Matrix() = default;
+		Matrix()
+		{
+			initialize_row_map();
+		}
 
 		/// <summary>
 		/// Sub-script operator
 		/// </summary>
 		std::array<R, ColDim>& operator [](const int i)
 		{
-			return data[i];
+			return data[row_map[i]];
 		}
 
 		/// <summary>
@@ -42,8 +59,49 @@ namespace LinAlg
 		/// </summary>
 		const std::array<R, ColDim>& operator [](const int i) const
 		{
-			return data[i];
+			return data[row_map[i]];
 		}
+
+		/// <summary>
+		/// Swap rows with the given indices
+		/// It is responsibility of the caller to ensure that the indices are within the acceptable range
+		/// </summary>
+		void swap_rows(const int row_id_0, const int row_id_1)
+		{
+			const auto temp = row_map[row_id_0];
+			row_map[row_id_0] = row_map[row_id_1];
+			row_map[row_id_1] = temp;
+		}
+
+		/// <summary>
+		/// Multiplies the row with index `row_to_add_id` by the given factor and adds it to the row with index `row_to_add_to_id`
+		/// It is responsibility of the caller to ensure that the indices are within the acceptable range
+		/// </summary>
+		void add_rows(const int row_to_add_id, const int row_to_add_to_id, const R& factor)
+		{
+			const auto& row_to_add = (*this)[row_to_add_id];
+			auto& row_to_add_to = (*this)[row_to_add_to_id];
+			for (int col_id = 0; col_id < ColDim; col_id++)
+				row_to_add_to[col_id] += row_to_add[col_id] * factor;
+		}
+
+		/// <summary>
+		/// Multiplies given row by the given factor
+		/// </summary>
+		void multiply_row(const int row_id, const R& factor)
+		{
+			auto& row = (*this)[row_id];
+
+			for (int col_id = 0; col_id < ColDim; col_id++)
+				row[col_id] *= factor;
+		}
+
+		/// <summary>
+		/// Tries to calculate inverse matrix for the current one
+		/// throws an exception if the current matrix is not invertable
+		/// Can be calle on square matrices only
+		/// </summary>
+		Matrix<R, RowDim, ColDim> Inverse() const;
 
 		/// <summary>
 		/// += operator
@@ -52,7 +110,7 @@ namespace LinAlg
 		{
 			for (int i = 0; i < RowDim; i++)
 				for (int j = 0; j < ColDim; j++)
-					data[i][j] += rhs.data[i][j];
+					(*this)[i][j] += rhs[i][j];
 
 			return *this;
 		}
@@ -64,7 +122,7 @@ namespace LinAlg
 		{
 			for (int i = 0; i < RowDim; i++)
 				for (int j = 0; j < ColDim; j++)
-					data[i][j] -= rhs.data[i][j];
+					(*this)[i][j] -= rhs[i][j];
 
 			return *this;
 		}
@@ -76,7 +134,7 @@ namespace LinAlg
 		{
 			for (int i = 0; i < RowDim; i++)
 				for (int j = 0; j < ColDim; j++)
-					data[i][j] *= rhs;
+					(*this)[i][j] *= rhs;
 
 			return *this;
 		}
@@ -90,34 +148,6 @@ namespace LinAlg
 		}
 
 		/// <summary>
-		/// Returns determinant of the matrix
-		/// </summary>
-		R Determinant() const
-		{
-			static_assert(RowDim == ColDim && RowDim == 2, "Only 2x2 matrices are supported");
-			return data[0][0] * data[1][1] - data[1][0] * data[0][1];
-		}
-
-		/// <summary>
-		/// Returns inverse matrix
-		/// </summary>
-		Matrix<R, RowDim, ColDim> Inverse() const
-		{
-			static_assert(RowDim == ColDim && RowDim == 2, "Only 2x2 matrices are supported");
-
-			const auto one_over_determinant = R(1) / Determinant();
-
-			Matrix<R, RowDim, ColDim> result;
-
-			result[0][0] =  one_over_determinant * data[1][1];
-			result[0][1] = -one_over_determinant * data[0][1];
-			result[1][0] = -one_over_determinant * data[1][0];
-			result[1][1] =  one_over_determinant * data[0][0];
-
-			return result;
-		}
-
-		/// <summary>
 		/// Returns transposed matrix
 		/// </summary>
 		Matrix<R, ColDim, RowDim> Transpose() const
@@ -126,7 +156,7 @@ namespace LinAlg
 
 			for (int i = 0; i < RowDim; i++)
 				for (int j = 0; j < ColDim; j++)
-					result[j][i] = data[i][j];
+					result[j][i] = (*this)[i][j];
 
 			return result;
 		}
@@ -162,7 +192,7 @@ namespace LinAlg
 
 			for (int i = 0; i < RowDim; i++)
 				for (int j = 0; j < ColDim; j++)
-					norm += data[i][j] * data[i][j];
+					norm += (*this)[i][j] * (*this)[i][j];
 
 			return auxutils::Sqrt(norm);
 
@@ -265,4 +295,133 @@ namespace LinAlg
 
 		return m;
 	}
+
+	/// <summary>
+	/// Returns matrix inverse for the given one
+	/// Or throws exception if the argyument matix is not invertible 
+	/// </summary>
+	template <class R, int Dim>
+	Matrix<R, Dim, Dim> inverse(const Matrix<R, Dim, Dim>& m)
+	{
+		static_assert(Dim != 1 && Dim != 2, "More efficient implementation must be considered");
+
+		static const R EPSILON_WEAK = 100 * std::numeric_limits<R>::epsilon();
+
+		Matrix<R, Dim, Dim> result{};
+
+		auto temp = m;
+		result = Matrix<R, Dim, Dim>::Identity();
+
+		for (int col_id = 0; col_id < Dim - 1; col_id++)
+		{
+			int best_row_id = col_id;
+			auto best_element_abs = auxutils::Abs(temp[col_id][col_id]);
+			//in the given column we search for the biggest element below the diagonal
+			for (int row_id = col_id + 1; row_id < Dim; row_id++)
+			{
+				const auto candidate_abs = auxutils::Abs(temp[row_id][col_id]);
+				if (candidate_abs > best_element_abs)
+				{
+					best_row_id = row_id;
+					best_element_abs = candidate_abs;
+				}
+			}
+
+			if (best_row_id != col_id)
+			{
+				temp.swap_rows(best_row_id, col_id);
+				result.swap_rows(best_row_id, col_id);
+			}
+
+			if (best_element_abs < EPSILON_WEAK)
+				continue;
+
+			const auto diagonal_element_inverted = R(1) / temp[col_id][col_id];
+			for (int row_id = col_id + 1; row_id < Dim; row_id++)
+			{
+				const auto factor = -temp[row_id][col_id] * diagonal_element_inverted;
+				temp.add_rows(col_id, row_id, factor);
+				result.add_rows(col_id, row_id, factor);
+			}
+		}
+
+		for (int i = 0; i < Dim; i++)
+			if (auxutils::Abs(temp[i][i]) < EPSILON_WEAK)
+				throw std::exception("Singular matrix");
+
+		for (int col_id = 0; col_id < Dim; col_id++)
+		{
+			const auto factor = R(1) / temp[col_id][col_id];
+			temp.multiply_row(col_id, factor);
+			result.multiply_row(col_id, factor);
+
+			for (int row_id = col_id - 1; row_id >= 0; row_id--)
+			{
+				const auto factor = -temp[row_id][col_id];
+				temp.add_rows(col_id, row_id, factor);
+				result.add_rows(col_id, row_id, factor);
+			}
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Returns matrix inverse for the given one
+	/// Or throws exception if the argyument matix is not invertible 
+	/// Partial specialization for the case of matrices 2x2
+	/// </summary>
+	template <class R>
+	Matrix<R, 2, 2> inverse(const Matrix<R, 2, 2>& m)
+	{
+		static const R EPSILON_WEAK = 100 * std::numeric_limits<R>::epsilon();
+
+		Matrix<R, 2, 2> result{};
+
+		const auto det = m[0][0] * m[1][1] - m[1][0] * m[0][1];
+
+		if (auxutils::Abs(det) < EPSILON_WEAK)
+			throw std::exception("Singular matrix");
+
+		const auto one_over_determinant = R(1) / det;
+
+		result[0][0] = one_over_determinant * m[1][1];
+		result[0][1] = -one_over_determinant * m[0][1];
+		result[1][0] = -one_over_determinant * m[1][0];
+		result[1][1] = one_over_determinant * m[0][0];
+
+		return result;
+	}
+
+	/// <summary>
+	/// Returns matrix inverse for the given one
+	/// Or throws exception if the argyument matix is not invertible 
+	/// Partial specialization for the case of matrices 1x1
+	/// </summary>
+	template <class R>
+	Matrix<R, 1, 1> inverse(const Matrix<R, 1, 1>& m)
+	{
+		static const R EPSILON_WEAK = 100 * std::numeric_limits<R>::epsilon();
+
+		Matrix<R, 1, 1> result{};
+
+		if (auxutils::Abs(m[0][0]) < EPSILON_WEAK)
+			throw std::exception("Singular matrix");
+
+		result[0][0] = R(1)/ m[0][0];
+
+		return result;
+	}
+
+	/// <summary>
+	/// Tries to calculate inverse matrix for the current one
+	/// throws an exception if the current matrix is not invertable
+	/// Can be calle on square matrices only
+	/// </summary>
+	template <class R, int RowDim, int ColDim>
+	Matrix<R, RowDim, ColDim> Matrix<R, RowDim, ColDim>::Inverse() const
+	{
+		return inverse(*this);
+	}
+
 }
