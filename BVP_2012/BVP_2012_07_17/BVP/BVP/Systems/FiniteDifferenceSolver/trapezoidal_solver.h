@@ -62,6 +62,9 @@ struct ConvergenceInfo
 template <class R, int eqCnt = 2>
 class trapezoidal_solver
 {
+	//TODO: it seems that now when `Matrix` class got general implementation of the matrix inversion functionality,
+	//this limitation on the number of equations (`eqCnt == 2`) can be finally removed.
+	//Of course, this requires proper coverage of automated tests
 	static_assert(eqCnt == 2, "Does not support other number of equaions");
 
 	typedef ode_system<R, eqCnt> sys;
@@ -637,8 +640,8 @@ class trapezoidal_solver
 		std::vector<mesh_point<R, eqCnt + 1>> solution_cleaned;
 		solution_cleaned.reserve(solution.size());
 
-		const auto& argument_min = solution[0][2];
-		const auto& argument_max = solution[solution.size() - 1][2];
+		const auto& argument_min = solution[0][eqCnt];
+		const auto& argument_max = solution[solution.size() - 1][eqCnt];
 
 		bool refinement_applied = false;
 
@@ -648,7 +651,7 @@ class trapezoidal_solver
 		{
 			const auto prev_pt = *solution_cleaned.rbegin();
 
-			if (solution[pt_id][2] < argument_min || solution[pt_id][2] > argument_max || prev_pt[2] >= solution[pt_id][2])
+			if (solution[pt_id][eqCnt] < argument_min || solution[pt_id][eqCnt] > argument_max || prev_pt[eqCnt] >= solution[pt_id][eqCnt])
 			{
 				refinement_applied = true;
 				continue;
