@@ -7,9 +7,18 @@
 #include "../BVP/FunctionApproximation/InitialCondition.h"
 #include "../BVP/Problems/ProblemAbstract.h"
 #include "../BVP/LinearAlgebra/Matrix.h"
+#include <stdlib.h>
 
 namespace UnitTestAux
 {
+	/// <summary>
+	/// Returns pseudorandom double from [0, 1]
+	/// </summary>
+	inline double Random()
+	{
+		return (double)std::rand() / RAND_MAX;
+	}
+
 	template <class T>
 	bool CheckQuadraticConvergenceOfNewtonMethd(const std::vector<T>& successiveCorrections)
 	{

@@ -199,7 +199,7 @@ namespace GeneralTest
 
 			Logger::WriteMessage((std::string("check_diff = ") + auxutils::ToString(check_diff)).c_str());
 
-			Assert::IsTrue(check_diff < 10 * std::numeric_limits<double>::epsilon(), L"Too high deviation");
+			Assert::IsTrue(check_diff < 50 * std::numeric_limits<double>::epsilon(), L"Too high deviation");
 		}
 
 		TEST_METHOD(UnaryMinusOperatorTest)

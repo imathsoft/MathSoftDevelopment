@@ -263,7 +263,7 @@ namespace GeneralTest
 
 		TEST_METHOD(BVP_2_ReparamAndInversionSecondFuncBCTest)
 		{
-			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, true, 100, -3, 3, 0.46, 0.2);
+			perform_test<double>(bvp_sys_factory<double>::BVP_2(), false, 0.5, true, true, 100, -3, 3, 0.48, 0.2);
 		}
 
 		TEST_METHOD(BVP_2_ReparamOnlyFirtsFuncBCTest)
@@ -329,17 +329,24 @@ namespace GeneralTest
 
 			for (const auto l : lambdas)
 			{
-
 				trapezoidal_solver<R> solver{};
 
 				init_guess = solver.solve(bvp_sys_factory<R>::BVP_T30_1(l).get_system(), init_guess,
 					{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
-					step, use_reparametrization, use_inversion, derivative_threshold);
+					step, use_reparametrization, use_inversion, derivative_threshold, R(20), 
+					std::nullopt, //"swap" map
+					std::array<bool, 2>{false, true} //"flip" map
+				);
 
 				Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
 
+				const auto diff_left = auxutils::Abs((*init_guess.begin())[0] - u0);
+				Logger::WriteMessage((std::string("diff_left =") + auxutils::ToString(diff_left) + std::string("\n")).c_str());
 				Assert::IsTrue(auxutils::Abs((*init_guess.begin())[0] - u0) < std::numeric_limits<R>::epsilon(),
 					L"Too big deviation form the left boundary condition");
+
+				const auto diff_right = auxutils::Abs((*init_guess.rbegin())[0] - u1);
+				Logger::WriteMessage((std::string("diff_right =") + auxutils::ToString(diff_right) + std::string("\n")).c_str());
 				Assert::IsTrue(auxutils::Abs((*init_guess.rbegin())[0] - u1) < 300 * std::numeric_limits<R>::epsilon(),
 					L"Too big deviation form the right boundary condition");
 

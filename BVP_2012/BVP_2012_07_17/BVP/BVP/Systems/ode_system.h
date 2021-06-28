@@ -89,17 +89,41 @@ struct mesh_point
 	}
 
 	/// <summary>
-	/// Write to stream
+	/// Write to stream (in binary format)
 	/// </summary>
 	friend std::ostream& operator<<(std::ostream& os, const mesh_point<R, varCnt>& pt)
 	{
 		for (int varId = 0; varId < varCnt; varId++)
-			os << pt[varId] << " ";
+			os.write((char*)&pt[varId], sizeof(R));
 
 		return os;
 	}
+
+	//Read from stream (in binary format)
+	friend std::istream& operator>>(std::istream& is, mesh_point<R, varCnt>& pt)
+	{
+		for (int varId = 0; varId < varCnt; varId++)
+			is.read((char*)&pt[varId], sizeof(R));
+
+		return is;
+	}
+
+	/// <summary>
+	/// Returns string representation of the current instance
+	/// </summary>
+	std::string to_string() const
+	{
+		std::string result;
+		for (int varId = 0; varId < varCnt; varId++)
+			result += auxutils::to_string_with_precision(pt[varId]) + " ";
+
+		return result;
+	}
 };
 
+/// <summary>
+/// Saves mesh points in text format
+/// </summary>
 template <class R, int Dim >
 void SaveMeshPoints(const std::vector<mesh_point<R, Dim>>& pts, const char* filename)
 {
@@ -107,7 +131,7 @@ void SaveMeshPoints(const std::vector<mesh_point<R, Dim>>& pts, const char* file
 	file.precision(std::numeric_limits<R>::digits10);
 	file.open(filename);
 	for (int ptId = 0; ptId < pts.size(); ptId++)
-		file << ptId << " " << pts[ptId] << std::endl;
+		file << ptId << " " << pts[ptId].to_string() << std::endl;
 
 	file.close();
 }

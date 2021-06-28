@@ -83,6 +83,20 @@ class trapezoidal_solver
 		/// The map defining which unknowns have been inverted during the transformation
 		/// </summary>
 		std::array<bool, eqCnt> inversion_map{};
+
+		/// <summary>
+		/// Returns string representation of the current instance
+		/// </summary>
+		std::string to_string() const
+		{
+			std::string result;
+			result += std::to_string(pivot_id) + " ";
+
+			for (int eq_id = 0; eq_id < eqCnt; eq_id++)
+				result += std::string(inversion_map[eq_id] ? "True" : "False") + " ";
+
+			return result;
+		}
 	};
 
 	/// <summary>
@@ -116,6 +130,25 @@ class trapezoidal_solver
 	/// Field to store "status" of the previous call of the "solve" method
 	/// </summary>
 	bool succeeded{true};
+
+	/// <summary>
+	/// Logs the transformation-related data to the fiven file on disk
+	/// </summary>
+	static void LogTransformationStrategy(const block_matrix& matrix, const char* filename)
+	{
+		std::ofstream file(filename);
+		for (const auto& block : matrix)
+		{
+			file << block.trans_marker.pivot_id << " ";
+
+			for (int eq_id = 0; eq_id < eqCnt; eq_id++)
+				file << std::to_string(block.trans_marker.inversion_map[eq_id]) << " ";
+
+			file << std::endl;
+		}
+
+		file.close();
+	}
 
 	/// <summary>
 	/// A data struct to hold evaluation result transformed via a "pivot" transformation
@@ -304,14 +337,14 @@ class trapezoidal_solver
 	struct transform_restrictions
 	{
 		/// <summary>
-		/// A map defining what variables van be considered as independent when doing a transformation
+		/// A map defining what variables can be considered as independent when doing a transformation (i.e., "swap" transformations)
 		/// </summary>
-		std::array<bool, eqCnt> transform_map{};
+		std::array<bool, eqCnt> swap_map{};
 
 		/// <summary>
-		/// A flag defining wheather to use inversion of unknowns or not
+		/// A map defining what variables can be inverted ("flipped")
 		/// </summary>
-		bool use_inversion{};
+		std::array<bool, eqCnt> flip_map {};
 
 		/// <summary>
 		/// Derivative threshold using to make a decision about what variable should be treated as "inrependent"
@@ -335,13 +368,13 @@ class trapezoidal_solver
 		{
 			const auto trial_abs_val = auxutils::Abs(res[var_id].v);
 
-			if (trial_abs_val > max_abs_val && trans_restrict.transform_map[var_id])//only variable that is "marked" in the transformation map can serve as "independent"
+			if (trial_abs_val > max_abs_val && trans_restrict.swap_map[var_id])//only variable that is "marked" in the "flip" map can serve as "independent"
 			{
 				independent_var_id = var_id;
 				max_abs_val = trial_abs_val;
 			}
-			else if (trans_restrict.use_inversion && !trans_restrict.transform_map[var_id] &&
-				(auxutils::Abs(pt[var_id]) > R(1)))//there is no point in applying inversion if the absolute
+			else if (trans_restrict.flip_map[var_id] &&
+				(auxutils::Abs(pt[var_id]) > R(1)))//there is no point in applying inversion ("flip" transformation) if the absolute
 												   //value of the corresponding variavle is less or equal to 1
 			{
 				inversion_map[var_id] = true;
@@ -402,28 +435,28 @@ class trapezoidal_solver
 	}
 
 	/// <summary>
-	/// Calculates "agreement factor" that is aimed to handle the "transition" situatuion, when inversion transformation is applied on the current interval
+	/// Calculates "agreement factor" that is aimed to handle the "transition" situatuion, when inversion ("flip") transformation is applied on the current interval
 	/// but was not applied on the previous interval (or vise versa). This transitions state requires us to still work with not transformed variable 
 	/// despite of the fact that equations that we built correspond to the transformed one.
 	/// In the other words, we have calculated partial derivative that corresponds to the transformed variable `w = 1/v`, however we need to have 
 	/// the partial derivative with respect to `v`. This can be handled by multiplying the partial derivative with respect to `w` by `-1/v^2`.
 	/// The latter is actually the "agreement" factor that the function calculates with respect to each unknown
 	/// </summary>
-	static std::array<R, eqCnt> calc_inversion_agreement_factor(const std::array<bool, eqCnt>& inversion_map_prev,
-		const std::array<bool, eqCnt>& inversion_map_next,
+	static std::array<R, eqCnt> calc_inversion_agreement_factor(const int pivot_id_prev, const std::array<bool, eqCnt>& flip_map_prev,
+		const std::array<bool, eqCnt>& flip_map_next,
 		const mesh_point<R, eqCnt + 1>& current_pt)
 	{
 		std::array<R, eqCnt> result{};
 
 		for (int unknown_id = 0; unknown_id < eqCnt; unknown_id++)
 		{
-			if (inversion_map_prev[unknown_id] == inversion_map_next[unknown_id])
+			if (unknown_id == pivot_id_prev || flip_map_prev[unknown_id] == flip_map_next[unknown_id])
 			{
 				result[unknown_id] = R(1);
 				continue;
 			}
 
-			if (inversion_map_prev[unknown_id])
+			if (flip_map_prev[unknown_id])
 				result[unknown_id] = -current_pt[unknown_id] * current_pt[unknown_id];
 			else {
 				const auto temp = R(1) / current_pt[unknown_id];
@@ -471,7 +504,7 @@ class trapezoidal_solver
 			const auto one_over_h = R(1) / pt_diff.pt[independent_var_id_next];
 			const auto divided_diff = one_over_h * pt_diff;
 
-			const auto agreement_factor = calc_inversion_agreement_factor(inversion_map_prev, inversion_map_next, init_guess[pt_id]);
+			const auto agreement_factor = calc_inversion_agreement_factor(independent_var_id_prev, inversion_map_prev, inversion_map_next, init_guess[pt_id]);
 
 			auto& current_stripe = result[pt_id];
 			current_stripe.trans_marker = trans_marker_next;
@@ -499,7 +532,7 @@ class trapezoidal_solver
 				for (int row_id = 0; row_id < eqCnt; row_id++)
 				{
 					const int actual_var_id = row_id != independent_var_id_next ? row_id : eqCnt;
-					current_stripe.m[row_id][swapped_var_col_id] += divided_diff[actual_var_id] * one_over_h;
+					current_stripe.m[row_id][swapped_var_col_id] += divided_diff[actual_var_id] * agreement_factor[swapped_var_col_id] * one_over_h;
 				}
 			}
 
@@ -536,6 +569,14 @@ class trapezoidal_solver
 		R magnitude() const
 		{
 			return point.max_abs();
+		}
+
+		/// <summary>
+		/// Returns string representation of the current instance
+		/// </summary>
+		std::string to_string() const
+		{
+			return point.to_string() + " " + trans_marker.to_string();
 		}
 	};
 
@@ -760,20 +801,38 @@ public:
 	/// The main solving method
 	/// </summary>
 	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm,
-		const R& precision, const R& desired_step, const bool use_reparametrization, const bool use_inversion, const R& derivative_threshold = R(1),
-		const R& second_deriv_refinement_threshold = R(20))
+		const R& precision, const R& desired_step, const bool use_swap_transform, const bool use_flip_transform, const R& derivative_threshold = R(1),
+		const R& second_deriv_refinement_threshold = R(20), 
+		std::optional<std::array<bool, eqCnt>> swap_transform_map = std::nullopt,
+		std::optional<std::array<bool, eqCnt>> flip_transform_map = std::nullopt)
 	{
 		if (!bcm.is_valid())
 			throw std::exception("Invalid boundary condition marker");
 
-		std::array<bool, eqCnt> transform_map{};
+		std::array<bool, eqCnt> swap_map{};
 
-		if (use_reparametrization)
-			for (int var_id = 0; var_id < eqCnt; var_id++)
-				transform_map[var_id] = bcm.left_marker[var_id] && bcm.right_marker[var_id];
+		if (use_swap_transform)
+		{
+			if (!swap_transform_map.has_value())
+				for (int var_id = 0; var_id < eqCnt; var_id++)
+					swap_map[var_id] = bcm.left_marker[var_id] && bcm.right_marker[var_id];
+			else
+				swap_map = swap_transform_map.value();
+		}
+
+		std::array<bool, eqCnt> flip_map{};
+
+		if (use_flip_transform)
+		{
+			if (!flip_transform_map.has_value())
+				for (int var_id = 0; var_id < eqCnt; var_id++)
+					flip_map[var_id] = true;
+			else
+				flip_map = flip_transform_map.value();
+		}
 
 
-		const transform_restrictions trans_restrict{ transform_map , use_inversion, derivative_threshold };
+		const transform_restrictions trans_restrict{ swap_map , flip_map, derivative_threshold };
 
 		auto solution = init_guess;
 		correction_magnitudes.clear();
@@ -790,7 +849,7 @@ public:
 
 			apply_correction(system, solution, correction);
 
-			const auto refinement_applied = use_reparametrization ?
+			const auto refinement_applied = use_swap_transform ?
 				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step, second_deriv_refinement_threshold) : false;
 
 			correction_magnitudes.emplace_back( ConvergenceInfo<R>{ correction_magnitude, refinement_applied });

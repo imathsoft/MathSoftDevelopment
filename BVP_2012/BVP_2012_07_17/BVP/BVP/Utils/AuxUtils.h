@@ -1,5 +1,4 @@
-#ifndef GUARD_AUXUTILS
-#define GUARD_AUXUTILS
+#pragma once
 
 #include <fstream>
 #include <strstream>
@@ -304,13 +303,96 @@ namespace auxutils
 	/// Converts given value to string with the given number of digits
 	/// </summary>
 	template <typename T>
-	std::string to_string_with_precision(const T a_value, const int n = 8)
+	std::string to_string_with_precision(const T a_value, const int n = std::numeric_limits<T>::digits10)
 	{
 		std::ostringstream out;
 		out.precision(n);
 		out << std::fixed << a_value;
 		return out.str();
 	}
-};
 
-#endif
+	/// <summary>
+	/// Operator to write the given collection into the given strim in binary format
+	/// </summary>
+	template<class T>
+	std::ostream& operator<<(std::ostream& output, const std::vector<T>& data) {
+
+		std::vector<T>::size_type size = data.size();
+		output.write((char*)&size, sizeof(std::vector<T>::size_type));
+		for (int item_id = 0; item_id < data.size(); item_id++)
+			output << data[item_id];
+
+		return output;
+	}
+
+	/// <summary>
+	/// Operator to read a colelction form the given stream in binary format
+	/// </summary>
+	template<class T>
+	std::istream& operator>>(std::istream& input, std::vector<T>& data) {
+
+		std::vector<T>::size_type size;
+		input.read((char*)&size, sizeof(std::vector<T>::size_type));
+		data.resize(size);
+		for (int item_id = 0; item_id < data.size(); item_id++)
+			input >> data[item_id];
+
+		return input;
+	}
+
+	/// <summary>
+	/// Saves the given container to the file with the given name in binary format
+	/// Returns "true" if succeeded
+	/// </summary>
+	template <typename T>
+	bool SaveToBinaryFile(const std::vector<T>& data, const char* file_name)
+	{
+		std::ofstream file;
+		file.open(file_name, std::ios::out | std::ios::binary);
+
+		if (file.fail())
+			return false;
+
+		file << data;
+
+		return true;
+	}
+
+	/// <summary>
+	/// Reads a collection with the given base type from a binary file with the given name
+	/// </summary>
+	template <typename T>
+	std::vector<T> ReadFromBinaryFile(const char* file_name)
+	{
+		std::ifstream file;
+		file.open(file_name, std::ios::in | std::ios::binary);
+
+		if (file.fail())
+			throw std::exception("Can't open file");
+
+		std::vector<T> result;
+		file >> result;
+
+		return result;
+	}
+
+	/// <summary>
+	/// Saves the given container to the file with the given name in text format
+	/// Returns "true" if succeeded
+	/// The value type of the container must implement "to_string()" method
+	/// </summary>
+	template <typename T>
+	bool SaveToTextFile(const std::vector<T>& data, const char* file_name)
+	{
+		std::ofstream file;
+		file.open(file_name);
+
+		if (file.fail())
+			return false;
+
+		for (const auto& item : data)
+			file << item.to_string() << std::endl;
+
+		return true;
+	}
+};
