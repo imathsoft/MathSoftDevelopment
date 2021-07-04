@@ -79,7 +79,8 @@ namespace GeneralTest
 		/// Method to check that the convergence rate of the iteration process is quadratic
 		/// </summary>
 		template <class R>
-		void CheckQuadraticConvergence(const trapezoidal_solver<R>& solver, const R& acceptable_approximation_error)
+		void CheckQuadraticConvergence(const trapezoidal_solver<R>& solver, const R& acceptable_approximation_error,
+			const bool skip_silently_if_not_enough_corrections = false)
 		{
 			const auto corrections = solver.get_correcion_magnitudes();
 
@@ -90,7 +91,12 @@ namespace GeneralTest
 				corrections[corr_id].CorrectionMagnitude < R(0.1); corr_id--)
 				chosen_corrections.insert(chosen_corrections.begin(), corrections[corr_id].CorrectionMagnitude);
 
-			Assert::IsTrue(chosen_corrections.size() >= 3, L"Too few corrections to detect quadratic convergence rate");
+			const auto enought_corrections_available = chosen_corrections.size() >= 3;
+
+			if (!enought_corrections_available && skip_silently_if_not_enough_corrections)
+				return;
+
+			Assert::IsTrue(enought_corrections_available, L"Too few corrections to detect quadratic convergence rate");
 
 			R M, q, max_rel_error;
 
@@ -315,30 +321,83 @@ namespace GeneralTest
 					return mesh_point<R, 3>{ u0 + (t - t0) * (u1 - u0) / (t1 - t0), tangent, t };
 				}, discretization);
 
-			const auto step = R(1.0) / discretization;
-
 			const auto lambdas = std::vector<R>({R(2), R(5),  R(10), R(20), R(40), R(60), R(80), R(100), R(140),
 				R(180), R(200), R(220), R(260), R(300), R(350), R(400), R(450), R(500), R(550), R(600), R(700), R(800), R(900), R(1000)
 				, R(1100) , R(1200) , R(1300) , R(1400) , R(1500) , R(1600) , R(1700) , R(1800) , R(1900), R(2000)
 				, R(2100) , R(2200) , R(2300) , R(2400) , R(2500) , R(2600) , R(2700) , R(2800) , R(2900), R(3000) 
 				, R(3100) , R(3200) , R(3300) , R(3400) , R(3500) , R(3600) , R(3700) , R(3800) , R(3900), R(4000)
-				//, R(4100) , R(4200) , R(4300) , R(4400) , R(4500), R(4600) , R(4700) , R(4800) , R(4900), R(5000)
-				//, R(5100) , R(5200) , R(5300) , R(5400) , R(5500) , R(5600) , R(5700) , R(5800) , R(5900), R(6000) 
-				//, R(6100) , R(6200) , R(6300) , R(6400) , R(6500) , R(6600) , R(6700) , R(6800) , R(6900), R(7000) 
+				, R(4100) , R(4200) , R(4300) , R(4400) , R(4500), R(4600) , R(4700) , R(4800) , R(4900), R(5000)
+				, R(5100) , R(5200) , R(5300) , R(5400) , R(5500) , R(5600) , R(5700) , R(5800) , R(5900), R(6000) 
+				, R(6100) , R(6200) , R(6300) , R(6400) , R(6500) , R(6600) , R(6700) , R(6800) , R(6900), R(7000)
+				, R(7100) , R(7200) , R(7300) , R(7400) , R(7500) , R(7600) , R(7700) , R(7800) , R(7900), R(8000)
+				, R(8100) , R(8200) , R(8300) , R(8400) , R(8500) , R(8600) , R(8700) , R(8800) , R(8900), R(9000)
+				, R(9100) , R(9200) , R(9300) , R(9400) , R(9500) , R(9600) , R(9700) , R(9800) , R(9900), R(10000)
+				, R(10500) , R(11000)
+				, R(11500) , R(12000)
+				, R(12500) , R(13000)
+				, R(13500) , R(14000)
+				, R(14500) , R(15000)
+				, R(15500) , R(16000)
+				, R(16500) , R(17000)
+				, R(17500) , R(18000)
+				, R(18500) , R(19000)
+				, R(19500) , R(20000)
 				});
+
+			const auto second_deriv_refinement_threshold = [](const auto lambda)
+			{
+				return R(20);
+			};
+
+			const auto min_h_threshold = [](const auto lambda)
+			{
+				if (lambda < 220)
+					return R(5e-4);
+				
+				if (lambda < 4500)
+					return R(5e-5);
+
+				if (lambda < 11500)
+					return R(2e-5);
+
+				return R(1e-5);
+			};
+
+			const auto step = [=](const auto lambda)
+			{
+				if (lambda < 7500)
+					return R(0.01);
+
+				if (lambda < 10500)
+				return R(0.007);
+
+				if (lambda < 15000)
+					return R(0.004);
+
+				if (lambda < 19000)
+					return R(0.003);
+
+				return R(0.0024);
+			};
 
 			for (const auto l : lambdas)
 			{
 				trapezoidal_solver<R> solver{};
 
+				Logger::WriteMessage((std::string("Lambda = ") + std::to_string(l) + "\n").c_str());
+
 				init_guess = solver.solve(bvp_sys_factory<R>::BVP_T30_1(l).get_system(), init_guess,
 					{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
-					step, use_reparametrization, use_inversion, derivative_threshold, R(20), 
+					step(l), use_reparametrization, use_inversion, derivative_threshold,
+					second_deriv_refinement_threshold(l), min_h_threshold(l),
 					std::nullopt, //"swap" map
 					std::array<bool, 2>{false, true} //"flip" map
 				);
 
-				Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
+				Assert::IsTrue(solver.success(), (std::wstring(L"Failed to achieve desired precision or iteration procedure is divergent. L = ") +
+					std::to_wstring(l)).c_str());
+
+				CheckQuadraticConvergence(solver, R(100), true);
 
 				const auto diff_left = auxutils::Abs((*init_guess.begin())[0] - u0);
 				Logger::WriteMessage((std::string("diff_left =") + auxutils::ToString(diff_left) + std::string("\n")).c_str());
@@ -347,19 +406,25 @@ namespace GeneralTest
 
 				const auto diff_right = auxutils::Abs((*init_guess.rbegin())[0] - u1);
 				Logger::WriteMessage((std::string("diff_right =") + auxutils::ToString(diff_right) + std::string("\n")).c_str());
-				Assert::IsTrue(auxutils::Abs((*init_guess.rbegin())[0] - u1) < 300 * std::numeric_limits<R>::epsilon(),
+				Assert::IsTrue(auxutils::Abs((*init_guess.rbegin())[0] - u1) < 200 * std::numeric_limits<R>::epsilon(),
 					L"Too big deviation form the right boundary condition");
 
-				Assert::IsTrue(l < 110 || auxutils::Abs((*init_guess.begin())[1]) < std::numeric_limits<R>::epsilon(),
+				const auto start_slope = auxutils::Abs((*init_guess.begin())[1]);
+				Logger::WriteMessage((std::string("start_slope =") + auxutils::ToString(start_slope) + std::string("\n")).c_str());
+				Assert::IsTrue(l < 110 || start_slope < 200*std::numeric_limits<R>::epsilon(),
 					L"Unexpected slope at the left boundary point");
-				Assert::IsTrue(l < 110 || auxutils::Abs((*init_guess.rbegin())[1]) < std::numeric_limits<R>::epsilon(),
+
+				const auto end_slope = auxutils::Abs((*init_guess.rbegin())[1]);
+				Logger::WriteMessage((std::string("end_slope =") + auxutils::ToString(end_slope) + std::string("\n")).c_str());
+				Assert::IsTrue(l < 110 || end_slope < 10 *std::numeric_limits<R>::epsilon(),
 					L"Unexpected slope at the right boundary point");
+
+				(*init_guess.rbegin())[0] = u1;//Ensure that the initial guess has "perfect" values of boundary conditions
 			}
 		}
 
 		TEST_METHOD(BVP_T30_1_Test)
 		{
-			//typedef number<cpp_dec_float<30>, et_off> R;
 			typedef double R;
 
 			perform_BVP_T30_1_test<R>(R(100.0), 100, true, true, R(1.0));

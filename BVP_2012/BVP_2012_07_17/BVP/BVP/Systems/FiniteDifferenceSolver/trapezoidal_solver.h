@@ -676,7 +676,7 @@ class trapezoidal_solver
 	/// Performs clean up and refinement of the solution
 	/// </summary>
 	static bool cleanup_and_refine_solution(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& solution,
-		const transform_restrictions& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold)
+		const transform_restrictions& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold, const R& min_h_threshold)
 	{
 		std::vector<mesh_point<R, eqCnt + 1>> solution_cleaned;
 		solution_cleaned.reserve(solution.size());
@@ -744,6 +744,27 @@ class trapezoidal_solver
 			eval_res_prev = eval_res_next;
 		}
 
+		solution_cleaned.clear();
+		pt_prev = solution[0];
+		eval_res_prev = system.evaluate_minimal(pt_prev);
+		auto eval_res_trans_prev = transform_values_only(eval_res_prev, trans_restrict);
+		solution_cleaned.push_back(pt_prev);
+
+		for (auto pt_id = 1; pt_id < solution.size(); pt_id++)
+		{
+			const auto pt_next = solution[pt_id];
+			const auto ind_id = eval_res_trans_prev.trans_marker.pivot_id;
+			const auto h = auxutils::Abs(pt_next[ind_id] - pt_prev[ind_id]);
+			if (h < min_h_threshold)
+				continue;
+			solution_cleaned.push_back(pt_next);
+			pt_prev = pt_next;
+			eval_res_prev = system.evaluate_minimal(pt_prev);
+			eval_res_trans_prev = transform_values_only(eval_res_prev, trans_restrict);
+		}
+
+		solution = std::move(solution_cleaned);
+
 		return refinement_applied;
 
 	}
@@ -802,7 +823,8 @@ public:
 	/// </summary>
 	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm,
 		const R& precision, const R& desired_step, const bool use_swap_transform, const bool use_flip_transform, const R& derivative_threshold = R(1),
-		const R& second_deriv_refinement_threshold = R(20), 
+		const R& second_deriv_refinement_threshold = R(20),
+		const R& min_h_threshold = R(2e-5),
 		std::optional<std::array<bool, eqCnt>> swap_transform_map = std::nullopt,
 		std::optional<std::array<bool, eqCnt>> flip_transform_map = std::nullopt)
 	{
@@ -849,8 +871,8 @@ public:
 
 			apply_correction(system, solution, correction);
 
-			const auto refinement_applied = use_swap_transform ?
-				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step, second_deriv_refinement_threshold) : false;
+			const auto refinement_applied = (use_swap_transform) ?
+				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step, second_deriv_refinement_threshold, min_h_threshold) : false;
 
 			correction_magnitudes.emplace_back( ConvergenceInfo<R>{ correction_magnitude, refinement_applied });
 
