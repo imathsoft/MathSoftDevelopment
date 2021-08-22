@@ -42,15 +42,27 @@ struct mesh_point
 	/// <summary>
 	/// Conditional version of the max abs function, where maximum is taken between the variables that correspond to "true" items in the given map
 	/// </summary>
-	R max_abs(const std::array<bool, varCnt>& map)
+	R max_abs(const std::array<bool, varCnt>& map) const
 	{
 		R result = -std::numeric_limits<R>::max();
 
 		for (int var_id = 0; var_id < varCnt; var_id++)
-		{
 			if (map[var_id])
 				result = std::max<R>(result, auxutils::Abs(pt[var_id]));
-		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Yet another version of the max_abs method that allows to exclude a single item from consideration
+	/// </summary>
+	R max_abs(const int exclude_id) const
+	{
+		R result = -std::numeric_limits<R>::max();
+
+		for (int var_id = 0; var_id < varCnt; var_id++)
+			if (var_id != exclude_id)
+				result = std::max<R>(result, auxutils::Abs(pt[var_id]));
 
 		return result;
 	}

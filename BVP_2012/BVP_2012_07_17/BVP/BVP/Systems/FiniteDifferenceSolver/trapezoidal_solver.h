@@ -6,6 +6,7 @@
 #include "../ode_system.h"
 #include "../../LinearAlgebra/Matrix.h"
 #include "../../Utils/AuxUtils.h"
+#include "transformation_strategy.h"
 
 /// <summary>
 /// A "boundary conditions marker" is a simple way to define some sub-set of two-point boundary conditions
@@ -59,7 +60,7 @@ struct ConvergenceInfo
 /// Finite difference solver implementing the trapezoidal scheme for systems of nonlinear 
 /// first order ordinary differential euations
 /// </summary>
-template <class R, int eqCnt = 2>
+template <class R, class S = ts_standard, int eqCnt = 2>
 class trapezoidal_solver
 {
 	//TODO: it seems that now when `Matrix` class got general implementation of the matrix inversion functionality,
@@ -70,36 +71,6 @@ class trapezoidal_solver
 	typedef ode_system<R, eqCnt> sys;
 
 	/// <summary>
-	/// Data describing a transformation that was applied to the system in question on one of the discretization intervals
-	/// </summary>
-	struct transformation_maker
-	{
-		/// <summary>
-		/// Index of the "pivot" unknown
-		/// </summary>
-		int pivot_id{};
-
-		/// <summary>
-		/// The map defining which unknowns have been inverted during the transformation
-		/// </summary>
-		std::array<bool, eqCnt> inversion_map{};
-
-		/// <summary>
-		/// Returns string representation of the current instance
-		/// </summary>
-		std::string to_string() const
-		{
-			std::string result;
-			result += std::to_string(pivot_id) + " ";
-
-			for (int eq_id = 0; eq_id < eqCnt; eq_id++)
-				result += std::string(inversion_map[eq_id] ? "True" : "False") + " ";
-
-			return result;
-		}
-	};
-
-	/// <summary>
 	/// A struct representing extended atrix of the form [m|b], where "m"
 	/// is a square matrix and "b" is a column-vector of the corresponding size
 	/// </summary>
@@ -107,7 +78,7 @@ class trapezoidal_solver
 	{
 		LinAlg::Matrix<R, eqCnt, eqCnt> m;
 		LinAlg::Matrix<R, eqCnt, 1> b;
-		transformation_maker trans_marker{};
+		transformation_maker<eqCnt> trans_marker{};
 	};
 
 	/// <summary>
@@ -164,7 +135,7 @@ class trapezoidal_solver
 		/// <summary>
 		/// Marker defining a transformation
 		/// </summary>
-		transformation_maker trans_marker{};
+		transformation_maker<eqCnt> trans_marker{};
 
 		/// <summary>
 		/// Returns values of the righ hand side vector together with the value of the independent variable used in the transformation
@@ -190,8 +161,8 @@ class trapezoidal_solver
 	/// Affects only values of the right hand side fucntions and not their gradients 
 	/// </summary>
 	template <class V>
-	static typename ode_system<R, eqCnt>::eval_result_base<V> transform_independent_var_values_only(
-		const typename ode_system<R, eqCnt>::eval_result_base<V>& res, const int& independent_var_id)
+	static typename ode_system<R, eqCnt>::template eval_result_base<V> transform_independent_var_values_only(
+		const typename ode_system<R, eqCnt>::template eval_result_base<V>& res, const int& independent_var_id)
 	{
 		auto result_transformed = res;
 
@@ -254,7 +225,7 @@ class trapezoidal_solver
 	/// Affects only values of the right hand side fucntions and not their gradients
 	/// </summary>
 	template<class V>
-	static typename ode_system<R, eqCnt>::eval_result_base<V> invert_unknowns_values_only(const typename ode_system<R, eqCnt>::eval_result_base<V>& res,
+	static typename ode_system<R, eqCnt>::template eval_result_base<V> invert_unknowns_values_only(const typename ode_system<R, eqCnt>::template eval_result_base<V>& res,
 		std::array<bool, eqCnt> inversion_map)
 	{
 		auto result_transformed = res;
@@ -322,7 +293,7 @@ class trapezoidal_solver
 	/// <summary>
 	/// Performs transformation of the system evalueation result according to the given "pivot" variable
 	/// </summary>
-	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res_to_transform, const transformation_maker& trans_marker)
+	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res_to_transform, const transformation_maker<eqCnt>& trans_marker)
 	{
 		const auto res_independent_var_transformed = transform_independent_var(res_to_transform, trans_marker.pivot_id);
 
@@ -332,63 +303,19 @@ class trapezoidal_solver
 	}
 
 	/// <summary>
-	/// Restrictions which are to be teken into account when deciding about transformation to be applied
-	/// </summary>
-	struct transform_restrictions
-	{
-		/// <summary>
-		/// A map defining what variables can be considered as independent when doing a transformation (i.e., "swap" transformations)
-		/// </summary>
-		std::array<bool, eqCnt> swap_map{};
-
-		/// <summary>
-		/// A map defining what variables can be inverted ("flipped")
-		/// </summary>
-		std::array<bool, eqCnt> flip_map {};
-
-		/// <summary>
-		/// Derivative threshold using to make a decision about what variable should be treated as "inrependent"
-		/// </summary>
-		R derivative_threshold{};
-	};
-
-	/// <summary>
 	/// Returns transformations parameters, i.e. independent variable id and map of unknowns to be inverted
 	/// </summary>
 	template <class V>
-	static transformation_maker get_transform_marker(const typename ode_system<R, eqCnt>::eval_result_base<V>& res, const transform_restrictions& trans_restrict)
+	static transformation_maker<eqCnt> get_transform_marker(const typename ode_system<R, eqCnt>::template eval_result_base<V>& res, const transform_restrictions<R, eqCnt>& trans_restrict)
 	{
-		int independent_var_id = eqCnt;
-		std::array<bool, eqCnt> inversion_map{};
-		const auto& pt = res.pt;
-
-		R max_abs_val = trans_restrict.derivative_threshold;
-
-		for (int var_id = 0; var_id < eqCnt; var_id++)
-		{
-			const auto trial_abs_val = auxutils::Abs(res[var_id].v);
-
-			if (trial_abs_val > max_abs_val && trans_restrict.swap_map[var_id])//only variable that is "marked" in the "flip" map can serve as "independent"
-			{
-				independent_var_id = var_id;
-				max_abs_val = trial_abs_val;
-			}
-			else if (trans_restrict.flip_map[var_id] &&
-				(auxutils::Abs(pt[var_id]) > R(1)))//there is no point in applying inversion ("flip" transformation) if the absolute
-												   //value of the corresponding variavle is less or equal to 1
-			{
-				inversion_map[var_id] = true;
-			}
-		}
-
-		return { independent_var_id, inversion_map };
+		return S::get_transform_marker<R, V, eqCnt>(res, trans_restrict);
 	}
 
 	/// <summary>
 	/// Performs transformation of the system evaluation result based on the transformation map and the value of the corresponding derivatives
 	/// Transformation map defines what unknownc can be chosen as "pivot" ones (to be swaped with the independent variable via inverting)
 	/// </summary>
-	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res,	const transform_restrictions& trans_restrict)
+	static eval_result_transformed transform(const typename ode_system<R, eqCnt>::eval_result& res,	const transform_restrictions<R, eqCnt>& trans_restrict)
 	{
 		const auto trans_marker = get_transform_marker(res, trans_restrict);
 
@@ -398,7 +325,7 @@ class trapezoidal_solver
 	/// <summary>
 	/// Subroutine to perform transformation of a minimal result of evaluation (only values of right hand side functions)
 	/// </summary>
-	static eval_result_transformed_minimal transform_values_only(const typename ode_system<R, eqCnt>::eval_result_minimal& res, const transformation_maker& trans_marker)
+	static eval_result_transformed_minimal transform_values_only(const typename ode_system<R, eqCnt>::eval_result_minimal& res, const transformation_maker<eqCnt>& trans_marker)
 	{
 		const auto independent_var_transform_result = transform_independent_var_values_only(res, trans_marker.pivot_id);
 		const auto result_final = invert_unknowns_values_only(independent_var_transform_result, trans_marker.inversion_map);
@@ -408,7 +335,7 @@ class trapezoidal_solver
 	/// <summary>
 	/// Subroutine to perform transformation of a minimal result of evaluation (only values of right hand side functions)
 	/// </summary>
-	static eval_result_transformed_minimal transform_values_only(const typename ode_system<R, eqCnt>::eval_result_minimal& res, const transform_restrictions& trans_restrict)
+	static eval_result_transformed_minimal transform_values_only(const typename ode_system<R, eqCnt>::eval_result_minimal& res, const transform_restrictions<R, eqCnt>& trans_restrict)
 	{
 		const auto trans_marker = get_transform_marker(res, trans_restrict);
 		return transform_values_only(res, trans_marker);
@@ -475,7 +402,7 @@ class trapezoidal_solver
 	/// </summary>
 	static block_matrix construct_extended_gradient_matrix(const sys& system,
 		const std::vector<mesh_point<R, eqCnt + 1>>& init_guess,
-		const transform_restrictions& trans_restrict)
+		const transform_restrictions<R, eqCnt>& trans_restrict)
 	{
 		if (init_guess.size() <= 1)
 			throw std::exception("Invalid input");
@@ -483,7 +410,7 @@ class trapezoidal_solver
 		block_matrix result(init_guess.size() - 1);
 
 		auto res_prev = system.evaluate(init_guess[0]);
-		transformation_maker trans_marker_prev{ -1 };
+		transformation_maker<eqCnt> trans_marker_prev{ -1 };
 		for (auto pt_id = 0; pt_id < init_guess.size() - 1; pt_id++)
 		{
 			const auto res_prev_transformed = transform(res_prev, trans_restrict);
@@ -561,7 +488,7 @@ class trapezoidal_solver
 		/// <summary>
 		/// Transformation marker
 		/// </summary>
-		transformation_maker trans_marker{};
+		transformation_maker<eqCnt> trans_marker{};
 
 		/// <summary>
 		/// Correction magnitude
@@ -583,7 +510,7 @@ class trapezoidal_solver
 	/// <summary>
 	/// A helper method to copy result from vector-column to the mesh point
 	/// </summary>
-	static void copy(correction& dest, const LinAlg::Matrix<R, eqCnt, 1>& source, const transformation_maker& trans_marker)
+	static void copy(correction& dest, const LinAlg::Matrix<R, eqCnt, 1>& source, const transformation_maker<eqCnt>& trans_marker)
 	{
 		dest.trans_marker = trans_marker;
 		for (int i = 0; i < eqCnt; i++)
@@ -676,7 +603,7 @@ class trapezoidal_solver
 	/// Performs clean up and refinement of the solution
 	/// </summary>
 	static bool cleanup_and_refine_solution(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& solution,
-		const transform_restrictions& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold, const R& min_h_threshold)
+		const transform_restrictions<R, eqCnt>& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold, const R& min_h_threshold)
 	{
 		std::vector<mesh_point<R, eqCnt + 1>> solution_cleaned;
 		solution_cleaned.reserve(solution.size());
@@ -722,7 +649,8 @@ class trapezoidal_solver
 			diff[eqCnt] *= independent_var_scale_factor;
 			const auto actual_step = diff.max_abs();
 
-			if (actual_step < second_deriv_threshold * R(0.1))
+			if (pt_id < solution_cleaned.size() - 1 &&
+				actual_step < second_deriv_threshold * R(0.1))
 				continue; //the point is too close to the previous one, so that we can skip it
 
 			const int points_to_add = static_cast<int>(actual_step / second_deriv_threshold);
@@ -767,6 +695,38 @@ class trapezoidal_solver
 
 		return refinement_applied;
 
+	}
+
+	/// <summary>
+	/// A diagnostics tool
+	/// Evaluates the right hand side part of the given system at each point of the given collection of points 
+	/// thransdorms the result of avaluation according to the given tansformation restrictions 
+	/// and saves it to the file with the given name (in the human readable text format)
+	/// </summary>
+	/// <param name="system">The given systen of ODE</param>
+	/// <param name="points">The given collection of points</param>
+	/// <param name="trans_restrict">The transformation restrictions</param>
+	void transform_and_save_evaluation_result(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& points,
+		const transform_restrictions<R, eqCnt>& trans_restrict, const char* file_name)
+	{
+		std::ofstream file;
+		file.open(file_name, std::ofstream::out);
+
+		for (const auto& pt : points)
+		{
+			const auto eval_res = system.evaluate_minimal(pt);
+			const auto eval_res_transformed = transform_values_only(eval_res, trans_restrict);
+			file << eval_res_transformed.values_to_mesh_point().to_string() << " " << eval_res_transformed.trans_marker.pivot_id << " ";
+
+			for (int eqId = 0; eqId < eqCnt; eqId++)
+			{
+				file << std::to_string(eval_res_transformed.trans_marker.inversion_map[eqId]).c_str() << " ";
+			}
+
+			file << pt.to_string() << std::endl;
+		}
+
+		file.close();
 	}
 
 	/// <summary>
@@ -854,7 +814,7 @@ public:
 		}
 
 
-		const transform_restrictions trans_restrict{ swap_map , flip_map, derivative_threshold };
+		const transform_restrictions<R, eqCnt> trans_restrict{ swap_map , flip_map, derivative_threshold };
 
 		auto solution = init_guess;
 		correction_magnitudes.clear();

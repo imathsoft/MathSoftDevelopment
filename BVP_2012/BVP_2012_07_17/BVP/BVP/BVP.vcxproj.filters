@@ -191,5 +191,8 @@
     <ClInclude Include="LinearAlgebra\Matrix.h">
       <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\FiniteDifferenceSolver\transformation_strategy.h">
+      <Filter>Header Files\Systems\FiniteDifferenceSolver</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
