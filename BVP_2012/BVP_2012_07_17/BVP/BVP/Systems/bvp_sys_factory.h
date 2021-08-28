@@ -98,4 +98,22 @@ public:
 			{ [](const auto t) { return std::numeric_limits<R>::quiet_NaN(); },
 			  [](const auto t) { return std::numeric_limits<R>::quiet_NaN(); } });
 	}
+
+
+	/// <summary>
+	/// Test boundary value problem bvp_t20, possesing a corner layer at point "alpha"
+	/// </summary>
+	static simple_bvp<R, 2> BVP_T20(const R lambda, const R alpha = R(0.5))
+	{
+		return simple_bvp<R, 2>(
+			{ {
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return args[1]; }),
+				ode_system<R, 2>::create_func([lambda](const auto& args) { return -lambda * (args[1] * args[1] - 1); }),
+			} },
+			{ {0, R(1) + auxutils::Log(auxutils::Cosh(-lambda*alpha))/lambda}, {1, R(1) + auxutils::Log(auxutils::Cosh(lambda*(R(1) - alpha)))/lambda } },
+			{ [lambda, alpha](const auto t) { return R(1) + auxutils::Log(auxutils::Cosh(lambda * (t - alpha)))/lambda; },
+			  [lambda, alpha](const auto t) { return auxutils::Tanh(lambda * (t - alpha)); } });
+	}
+
+
 };

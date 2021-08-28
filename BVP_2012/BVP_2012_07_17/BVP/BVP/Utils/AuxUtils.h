@@ -111,6 +111,22 @@ namespace auxutils
 		return boost::multiprecision::cosh(val);
 	}
 
+	inline double Tanh(const double d)
+	{
+		return std::tanh(d);
+	}
+
+	inline float Tanh(const float d)
+	{
+		return std::tanhf(d);
+	}
+
+	template <unsigned Digits10>
+	inline number<cpp_dec_float<Digits10>, et_off> Tanh(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return boost::multiprecision::tanh(val);
+	}
+
 	inline double Sin(const double d)
 	{
 		return std::sin(d);
