@@ -362,12 +362,12 @@ class trapezoidal_solver
 	}
 
 	/// <summary>
-	/// Calculates "agreement factor" that is aimed to handle the "transition" situatuion, when inversion ("flip") transformation is applied on the current interval
-	/// but was not applied on the previous interval (or vise versa). This transitions state requires us to still work with not transformed variable 
+	/// Calculates "agreement factor" that is aimed to handle the "transition" situatuion, when inversion (the "flip") transformation is applied on the current interval
+	/// but was not applied on the previous interval (or vise versa). This transitions state requires us to still work with a not transformed variable 
 	/// despite of the fact that equations that we built correspond to the transformed one.
 	/// In the other words, we have calculated partial derivative that corresponds to the transformed variable `w = 1/v`, however we need to have 
 	/// the partial derivative with respect to `v`. This can be handled by multiplying the partial derivative with respect to `w` by `-1/v^2`.
-	/// The latter is actually the "agreement" factor that the function calculates with respect to each unknown
+	/// The latter is actually the "agreement" factor that the function calculates with respect to each variable
 	/// </summary>
 	static std::array<R, eqCnt> calc_inversion_agreement_factor(const int pivot_id_prev, const std::array<bool, eqCnt>& flip_map_prev,
 		const std::array<bool, eqCnt>& flip_map_next,
@@ -377,7 +377,13 @@ class trapezoidal_solver
 
 		for (int unknown_id = 0; unknown_id < eqCnt; unknown_id++)
 		{
-			if (unknown_id == pivot_id_prev || flip_map_prev[unknown_id] == flip_map_next[unknown_id])
+			//An obvious case, when the "agreement factor" is trivial (i.e. equal to "1") is when 
+			//the "flip" flags for this variable coinside for the current and previious steps
+			//Another (more subtle) case, when the agreement factor shoud be trivial is when 
+			//the variable with the given index was an independent variable on the previous step.
+			//In the latter case, the "flip" flag on the previous step cannot be set by definition (the "flipping" cannot be performed on an independent variable)
+			//and the "flip" flg on the current ("next") step, in case it is set, in fact, corresponds to another variable variale and must be ignored
+ 			if (unknown_id == pivot_id_prev || flip_map_prev[unknown_id] == flip_map_next[unknown_id])
 			{
 				result[unknown_id] = R(1);
 				continue;
@@ -391,6 +397,40 @@ class trapezoidal_solver
 			}
 		}
 
+		return result;
+	}
+
+	/// <summary>
+	/// Returns the Jacobian matrix of the vector function F(x_1, x_2, ...,x_{eqCnt+1}) = ([y_1, y_2, ...,y_{eqCnt + 1}] - [x_1, x_2, ...,x_{eqCnt + 1}])/(y_{independent_var_id} - x_{independent_var_id})
+	/// multiplied by (y_{independent_var_id} - x_{independent_var_id}) (i.e., the Jacobian matrix is multiplied by the mentioned factor),
+	/// where X and Y vectors are defined with their "divided difference"
+	/// </summary>
+	static LinAlg::Matrix<R, eqCnt, eqCnt + 1> CalcJacobianOfDividedDifference(const mesh_point<R, eqCnt + 1>& divided_difference, const int independent_var_id)
+	{
+		LinAlg::Matrix<R, eqCnt, eqCnt + 1> result{};
+
+		for (int row_id = 0; row_id < eqCnt; row_id++)
+		{
+			//Since the variable "swapping" mechanism is involved, the row index is not necessarly corresponds to the "variaable" index
+			//however, knowing the index of the independent variable, we can deduce the actual variable index according to the following formula
+			const auto var_id = row_id != independent_var_id ? row_id : eqCnt;
+
+			for (int col_id = 0; col_id < eqCnt + 1; col_id++)
+			{
+				//The case when column index is equal to the variable index, 
+				//which means that we need to take derivative of (y_{col_id} - x_{col_id})/(y_{independent_var_id} - x_{independent_var_id}) with respect to x_{col_id}
+				//and mulltily the resutl by (y_{independent_var_id} - x_{independent_var_id}) (see the summary of the method)
+				if (col_id == var_id)
+					result[row_id][col_id] = - R(1);
+				//The case when we need to take derivative of (y_{col_id} - x_{col_id})/(y_{independent_var_id} - x_{independent_var_id})  
+				//but this time with respect to x_{independent_var_id}) and again multiply the result by (y_{independent_var_id} - x_{independent_var_id})
+				else if (col_id == independent_var_id)
+					result[row_id][col_id] = divided_difference[var_id];
+				else
+			    //The case when the expression that we need to differentiate is not explicitely depentent of x_{col_id}, so the derivative if zero
+					result[row_id][col_id] = R(0);
+			}
+		}
 		return result;
 	}
 
@@ -430,6 +470,8 @@ class trapezoidal_solver
 			const auto pt_diff = get_mesh_point_diff(init_guess[pt_id], init_guess[pt_id + 1], inversion_map_next);
 			const auto one_over_h = R(1) / pt_diff.pt[independent_var_id_next];
 			const auto divided_diff = one_over_h * pt_diff;
+			const auto divided_diff_J = CalcJacobianOfDividedDifference(divided_diff, independent_var_id_next);
+
 
 			const auto agreement_factor = calc_inversion_agreement_factor(independent_var_id_prev, inversion_map_prev, inversion_map_next, init_guess[pt_id]);
 
@@ -441,26 +483,16 @@ class trapezoidal_solver
 			{
 				for (int col_id = 0; col_id < eqCnt; col_id++)
 				{
-					current_stripe.m[row_id][col_id] = -OneHalf * agreement_factor[col_id] * res_prev_transformed.res[row_id].grad[col_id != independent_var_id_prev ? col_id : eqCnt];
+					const auto var_id_prev = col_id != independent_var_id_prev ? col_id : eqCnt;
+					current_stripe.m[row_id][col_id] = -OneHalf * agreement_factor[col_id] * res_prev_transformed.res[row_id].grad[var_id_prev] +
+						agreement_factor[col_id] * divided_diff_J[row_id][var_id_prev] * one_over_h;
 					temp[row_id][col_id] = -OneHalf * res_next_transformed.res[row_id].grad[col_id != independent_var_id_next ? col_id : eqCnt];
 				}
 
-				const int actual_var_id = row_id != independent_var_id_next ? row_id : eqCnt;
-
-				current_stripe.m[row_id][row_id] -= actual_var_id != independent_var_id_prev ? agreement_factor[row_id] * one_over_h : R(0);
 				temp[row_id][row_id] += one_over_h;
 
+				const int actual_var_id = row_id != independent_var_id_next ? row_id : eqCnt;
 				current_stripe.b[row_id][0] = divided_diff[actual_var_id] - OneHalf * (res_prev_transformed.res[row_id].v + res_next_transformed.res[row_id].v);
-			}
-
-			if (independent_var_id_prev != independent_var_id_next)//"transition" step
-			{
-				const int swapped_var_col_id = independent_var_id_next != eqCnt ? independent_var_id_next : independent_var_id_prev;
-				for (int row_id = 0; row_id < eqCnt; row_id++)
-				{
-					const int actual_var_id = row_id != independent_var_id_next ? row_id : eqCnt;
-					current_stripe.m[row_id][swapped_var_col_id] += divided_diff[actual_var_id] * agreement_factor[swapped_var_col_id] * one_over_h;
-				}
 			}
 
 			const auto temp_inverted = temp.Inverse();

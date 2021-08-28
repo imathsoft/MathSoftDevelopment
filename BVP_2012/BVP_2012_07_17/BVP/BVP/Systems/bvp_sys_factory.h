@@ -85,7 +85,7 @@ public:
 	}
 
 	/// <summary>
-	/// Test boundary value problem bvp_t_30
+	/// Test boundary value problem bvp_t_30 (modified version with derivatives tending to zero at both boundary points as lambda tends to infinity)
 	/// </summary>
 	static simple_bvp<R, 2> BVP_T30_1(const R lambda)
 	{
