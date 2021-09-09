@@ -101,6 +101,26 @@ struct mesh_point
 	}
 
 	/// <summary>
+	/// Equality operator
+	/// </summary>
+	bool operator == (const mesh_point<R, varCnt>& arg) const
+	{
+		for (int i = 0; i < varCnt; i++)
+			if (!(pt[i] == arg.pt[i]))
+				return false;
+
+		return true;
+	}
+
+	/// <summary>
+	/// Not equality operator
+	/// </summary>
+	bool operator != (const mesh_point<R, varCnt>& arg) const
+	{
+		return !(*this == arg);
+	}
+
+	/// <summary>
 	/// Write to stream (in binary format)
 	/// </summary>
 	friend std::ostream& operator<<(std::ostream& os, const mesh_point<R, varCnt>& pt)
@@ -289,7 +309,7 @@ public:
 	template <class V>
 	struct eval_result_base
 	{
-	private:
+	protected:
 		std::array<V, eqCnt> _values;
 
 	public:
@@ -318,7 +338,28 @@ public:
 
 	using eval_result = eval_result_base<func_value_with_gradient<R, varCnt>>;
 
-	using eval_result_minimal = eval_result_base<func_value<R>>;
+	struct eval_result_minimal : public eval_result_base<func_value<R>>
+	{
+		/// <summary>
+		/// Transforma the current data structure into a mesh point which (taking into account
+		/// that the "minimal result" is an evaluation of the right hand side part of a system of ODEs)
+		/// is a vector of derivatives of all the variables (including the independent one) evaluated at some point
+		/// The derivative of independent variable has index `eqCnt` and always equal to "1"
+		/// </summary>
+		mesh_point<R, varCnt> values_to_mesh_point() const
+		{
+			mesh_point<R, varCnt> result{};
+
+			for (int var_id = 0; var_id < eqCnt; var_id++)
+			{
+				result[var_id] = _values[var_id].v;
+			}
+
+			result[eqCnt] = R(1);
+
+			return result;
+		}
+	};
 
 	/// <summary>
 	/// Returns number of variables involved (number of equations + 1)

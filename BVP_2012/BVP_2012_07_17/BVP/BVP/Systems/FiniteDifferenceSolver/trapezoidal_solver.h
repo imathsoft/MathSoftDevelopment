@@ -632,101 +632,144 @@ class trapezoidal_solver
 	}
 
 	/// <summary>
+	/// All the data needed to perform "smart" mesh refinement
+	/// </summary>
+	struct refinement_data
+	{
+		/// <summary>
+		/// The right hand side ('rhs') part of the system evaluated at some point
+		/// </summary>
+		typename ode_system<R, eqCnt>::eval_result_minimal rhs;
+
+		/// <summary>
+		/// The transformed version of the right hand side ('rhs') part of the system evaluated at some point
+		/// </summary>
+		eval_result_transformed_minimal rhs_transformed;
+
+		/// <summary>
+		/// Returns index of the independent variable that was chosen when calculating the transformed right hand side values
+		/// </summary>
+		int independent_var_id() const
+		{
+			return rhs_transformed.trans_marker.pivot_id;
+		}
+
+		/// <summary>
+		/// Returns transformend right hand side evaluation result as a mesh point of the corresponding dimension
+		/// </summary>
+		mesh_point<R, eqCnt + 1> transformed_to_point() const
+		{
+			return rhs_transformed.values_to_mesh_point();
+		}
+
+		/// <summary>
+		/// Transforms the right hand side evaluation result according to the given transformation marker and returns the result 
+		/// in a form of a mesh point of the corresponding dimension
+		/// For the optomization purposes, the inpur marker is compared to the local transformation marker and if they are equal
+		/// the existing transformed result is used (no additional calculations)
+		/// </summary>
+		mesh_point<R, eqCnt + 1> transformed_to_point(const transformation_maker<eqCnt>& trans_marker) const
+		{
+			if (trans_marker == rhs_transformed.trans_marker)
+				return rhs_transformed.values_to_mesh_point();
+
+			return transform_values_only(rhs, trans_marker).values_to_mesh_point();
+		}
+	};
+
+	/// <summary>
+	/// Returns the refinement data structure calculated for the given mesh point
+	/// </summary>
+	static refinement_data calc_refinement_data(const mesh_point<R, eqCnt + 1>& pt,
+		const sys& system, const transform_restrictions<R, eqCnt>& trans_restrict)
+	{
+		auto eval_res = system.evaluate_minimal(pt);
+		auto eval_res_transformed = transform_values_only(eval_res, trans_restrict);
+
+		return { eval_res, eval_res_transformed };
+	}
+
+	/// <summary>
 	/// Performs clean up and refinement of the solution
 	/// </summary>
 	static bool cleanup_and_refine_solution(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& solution,
-		const transform_restrictions<R, eqCnt>& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold, const R& min_h_threshold)
+		const transform_restrictions<R, eqCnt>& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold,
+		const R& min_step_size, const R remove_threshold = R(0.1))
 	{
-		std::vector<mesh_point<R, eqCnt + 1>> solution_cleaned;
-		solution_cleaned.reserve(solution.size());
+		if (solution.size() <= 2)
+			return false; //There is literally nothing to refine
 
-		const auto& argument_min = solution[0][eqCnt];
-		const auto& argument_max = solution[solution.size() - 1][eqCnt];
+		const auto  solution_input = solution;
 
-		bool refinement_applied = false;
-
-		solution_cleaned.push_back(solution[0]);
-
-		for (auto pt_id = 1; pt_id < solution.size(); pt_id++)
-		{
-			const auto prev_pt = *solution_cleaned.rbegin();
-
-			if (solution[pt_id][eqCnt] < argument_min || solution[pt_id][eqCnt] > argument_max || prev_pt[eqCnt] >= solution[pt_id][eqCnt])
-			{
-				refinement_applied = true;
-				continue;
-			}
-			else
-			{
-				solution_cleaned.push_back(solution[pt_id]);
-			}
-		}
-
-		solution.clear();
-		auto pt_prev = solution_cleaned[0];
-		auto eval_res_prev = system.evaluate_minimal(pt_prev);
-		solution.push_back(pt_prev);
-
+		const auto argument_min = solution[0][eqCnt];
+		const auto argument_max = solution[solution.size() - 1][eqCnt];
 		const auto independent_var_scale_factor = second_deriv_threshold / desired_step_size;
 
-		for (auto pt_id = 1; pt_id < solution_cleaned.size(); pt_id++)
+		solution.clear();
+		auto pt_prev = solution_input[0];
+		auto refine_data_prev = calc_refinement_data(pt_prev, system, trans_restrict);
+		
+		auto pt_next = solution_input[1];
+		auto refine_data_next = calc_refinement_data(pt_next, system, trans_restrict);
+
+		solution.push_back(pt_prev);
+		bool solution_altered = false;
+
+		int pt_id = 1;
+		while (true)
 		{
-			const auto pt_next = solution_cleaned[pt_id];
-			const auto eval_res_next = system.evaluate_minimal(pt_next);
+			const auto independent_var_id = refine_data_prev.independent_var_id();
+			const auto prev_trans_pt = refine_data_prev.transformed_to_point();
+			const auto next_trans_pt = refine_data_next.transformed_to_point(refine_data_prev.rhs_transformed.trans_marker);
+			auto diff = prev_trans_pt - next_trans_pt;
+			diff[eqCnt] *= independent_var_scale_factor;// *auxutils::Sqrt(R(0.5) * (prev_trans_pt.max_abs(eqCnt) + next_trans_pt.max_abs(eqCnt)));
 
-			const auto eval_res_transformed_prev = transform_values_only(eval_res_prev, trans_restrict);
-			const auto eval_res_transformed_next = transform_values_only(eval_res_next, eval_res_transformed_prev.trans_marker);
+			const auto actual_step_size = diff.max_abs();
 
-			auto diff = (eval_res_transformed_prev.values_to_mesh_point() - eval_res_transformed_next.values_to_mesh_point());
-			diff[eqCnt] *= independent_var_scale_factor;
-			const auto actual_step = diff.max_abs();
-
-			if (pt_id < solution_cleaned.size() - 1 &&
-				actual_step < second_deriv_threshold * R(0.1))
-				continue; //the point is too close to the previous one, so that we can skip it
-
-			const int points_to_add = static_cast<int>(actual_step / second_deriv_threshold);
-
-			const auto h = R(1) / (points_to_add + 1);
-			const auto position_increment = (pt_next - pt_prev) * h;
-
-			auto temp = pt_prev;
-			for (int extra_pt_id = 0; extra_pt_id < points_to_add; extra_pt_id++)
+			//Check for "zigzags"
+			if ((pt_next[eqCnt] < argument_min || pt_next[eqCnt] > argument_max || 
+				pt_next[eqCnt] <= pt_prev[eqCnt] ||
+				actual_step_size < second_deriv_threshold * remove_threshold ||
+				auxutils::Abs(pt_next[independent_var_id] - pt_prev[independent_var_id]) < min_step_size) && // minimal allowed step size check
+				pt_id < (solution_input.size() - 1)) 
 			{
-				temp += position_increment;
-				solution.push_back(temp);
-				refinement_applied = true;
+				solution_altered = true;
+			} else 
+			{
+				const int points_to_add = static_cast<int>(actual_step_size / second_deriv_threshold);
+				const auto h = R(1) / (points_to_add + 1);
+				const auto position_increment = (pt_next - pt_prev) * h;
+
+				auto temp = pt_prev;
+				for (int extra_pt_id = 0; extra_pt_id < points_to_add + 1; extra_pt_id++)
+				{
+					if (extra_pt_id != points_to_add)
+						temp += position_increment;
+					else
+						temp = pt_next;
+
+					const auto ind_var_id = refine_data_prev.independent_var_id();
+
+					if (auxutils::Abs(temp[ind_var_id] - pt_prev[ind_var_id]) < min_step_size)
+						continue;
+
+					pt_prev = temp;
+					refine_data_prev = calc_refinement_data(pt_prev, system, trans_restrict);
+					solution.push_back(pt_prev);
+					solution_altered = solution_altered || (extra_pt_id != points_to_add);//we just added a new point so the solution was altered
+				}
 			}
 
-			solution.push_back(pt_next);
+			pt_id++;
 
-			pt_prev = pt_next;
-			eval_res_prev = eval_res_next;
+			if (pt_id == solution_input.size())
+				break;
+			
+			pt_next = solution_input[pt_id];
+			refine_data_next = calc_refinement_data(pt_next, system, trans_restrict);
 		}
 
-		solution_cleaned.clear();
-		pt_prev = solution[0];
-		eval_res_prev = system.evaluate_minimal(pt_prev);
-		auto eval_res_trans_prev = transform_values_only(eval_res_prev, trans_restrict);
-		solution_cleaned.push_back(pt_prev);
-
-		for (auto pt_id = 1; pt_id < solution.size(); pt_id++)
-		{
-			const auto pt_next = solution[pt_id];
-			const auto ind_id = eval_res_trans_prev.trans_marker.pivot_id;
-			const auto h = auxutils::Abs(pt_next[ind_id] - pt_prev[ind_id]);
-			if (h < min_h_threshold)
-				continue;
-			solution_cleaned.push_back(pt_next);
-			pt_prev = pt_next;
-			eval_res_prev = system.evaluate_minimal(pt_prev);
-			eval_res_trans_prev = transform_values_only(eval_res_prev, trans_restrict);
-		}
-
-		solution = std::move(solution_cleaned);
-
-		return refinement_applied;
-
+		return solution_altered;
 	}
 
 	/// <summary>
@@ -748,7 +791,7 @@ class trapezoidal_solver
 		{
 			const auto eval_res = system.evaluate_minimal(pt);
 			const auto eval_res_transformed = transform_values_only(eval_res, trans_restrict);
-			file << eval_res_transformed.values_to_mesh_point().to_string() << " " << eval_res_transformed.trans_marker.pivot_id << " ";
+			file << eval_res_transformed.values_to_mesh_point().to_string() << eval_res_transformed.trans_marker.pivot_id << " ";
 
 			for (int eqId = 0; eqId < eqCnt; eqId++)
 			{

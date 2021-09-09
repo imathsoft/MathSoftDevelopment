@@ -393,9 +393,9 @@ namespace auxutils
 	}
 
 	/// <summary>
-	/// Saves the given container to the file with the given name in text format
+	/// Saves the given collection to the file with the given name in a text format
 	/// Returns "true" if succeeded
-	/// The value type of the container must implement "to_string()" method
+	/// The value type of the collection must implement "to_string()" method
 	/// </summary>
 	template <typename T>
 	bool SaveToTextFile(const std::vector<T>& data, const char* file_name)
@@ -408,6 +408,33 @@ namespace auxutils
 
 		for (const auto& item : data)
 			file << item.to_string() << std::endl;
+
+		return true;
+	}
+
+	/// <summary>
+	/// Saves the given collections to the file with the given name in a text format
+	/// Returns "true" if succeeded
+	/// The value type of the collections must implement "to_string()" method
+	/// It is assumed that the data in the two collections is "associated", having one-to-one correspondence between their element
+	/// The "corresponding" elements of the two collections form a line in the saved text file
+	/// </summary>
+	template <typename T1, typename T2>
+	bool SaveToTextFile(const std::vector<T1>& data1, const std::vector<T2>& data2, const char* file_name)
+	{
+		if (data1.size() != data2.size())
+			throw std::exception("Inconsistent input data");
+
+		std::ofstream file;
+		file.open(file_name);
+
+		if (file.fail())
+			return false;
+
+		for (int item_id = 0; item_id < data1.size(); item_id++)
+		{
+			file << data1[item_id].to_string() << " " << data2[item_id].to_string() << std::endl;
+		}
 
 		return true;
 	}
