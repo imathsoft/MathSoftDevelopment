@@ -91,5 +91,8 @@
     <None Include="TestData\solution_double_precision.txt">
       <Filter>TestData</Filter>
     </None>
+    <None Include="TestData\BVP_T30_solution_100.dat">
+      <Filter>TestData</Filter>
+    </None>
   </ItemGroup>
 </Project>

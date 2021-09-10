@@ -104,7 +104,8 @@ public:
 };
 
 /// <summary>
-/// A placeholder for experimenting with transformation strategies
+/// A transformation strategy designed specifically for the systems of 2 ODEs that represents a second order ordinary differential equaion 
+/// (under some additional assumptions)
 /// </summary>
 class ts_experimental
 {
@@ -122,13 +123,12 @@ public:
 		const auto& pt = res.pt;
 
 		if (auxutils::Abs(pt[1]) > R(1) && auxutils::Abs(pt[1] * pt[1] * pt[1]) > auxutils::Abs(res[1].v))
-			return { 0, {false, false} };
+			return { 0, {false, true} };
 
-		if (auxutils::Abs(res[1].v) > R(5))
+		if (auxutils::Abs(res[1].v) > R(1) && pt[2] > R(0.2) && pt[2] < R(0.7))
 			return { 1, {false, false} };
 
 		return { 2, {false, false} };
 	}
-
 };
 

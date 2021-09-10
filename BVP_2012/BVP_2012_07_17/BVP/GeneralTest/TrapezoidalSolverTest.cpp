@@ -380,11 +380,11 @@ namespace GeneralTest
 				return R(0.0024);
 			};
 
+			trapezoidal_solver<R> solver{};
+
 			for (const auto l : lambdas)
 			{
 				Logger::WriteMessage((std::string("Lambda = ") + std::to_string(l) + "\n").c_str());
-
-				trapezoidal_solver<R> solver{};
 
 				init_guess = solver.solve(bvp_sys_factory<R>::BVP_T30_1(l).get_system(), init_guess,
 					{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
@@ -430,5 +430,88 @@ namespace GeneralTest
 			perform_BVP_T30_1_test<R>(R(100.0), 100, true, true, R(1.0));
 		}
 
+		TEST_METHOD(BVP_T30_full_reparametrization)
+		{
+			using R = double;
+
+			const auto l_0 = 100;
+			auto init_guess = auxutils::ReadFromBinaryFile<mesh_point<R, 3>>((std::string("TestData\\BVP_T30_solution_") + std::to_string((int)l_0) + std::string(".dat")).c_str());
+
+			const auto lambdas = std::vector<R>({R(140),
+				R(180), R(200), R(220), R(260), R(300), R(350), R(400), R(450), R(500), R(550), R(600), R(700), R(800), R(900), R(1000)
+				, R(1100) , R(1200) , R(1300) , R(1400) , R(1500) , R(1600) , R(1700) , R(1800) , R(1900), R(2000)
+				, R(2100) , R(2200) , R(2300) , R(2400) , R(2500) , R(2600) , R(2700) , R(2800) , R(2900), R(3000)
+				, R(3100) , R(3200) , R(3300) , R(3400) , R(3500) , R(3600) , R(3700) , R(3800) , R(3900), R(4000)
+				, R(4100) , R(4200) , R(4300) , R(4400) , R(4500), R(4600) , R(4700) , R(4800) , R(4900), R(5000)
+				, R(5100) , R(5200) , R(5300) , R(5400) , R(5500) , R(5600) , R(5700) , R(5800) , R(5900), R(6000)
+				, R(6100) , R(6200) , R(6300) , R(6400) , R(6500) , R(6600) , R(6700) , R(6800) , R(6900), R(7000)
+				, R(7100) , R(7200) , R(7300) , R(7400) , R(7500) , R(7600) , R(7700) , R(7800) , R(7900), R(8000)
+				, R(8100) , R(8200) , R(8300) , R(8400) , R(8500) , R(8600) , R(8700) , R(8800) , R(8900), R(9000)
+				, R(9100) , R(9200) , R(9300) , R(9400) , R(9500) , R(9600) , R(9700) , R(9800) , R(9900), R(10000)
+				, R(10500) , R(11000)
+				, R(11500) , R(12000)
+				, R(12500) , R(13000)
+				, R(13500) , R(14000)
+				, R(14500) , R(15000)
+				, R(15500) , R(16000)
+				, R(16500) , R(17000)
+				, R(17500) , R(18000)
+				, R(18500) , R(19000)
+				, R(19500) , R(20000)
+				});
+
+			const auto use_reparametrization = true;
+			const auto use_inversion = false;
+			const auto derivative_threshold = 1.0;
+
+			const auto step = [=](const auto lambda)
+			{
+				if (lambda < 600)
+					return R(0.1);
+
+				if (lambda < 5700)
+					return R(0.03);
+
+				return R(0.01);
+
+			};
+
+			const auto second_deriv_refinement_threshold = [](const auto lambda)
+			{
+				if (lambda < 3600)
+					return R(1);
+
+				if (lambda < 19000)
+					return R(0.1);
+
+				return R(0.03);
+			};
+
+			trapezoidal_solver<R, ts_experimental> solver{};
+			solver.DoPreRefinement = true;
+			solver.OptimizeStepSize = true;
+			solver.RefinementRemoveFactor = R(0.01);
+
+			for (const auto l : lambdas)
+			{
+				if ((int)l == 5900)
+					int i = 0;
+
+				Logger::WriteMessage((std::string("Lambda = ") + std::to_string(l) + "\n").c_str());
+
+				init_guess = solver.solve(bvp_sys_factory<R>::BVP_T30_1(l).get_system(), init_guess,
+					{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
+					step(l), use_reparametrization, use_inversion, derivative_threshold,
+					second_deriv_refinement_threshold(l), R(1e-5),
+					std::nullopt, //"swap" map
+					std::nullopt //"flip" map
+				);
+
+				Assert::IsTrue(solver.success(), (std::wstring(L"Failed to achieve desired precision or iteration procedure is divergent. L = ") +
+					std::to_wstring(l)).c_str());
+
+				CheckQuadraticConvergence(solver, R(100), true);
+			}
+		}
 	};
 }

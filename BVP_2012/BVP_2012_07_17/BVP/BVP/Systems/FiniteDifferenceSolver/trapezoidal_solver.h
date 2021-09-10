@@ -694,7 +694,7 @@ class trapezoidal_solver
 	/// </summary>
 	static bool cleanup_and_refine_solution(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& solution,
 		const transform_restrictions<R, eqCnt>& trans_restrict, const R& desired_step_size, const R& second_deriv_threshold,
-		const R& min_step_size, const R remove_threshold = R(0.1))
+		const R& min_step_size, const bool optimize_step_size, const R remove_threshold = R(0.1))
 	{
 		if (solution.size() <= 2)
 			return false; //There is literally nothing to refine
@@ -722,7 +722,7 @@ class trapezoidal_solver
 			const auto prev_trans_pt = refine_data_prev.transformed_to_point();
 			const auto next_trans_pt = refine_data_next.transformed_to_point(refine_data_prev.rhs_transformed.trans_marker);
 			auto diff = prev_trans_pt - next_trans_pt;
-			diff[eqCnt] *= independent_var_scale_factor;// *auxutils::Sqrt(R(0.5) * (prev_trans_pt.max_abs(eqCnt) + next_trans_pt.max_abs(eqCnt)));
+			diff[eqCnt] *= independent_var_scale_factor* (optimize_step_size ? auxutils::Sqrt(R(0.5) * (prev_trans_pt.max_abs(eqCnt) + next_trans_pt.max_abs(eqCnt))) : R(1));
 
 			const auto actual_step_size = diff.max_abs();
 
@@ -854,6 +854,22 @@ public:
 	}
 
 	/// <summary>
+	/// A setting defining whether to do pre-refinement before running the Newton's procedure
+	/// </summary>
+	bool DoPreRefinement = false;
+
+	/// <summary>
+	/// A setting defining whether the step size should be optimized by using some step selection strategies when refining the mesh
+	/// </summary>
+	bool OptimizeStepSize = false;
+
+	/// <summary>
+	/// A value that defines the minimal ratio between the "actual" and "desired" step size of the mesh
+	/// If the ratio is smaller the corresponding points will be removed during the refinement procedure
+	/// </summary>
+	R RefinementRemoveFactor = R(0.1);
+
+	/// <summary>
 	/// The main solving method
 	/// </summary>
 	std::vector<mesh_point<R, eqCnt + 1>> solve(const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& init_guess, const bc_marker<eqCnt>& bcm,
@@ -896,6 +912,10 @@ public:
 
 		R correction_magnitude = std::numeric_limits<R>::max();
 
+		if (DoPreRefinement)
+			cleanup_and_refine_solution(system, solution, trans_restrict, desired_step,
+				second_deriv_refinement_threshold, min_h_threshold, OptimizeStepSize, RefinementRemoveFactor*R(10));
+
 		int iter_count = 0;
 		while (correction_magnitude > precision && iter_count < max_iterations_count)
 		{
@@ -907,7 +927,8 @@ public:
 			apply_correction(system, solution, correction);
 
 			const auto refinement_applied = (use_swap_transform) ?
-				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step, second_deriv_refinement_threshold, min_h_threshold) : false;
+				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step,
+					second_deriv_refinement_threshold, min_h_threshold, OptimizeStepSize, RefinementRemoveFactor) : false;
 
 			correction_magnitudes.emplace_back( ConvergenceInfo<R>{ correction_magnitude, refinement_applied });
 

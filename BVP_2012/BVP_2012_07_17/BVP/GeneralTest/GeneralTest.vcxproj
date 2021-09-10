@@ -187,6 +187,10 @@
     <ClCompile Include="XFunctionTestUnit.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="TestData\BVP_T30_solution_100.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <FileType>Document</FileType>
+    </None>
     <None Include="TestData\OscillatingTestProblemMSInitGuess.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
