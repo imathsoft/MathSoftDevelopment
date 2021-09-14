@@ -212,6 +212,36 @@ namespace LinAlg
 
 			return identity;
 		}
+
+		/// <summary>
+		/// "Equal" operator
+		/// </summary>
+		bool operator == (const Matrix<R, RowDim, ColDim>& matr) const
+		{
+			for (int i = 0; i < RowDim; i++)
+				for (int j = 0; j < ColDim; j++)
+					if ((*this)[i][j] != matr[i][j])
+						return false;
+
+			return true;
+		}
+
+		/// <summary>
+		/// "Not equal" opertor
+		/// </summary>
+		bool operator != (const Matrix<R, RowDim, ColDim>& matr) const
+		{
+			return !((*this) == matr);
+		}
+
+		/// <summary>
+		/// Returns `true` if at least one element of the matrix is "not a number"
+		/// </summary>
+		/// <returns></returns>
+		bool is_nan() const
+		{
+			return (*this) != (*this);
+		}
 	};
 
 	/// <summary>

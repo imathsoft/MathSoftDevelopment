@@ -413,6 +413,16 @@ namespace auxutils
 	}
 
 	/// <summary>
+	/// Specific implementation of the "save to text file" procedure that provides a a more convenientway to save 
+	/// a series of data collections to a set of files with different name suffixes 
+	/// </summary>
+	template <typename T>
+	bool SaveToTextFile(const std::vector<T>& data, const std::string folder, const std::string file_name_base, const std::string file_name_suffix)
+	{
+		return SaveToTextFile(data, (folder + std::string("//") + file_name_base + file_name_suffix + std::string(".txt")).c_str());
+	}
+
+	/// <summary>
 	/// Saves the given collections to the file with the given name in a text format
 	/// Returns "true" if succeeded
 	/// The value type of the collections must implement "to_string()" method

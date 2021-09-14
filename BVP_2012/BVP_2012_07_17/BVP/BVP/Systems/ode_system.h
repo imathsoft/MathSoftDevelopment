@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "poly_function.h"
 
 
@@ -36,19 +37,13 @@ struct mesh_point
 	/// </summary>
 	R max_abs() const
 	{
-		return auxutils::Abs(*std::max_element(pt.begin(), pt.end(), [](const auto& a, const auto& b) { return auxutils::Abs(a) < auxutils::Abs(b); }));
-	}
-
-	/// <summary>
-	/// Conditional version of the max abs function, where maximum is taken between the variables that correspond to "true" items in the given map
-	/// </summary>
-	R max_abs(const std::array<bool, varCnt>& map) const
-	{
-		R result = -std::numeric_limits<R>::max();
+		R result = R(0);
 
 		for (int var_id = 0; var_id < varCnt; var_id++)
-			if (map[var_id])
+			if (pt[var_id] == pt[var_id]) //test for "not a number"
 				result = std::max<R>(result, auxutils::Abs(pt[var_id]));
+			else
+				return std::numeric_limits<R>::infinity(); //"Not a number" return infinity
 
 		return result;
 	}
@@ -58,11 +53,18 @@ struct mesh_point
 	/// </summary>
 	R max_abs(const int exclude_id) const
 	{
-		R result = -std::numeric_limits<R>::max();
+		R result = R(0);
 
 		for (int var_id = 0; var_id < varCnt; var_id++)
-			if (var_id != exclude_id)
+		{
+			if (var_id == exclude_id)
+				continue;
+
+			if (pt[var_id] == pt[var_id]) //test for "not a number"
 				result = std::max<R>(result, auxutils::Abs(pt[var_id]));
+			else
+				return std::numeric_limits<R>::infinity();
+		}
 
 		return result;
 	}
@@ -150,6 +152,14 @@ struct mesh_point
 			result += auxutils::to_string_with_precision(pt[varId]) + " ";
 
 		return result;
+	}
+
+	/// <summary>
+	/// Returns true if at least one coordinate of the point is "not a number"
+	/// </summary>
+	bool is_nan() const
+	{
+		return (*this) != (*this);
 	}
 };
 
@@ -248,8 +258,16 @@ struct func_value_with_gradient : public func_value<R>
 
 		return this*;
 	}
-};
 
+	/// <summary>
+	/// Returns true if either value of gradient if "not a number"
+	/// </summary>
+	/// <returns></returns>
+	bool is_nan() const
+	{
+		return grad.is_nan() || v != v;
+	}
+};
 
 template <class R, int varCnt>
 func_value_with_gradient<R, varCnt> operator +(func_value_with_gradient<R, varCnt> lhs, const func_value_with_gradient<R, varCnt>& rhs)
@@ -333,6 +351,14 @@ public:
 		const V& operator[](const int i) const
 		{
 			return _values[i];
+		}
+
+		/// <summary>
+		///Retuns "true" if either values or the point is "not a number"
+		/// </summary>
+		bool is_nan() const
+		{
+			return std::any_of(_values.begin(), _values.end(), [](const auto& x) { return x.is_nan(); }) || pt.is_nan();
 		}
 	};
 
