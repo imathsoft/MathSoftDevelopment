@@ -736,7 +736,16 @@ class trapezoidal_solver
 				solution_altered = true;
 			} else 
 			{
-				const int points_to_add = static_cast<int>(actual_step_size / second_deriv_threshold);
+				 int points_to_add = static_cast<int>(actual_step_size / second_deriv_threshold);
+
+				if (refine_data_prev.independent_var_id() == refine_data_next.independent_var_id()) //some optimization
+				{
+					//if the independent variables on both sides of the sub-interval are the same
+					//we make an assumption that there will be no transformation change on the interval
+					//an if so than we can try to optimize the number of points that we can add to it
+					points_to_add = std::min<int>(points_to_add, static_cast<int>(auxutils::Abs(pt_next[independent_var_id] - pt_prev[independent_var_id])/ min_step_size));
+				}
+
 				const auto h = R(1) / (points_to_add + 1);
 				const auto position_increment = (pt_next - pt_prev) * h;
 
@@ -859,6 +868,11 @@ public:
 	bool DoPreRefinement = false;
 
 	/// <summary>
+	/// Devines whether the mesh folud be refined after each iteration
+	/// </summary>
+	bool DoMeshRefinement = false;
+
+	/// <summary>
 	/// A setting defining whether the step size should be optimized by using some step selection strategies when refining the mesh
 	/// </summary>
 	bool OptimizeStepSize = false;
@@ -926,7 +940,7 @@ public:
 
 			apply_correction(system, solution, correction);
 
-			const auto refinement_applied = (use_swap_transform) ?
+			const auto refinement_applied = DoMeshRefinement ?
 				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step,
 					second_deriv_refinement_threshold, min_h_threshold, OptimizeStepSize, RefinementRemoveFactor) : false;
 

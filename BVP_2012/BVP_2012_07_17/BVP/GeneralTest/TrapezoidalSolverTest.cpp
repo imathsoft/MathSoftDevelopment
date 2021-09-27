@@ -163,6 +163,7 @@ namespace GeneralTest
 			const auto step = 1.0 / discretization;
 
 			trapezoidal_solver<R> solver{};
+			solver.DoMeshRefinement = use_reparametrization;
 
 			const auto solution = solver.solve(pr.get_system(), init_guess, { {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
 				step, use_reparametrization, use_inversion);
@@ -219,6 +220,7 @@ namespace GeneralTest
 			const auto step = (t1 - t0) / discretization;
 
 			trapezoidal_solver<R> solver{};
+			solver.DoMeshRefinement = use_reparametrization;
 
 			const auto solution = solver.solve(pr.get_system(), init_guess, { {first_func_bc, !first_func_bc},{ first_func_bc, !first_func_bc} },
 				100*std::numeric_limits<R>::epsilon(), step, use_reparametrization, use_inversion);
@@ -381,6 +383,7 @@ namespace GeneralTest
 			};
 
 			trapezoidal_solver<R> solver{};
+			solver.DoMeshRefinement = use_reparametrization;
 
 			for (const auto l : lambdas)
 			{
@@ -416,7 +419,7 @@ namespace GeneralTest
 
 				const auto end_slope = auxutils::Abs((*init_guess.rbegin())[1]);
 				Logger::WriteMessage((std::string("end_slope =") + auxutils::ToString(end_slope) + std::string("\n")).c_str());
-				Assert::IsTrue(l < 110 || end_slope < 10 *std::numeric_limits<R>::epsilon(),
+				Assert::IsTrue(l < 110 || end_slope < 20 *std::numeric_limits<R>::epsilon(),
 					L"Unexpected slope at the right boundary point");
 
 				(*init_guess.rbegin())[0] = u1;//Ensure that the initial guess has "perfect" values of boundary conditions
@@ -491,6 +494,7 @@ namespace GeneralTest
 			solver.DoPreRefinement = true;
 			solver.OptimizeStepSize = true;
 			solver.RefinementRemoveFactor = R(0.01);
+			solver.DoMeshRefinement = true;
 
 			for (const auto l : lambdas)
 			{
