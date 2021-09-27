@@ -708,6 +708,7 @@ class trapezoidal_solver
 			return false; //There is literally nothing to refine
 
 		const auto  solution_input = solution;
+		const auto last_point_id = solution_input.size() - 1;
 
 		const auto argument_min = solution[0][eqCnt];
 		const auto argument_max = solution[solution.size() - 1][eqCnt];
@@ -739,12 +740,12 @@ class trapezoidal_solver
 				pt_next[eqCnt] <= pt_prev[eqCnt] ||
 				actual_step_size < second_deriv_threshold * remove_threshold ||
 				auxutils::Abs(pt_next[independent_var_id] - pt_prev[independent_var_id]) < min_step_size) && // minimal allowed step size check
-				pt_id < (solution_input.size() - 1)) 
+				pt_id < last_point_id)
 			{
 				solution_altered = true;
 			} else 
 			{
-				 int points_to_add = static_cast<int>(actual_step_size / second_deriv_threshold);
+				 int points_to_add = static_cast<int>(std::min<R>(actual_step_size / second_deriv_threshold, std::numeric_limits<int>::max()));
 
 				if (refine_data_prev.independent_var_id() == refine_data_next.independent_var_id()) //some optimization
 				{
@@ -766,9 +767,10 @@ class trapezoidal_solver
 						temp = pt_next;
 
 					const auto ind_var_id = refine_data_prev.independent_var_id();
+					const auto last_point = (pt_id == last_point_id) && (extra_pt_id == points_to_add);
 
-					if (auxutils::Abs(temp[ind_var_id] - pt_prev[ind_var_id]) < min_step_size)
-						continue;
+					if (auxutils::Abs(temp[ind_var_id] - pt_prev[ind_var_id]) < min_step_size && !last_point)//we can't skip the very last point
+						continue;																			 //since it is the boundary point
 
 					pt_prev = temp;
 					refine_data_prev = calc_refinement_data(pt_prev, system, trans_restrict);

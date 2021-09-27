@@ -331,7 +331,7 @@ namespace GeneralTest
 				, R(4100) , R(4200) , R(4300) , R(4400) , R(4500), R(4600) , R(4700) , R(4800) , R(4900), R(5000)
 				, R(5100) , R(5200) , R(5300) , R(5400) , R(5500) , R(5600) , R(5700) , R(5800) , R(5900), R(6000) 
 				, R(6100) , R(6200) , R(6300) , R(6400) , R(6500) , R(6600) , R(6700) , R(6800) , R(6900), R(7000)
-				, R(7100) , R(7200) , R(7300) , R(7400) , R(7500) , R(7600) , R(7700) , R(7800) , R(7900), R(8000)
+				, R(7100) , R(7200) , R(7300) , R(7400) /*, R(7500)*/ , R(7600) , R(7700) , R(7800) , R(7900), R(8000)
 				, R(8100) , R(8200) , R(8300) , R(8400) , R(8500) , R(8600) , R(8700) , R(8800) , R(8900), R(9000)
 				, R(9100) , R(9200) , R(9300) , R(9400) , R(9500) , R(9600) , R(9700) , R(9800) , R(9900), R(10000)
 				, R(10500) , R(11000)
@@ -409,7 +409,7 @@ namespace GeneralTest
 
 				const auto diff_right = auxutils::Abs((*init_guess.rbegin())[0] - u1);
 				Logger::WriteMessage((std::string("diff_right =") + auxutils::ToString(diff_right) + std::string("\n")).c_str());
-				Assert::IsTrue(auxutils::Abs((*init_guess.rbegin())[0] - u1) < 200 * std::numeric_limits<R>::epsilon(),
+				Assert::IsTrue(auxutils::Abs((*init_guess.rbegin())[0] - u1) < std::numeric_limits<R>::epsilon(),
 					L"Too big deviation form the right boundary condition");
 
 				const auto start_slope = auxutils::Abs((*init_guess.begin())[1]);
@@ -419,7 +419,7 @@ namespace GeneralTest
 
 				const auto end_slope = auxutils::Abs((*init_guess.rbegin())[1]);
 				Logger::WriteMessage((std::string("end_slope =") + auxutils::ToString(end_slope) + std::string("\n")).c_str());
-				Assert::IsTrue(l < 110 || end_slope < 20 *std::numeric_limits<R>::epsilon(),
+				Assert::IsTrue(l < 110 || end_slope < 25 *std::numeric_limits<R>::epsilon(),
 					L"Unexpected slope at the right boundary point");
 
 				(*init_guess.rbegin())[0] = u1;//Ensure that the initial guess has "perfect" values of boundary conditions
