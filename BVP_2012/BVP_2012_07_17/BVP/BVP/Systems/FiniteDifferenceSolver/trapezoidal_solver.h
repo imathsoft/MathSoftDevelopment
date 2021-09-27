@@ -560,11 +560,12 @@ class trapezoidal_solver
 	/// specified via the boundary conditions, so that eventually we end up with a
 	/// system of eqCnt equations with eqCnt unknowns
 	/// </summary>
-	static LinAlg::Matrix<R, eqCnt, 1> resolve_endpoint_corrections(
+	static std::tuple<LinAlg::Matrix<R, eqCnt, 1>, LinAlg::Matrix<R, eqCnt, 1>> resolve_endpoint_corrections(
 		const stripe& final_block, const bc_marker<eqCnt>& bcm)
 	{
 		LinAlg::Matrix<R, eqCnt, eqCnt> temp{};
-		LinAlg::Matrix<R, eqCnt, 1> result{};
+		LinAlg::Matrix<R, eqCnt, 1> result_left{};
+		LinAlg::Matrix<R, eqCnt, 1> result_right{};
 		std::vector<R*> map{};
 
 		int col_id = 0;
@@ -574,7 +575,7 @@ class trapezoidal_solver
 			if (bcm.left_marker[m_id])
 				continue;
 
-			map.push_back(&result[m_id][0]);
+			map.push_back(&result_left[m_id][0]);
 
 			for (int row_id = 0; row_id < eqCnt; row_id++)
 				temp[row_id][col_id] = m[row_id][m_id];
@@ -586,6 +587,8 @@ class trapezoidal_solver
 		{
 			if (bcm.right_marker[m_id])
 				continue;
+
+			map.push_back(&result_right[m_id][0]);
 
 			temp[m_id][col_id] = R(1);
 
@@ -600,7 +603,7 @@ class trapezoidal_solver
 		for (int i = 0; i < map.size(); i++)
 			*map[i] = solution[i][0];
 
-		return result;
+		return std::make_tuple(result_left, result_right);
 	}
 
 	/// <summary>
@@ -619,13 +622,18 @@ class trapezoidal_solver
 		static_assert(eqCnt == 2, "Current implementation supports only systems of ODEs with 2 equations and 2 unknown functions.");
 
 		const auto& final_block = *gradient_matrix.rbegin();
-		const auto u_0 = resolve_endpoint_corrections(final_block, bcm);
 
-		std::vector<correction> result(gradient_matrix.size() + 1);
+		const auto resolve_result = resolve_endpoint_corrections(final_block, bcm);
+		const auto u_0 = std::get<0>(resolve_result);
+		const auto u_n = - std::get<1>(resolve_result);
+		const auto n_steps = gradient_matrix.size();
+		std::vector<correction> result(n_steps + 1);
 
 		copy(result[0], u_0, gradient_matrix[0].trans_marker);
+		//const auto check = gradient_matrix[n - 1].m * u_0 + gradient_matrix[n - 1].b;
+		copy(result[n_steps], u_n, gradient_matrix[n_steps - 1].trans_marker);
 
-		for (auto block_id = 0; block_id < gradient_matrix.size(); block_id++)
+		for (auto block_id = 0; block_id < n_steps - 1; block_id++) //skip the first and the last correctioins since they were taken into account above
 			copy(result[block_id + 1], gradient_matrix[block_id].m * u_0 + gradient_matrix[block_id].b, gradient_matrix[block_id].trans_marker);
 
 		return result;
