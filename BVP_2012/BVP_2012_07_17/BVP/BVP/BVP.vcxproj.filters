@@ -194,5 +194,8 @@
     <ClInclude Include="Systems\FiniteDifferenceSolver\transformation_strategy.h">
       <Filter>Header Files\Systems\FiniteDifferenceSolver</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\LoggingUtils.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

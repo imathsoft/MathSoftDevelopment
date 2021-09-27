@@ -250,6 +250,7 @@
     <ClInclude Include="Systems\FiniteDifferenceSolver\trapezoidal_solver.h" />
     <ClInclude Include="Utils\AuxUtils.h" />
     <ClInclude Include="Utils\Exceptions.h" />
+    <ClInclude Include="Utils\LoggingUtils.h" />
     <ClInclude Include="Utils\SolutionUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
