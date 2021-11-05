@@ -448,4 +448,13 @@ namespace auxutils
 
 		return true;
 	}
+	
+	/// <summary>
+	/// Calculates relative difference between the given reference and trial value
+	/// </summary>
+	template <class T>
+	T rel_diff(const T& reference, const T& value)
+	{
+		return Abs((reference - value) / reference);
+	}
 };

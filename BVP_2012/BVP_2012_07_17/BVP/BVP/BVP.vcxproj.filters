@@ -55,6 +55,9 @@
     <Filter Include="Header Files\LinearAlgebra">
       <UniqueIdentifier>{f5c52374-22d5-418a-bce9-a2e0a702bd6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Problems\References">
+      <UniqueIdentifier>{07fe5f09-cec0-4184-8f4d-b748262d0182}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -196,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="Utils\LoggingUtils.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Problems\References\TroeschReferences.h">
+      <Filter>Header Files\Problems\References</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

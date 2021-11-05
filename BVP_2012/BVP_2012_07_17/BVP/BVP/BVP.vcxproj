@@ -238,6 +238,7 @@
     <ClInclude Include="Problems\ProblemAbstract.h" />
     <ClInclude Include="Problems\ProblemAutonomousAbstract.h" />
     <ClInclude Include="Problems\ProblemNonAutonomousAbstract.h" />
+    <ClInclude Include="Problems\References\TroeschReferences.h" />
     <ClInclude Include="Problems\TroeschProblemBernoulli.h" />
     <ClInclude Include="Problems\TroeschProblemStatic.h" />
     <ClInclude Include="Problems\TroeschProblem.h" />
