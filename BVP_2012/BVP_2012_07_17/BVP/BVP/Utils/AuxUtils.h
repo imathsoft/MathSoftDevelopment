@@ -457,4 +457,18 @@ namespace auxutils
 	{
 		return Abs((reference - value) / reference);
 	}
+
+	/// <summary>
+	/// Estimates machine epsilon for the given data type that supports basic arithmetic operations
+	/// By machine epsilont we mean the smallest positive number "e" such that 1 + "e" == 1
+	/// </summary>
+	template <class T> 
+	T estimate_epsilon()
+	{
+		auto epsilon = T(1);
+		while (T(1) + epsilon != T(1))
+			epsilon /= T(2);
+
+		return epsilon;
+	}
 };
