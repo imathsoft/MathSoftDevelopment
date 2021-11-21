@@ -705,6 +705,8 @@ class trapezoidal_solver
 		return { eval_res, eval_res_transformed };
 	}
 
+	static const unsigned long long MaxMemoryFootprint = 4ull << 30; //4 Gb
+
 	/// <summary>
 	/// Performs clean up and refinement of the solution
 	/// </summary>
@@ -786,6 +788,9 @@ class trapezoidal_solver
 					solution_altered = solution_altered || (extra_pt_id != points_to_add);//we just added a new point so the solution was altered
 				}
 			}
+
+			if (solution.size() * sizeof(mesh_point<R, eqCnt + 1>) > MaxMemoryFootprint)
+				throw std::exception("Memory limit exceeded"); // we just exceeded 4 Gb limit, something has definitely went wrong
 
 			pt_id++;
 

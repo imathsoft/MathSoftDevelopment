@@ -118,8 +118,6 @@ public:
 	{
 		static_assert(eqCnt == 2, "Unexpected number of equations");
 
-		int independent_var_id = eqCnt;
-		std::array<bool, eqCnt> inversion_map{};
 		const auto& pt = res.pt;
 
 		if (auxutils::Abs(pt[1]) > R(1) && auxutils::Abs(pt[1] * pt[1] * pt[1]) > auxutils::Abs(res[1].v))
