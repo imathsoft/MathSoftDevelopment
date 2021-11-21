@@ -203,5 +203,8 @@
     <ClInclude Include="Problems\References\TroeschReferences.h">
       <Filter>Header Files\Problems\References</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\FiniteDifferenceSolver\ts_diagnostics.h">
+      <Filter>Header Files\Systems\FiniteDifferenceSolver</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

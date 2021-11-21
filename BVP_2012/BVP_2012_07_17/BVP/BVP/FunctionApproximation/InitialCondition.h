@@ -9,6 +9,8 @@ struct InitCondition
 {
 public :
 
+	using float_t = T;
+
 	T Value;
 	T Derivative;
 	T SecDerivative;

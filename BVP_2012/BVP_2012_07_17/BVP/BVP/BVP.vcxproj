@@ -245,6 +245,7 @@
     <ClInclude Include="ShootingSimple\BisectionComponent.h" />
     <ClInclude Include="SpecialFunctions\Sinhc.h" />
     <ClInclude Include="Systems\FiniteDifferenceSolver\transformation_strategy.h" />
+    <ClInclude Include="Systems\FiniteDifferenceSolver\ts_diagnostics.h" />
     <ClInclude Include="Systems\simple_bvp.h" />
     <ClInclude Include="Systems\ode_system.h" />
     <ClInclude Include="Systems\bvp_sys_factory.h" />

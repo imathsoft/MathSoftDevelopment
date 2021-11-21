@@ -7,6 +7,7 @@
 #include "../../LinearAlgebra/Matrix.h"
 #include "../../Utils/AuxUtils.h"
 #include "transformation_strategy.h"
+#include "ts_diagnostics.h"
 
 /// <summary>
 /// A "boundary conditions marker" is a simple way to define some sub-set of two-point boundary conditions
@@ -63,12 +64,19 @@ struct ConvergenceInfo
 template <class R, class S = ts_standard, int eqCnt = 2>
 class trapezoidal_solver
 {
+	friend class ts_diagnostics;
+
 	//TODO: it seems that now when `Matrix` class got general implementation of the matrix inversion functionality,
 	//this limitation on the number of equations (`eqCnt == 2`) can be finally removed.
 	//Of course, this requires proper coverage of automated tests
 	static_assert(eqCnt == 2, "Does not support other number of equaions");
 
 	typedef ode_system<R, eqCnt> sys;
+
+	/// <summary>
+	/// Transformation restrictions
+	/// </summary>
+	transform_restrictions<R, eqCnt> _trans_restrict;
 
 	/// <summary>
 	/// A struct representing extended atrix of the form [m|b], where "m"
@@ -800,8 +808,8 @@ class trapezoidal_solver
 	/// <param name="system">The given systen of ODE</param>
 	/// <param name="points">The given collection of points</param>
 	/// <param name="trans_restrict">The transformation restrictions</param>
-	void transform_and_save_evaluation_result(const sys& system, std::vector<mesh_point<R, eqCnt + 1>>& points,
-		const transform_restrictions<R, eqCnt>& trans_restrict, const char* file_name)
+	static void transform_and_save_evaluation_result(const char* file_name, const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& points,
+		const transform_restrictions<R, eqCnt>& trans_restrict)
 	{
 		std::ofstream file;
 		file.open(file_name, std::ofstream::out);
@@ -810,7 +818,9 @@ class trapezoidal_solver
 		{
 			const auto eval_res = system.evaluate_minimal(pt);
 			const auto eval_res_transformed = transform_values_only(eval_res, trans_restrict);
-			file << eval_res_transformed.values_to_mesh_point().to_string() << eval_res_transformed.trans_marker.pivot_id << " ";
+			file << eval_res_transformed.values_to_mesh_point().to_string() 
+				<< auxutils::ToString(eval_res_transformed.values_to_mesh_point().max_abs(eqCnt))
+				<< " " << eval_res_transformed.trans_marker.pivot_id << " ";
 
 			for (int eqId = 0; eqId < eqCnt; eqId++)
 			{
@@ -847,6 +857,22 @@ class trapezoidal_solver
 	}
 
 public:
+
+	/// <summary>
+	/// Saves some diagnostics data to the specified file on disk
+	/// </summary>
+	void save_diagnostics_data(const std::string& file_name, const sys& system, const std::vector<mesh_point<R, eqCnt + 1>>& points) const
+	{
+		transform_and_save_evaluation_result(file_name.c_str(), system, points, _trans_restrict);
+	}
+
+	/// <summary>
+	/// Setter for the max iterations count field
+	/// </summary>
+	void set_max_iterations(int new_max_iter)
+	{
+		max_iterations_count = new_max_iter;
+	}
 
 	/// <summary>
 	/// Getter for the "status" field
@@ -928,8 +954,7 @@ public:
 				flip_map = flip_transform_map.value();
 		}
 
-
-		const transform_restrictions<R, eqCnt> trans_restrict{ swap_map , flip_map, derivative_threshold };
+		_trans_restrict = transform_restrictions<R, eqCnt>{ swap_map , flip_map, derivative_threshold };
 
 		auto solution = init_guess;
 		correction_magnitudes.clear();
@@ -937,13 +962,13 @@ public:
 		R correction_magnitude = std::numeric_limits<R>::max();
 
 		if (DoPreRefinement)
-			cleanup_and_refine_solution(system, solution, trans_restrict, desired_step,
+			cleanup_and_refine_solution(system, solution, _trans_restrict, desired_step,
 				second_deriv_refinement_threshold, min_h_threshold, OptimizeStepSize, RefinementRemoveFactor*R(10));
 
 		int iter_count = 0;
 		while (correction_magnitude > precision && iter_count < max_iterations_count)
 		{
-			auto g_matrix = construct_extended_gradient_matrix(system, solution, trans_restrict);
+			auto g_matrix = construct_extended_gradient_matrix(system, solution, _trans_restrict);
 			const auto correction = get_newton_correction(g_matrix, bcm);
 			correction_magnitude = std::max_element(correction.begin(), correction.end(),
 				[](const auto& a, const auto& b) { return a.magnitude() < b.magnitude(); })->magnitude();
@@ -951,7 +976,7 @@ public:
 			apply_correction(system, solution, correction);
 
 			const auto refinement_applied = DoMeshRefinement ?
-				cleanup_and_refine_solution(system, solution, trans_restrict, desired_step,
+				cleanup_and_refine_solution(system, solution, _trans_restrict, desired_step,
 					second_deriv_refinement_threshold, min_h_threshold, OptimizeStepSize, RefinementRemoveFactor) : false;
 
 			correction_magnitudes.emplace_back( ConvergenceInfo<R>{ correction_magnitude, refinement_applied });

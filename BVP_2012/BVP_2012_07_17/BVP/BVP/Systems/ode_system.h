@@ -14,6 +14,8 @@
 template <class R, int varCnt>
 struct mesh_point
 {
+	using float_t = R;
+
 	std::array<R, varCnt> pt{};
 
 	/// <summary>
@@ -34,24 +36,9 @@ struct mesh_point
 
 	/// <summary>
 	/// Returns maximal absolute value of the mesh point coordinates
+	/// Does not take into account a coordinate with the `exclude_id` index
 	/// </summary>
-	R max_abs() const
-	{
-		R result = R(0);
-
-		for (int var_id = 0; var_id < varCnt; var_id++)
-			if (pt[var_id] == pt[var_id]) //test for "not a number"
-				result = std::max<R>(result, auxutils::Abs(pt[var_id]));
-			else
-				return std::numeric_limits<R>::infinity(); //"Not a number" return infinity
-
-		return result;
-	}
-
-	/// <summary>
-	/// Yet another version of the max_abs method that allows to exclude a single item from consideration
-	/// </summary>
-	R max_abs(const int exclude_id) const
+	R max_abs(const int exclude_id = -1) const
 	{
 		R result = R(0);
 
@@ -67,6 +54,34 @@ struct mesh_point
 		}
 
 		return result;
+	}
+
+	/// <summary>
+	/// Returns squared Euclidean norm of the current mesh point (as a vector of the corresponding dimension)
+	/// Does not take into account a coordinate with the `exclude_id` index
+	/// </summary>
+	R norm_sqr(const int exclude_id = -1)
+	{
+		R result = R(0);
+
+		for (int var_id = 0; var_id < varCnt; var_id++)
+		{
+			if (var_id == exclude_id)
+				continue;
+
+			result += pt[var_id] * pt[var_id];
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Returns squared Euclidean norm of the current mesh point (as a vector of the corresponding dimension)
+	/// Does not take into account a coordinate with the `exclude_id` index
+	/// </summary>
+	R norm(const int exclude_id = -1)
+	{
+		return auxutils::Sqrt(norm_sqr(exclude_id));
 	}
 
 	/// <summary>
@@ -367,7 +382,7 @@ public:
 	struct eval_result_minimal : public eval_result_base<func_value<R>>
 	{
 		/// <summary>
-		/// Transforma the current data structure into a mesh point which (taking into account
+		/// Transfors the current data structure into a mesh point which (taking into account
 		/// that the "minimal result" is an evaluation of the right hand side part of a system of ODEs)
 		/// is a vector of derivatives of all the variables (including the independent one) evaluated at some point
 		/// The derivative of independent variable has index `eqCnt` and always equal to "1"
