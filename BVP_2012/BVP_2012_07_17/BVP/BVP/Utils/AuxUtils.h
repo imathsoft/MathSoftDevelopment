@@ -241,6 +241,23 @@ namespace auxutils
 		return curVal;
 	}
 
+	/// <summary>
+	/// Converts the given multi-precision floating point value to double-precision value
+	/// </summary>
+	template <unsigned Digits10>
+	inline double ToDouble(const number<cpp_dec_float<Digits10>, et_off>& val)
+	{
+		return val.convert_to<double>();
+	}
+
+	/// <summary>
+	/// Double-to-double overload of the corresponding convedsion method for the multi-precision value
+	/// </summary>
+	inline double ToDouble(const double& val) noexcept
+	{
+		return val;
+	}
+
 	template <unsigned Digits10>
 	void WriteToStream(std::ofstream& stream, number<cpp_dec_float<Digits10>, et_off>& value )
 	{

@@ -1,11 +1,17 @@
 #include "CppUnitTest.h"
 #include <vector>
+#include <string>
+#include <exception>
 #include <numeric>
 #include "../BVP/LinearAlgebra/Matrix.h"
 #include "../BVP/Systems/bvp_sys_factory.h"
+#include "../BVP/Problems/References/TroeschReferences.h"
 #include "../BVP/Systems/FiniteDifferenceSolver/trapezoidal_solver.h"
+#include "../BVP/Systems/FiniteDifferenceSolver/ts_diagnostics.h"
 #include "../BVP/Utils/AuxUtils.h"
 #include "UnitTestAux.h"
+#include "../BVP/Utils/LoggingUtils.h"
+#include <map>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace LinAlg;
@@ -516,6 +522,230 @@ namespace GeneralTest
 
 				CheckQuadraticConvergence(solver, R(100), true);
 			}
+		}
+
+		template <class R>
+		void perform_BVP_T20_test(const R lambda, const int discretization = 100,
+			const bool use_reparametrization = false, const bool use_inversion = false,
+			const R& derivative_threshold = R(1), const R& quadratic_convergence_tolerance = 1.75)
+		{
+			const auto alpha = R(0.5);
+
+			const auto lambdas = std::vector<R>({ R(0.5), R(1), R(2), R(5),  R(10), R(20), R(40), R(60), R(80), R(100), R(140) });
+
+			for (const auto l : lambdas)
+			{
+
+				const auto pr = bvp_sys_factory<R>::BVP_T20(l, alpha);
+
+				const auto t0 = pr.get_bc().left.t;
+				const auto u0 = pr.get_bc().left.u;
+
+				const auto t1 = pr.get_bc().right.t;
+				const auto u1 = pr.get_bc().right.u;
+				const auto tangent0 = (R(1) - u0) / (alpha - t0);
+				const auto tangent1 = (u1 - R(1)) / (t1 - alpha);
+
+				auto init_guess = GenerateInitialGuess<R, 3>(t0, t1, [u0, u1, t0, t1, tangent0, tangent1, alpha](const auto& t)
+					{
+						if (t < alpha)
+							return mesh_point<R, 3>{ u0 + (t - t0) * tangent0, tangent0, t };
+						if (t > alpha)
+							return mesh_point<R, 3>{ R(1) + (t - alpha) * tangent1, tangent1, t };
+
+						return mesh_point<R, 3>{ R(1), R(0), t };
+
+					}, discretization);
+
+				auxutils::SaveToTextFile(init_guess, (std::string("D:\\Development\\SandBox\\init_guess_iter_") + std::to_string((int)l) + std::string(".txt")).c_str());
+
+
+				trapezoidal_solver<R/*, ts_experimental*/> solver{};
+
+				const auto pr_work = bvp_sys_factory<R>::BVP_T20(l, alpha);
+
+				init_guess[0][0] = pr_work.get_bc().left.u;
+				(*init_guess.rbegin())[0] = pr_work.get_bc().right.u;
+
+				init_guess = solver.solve(pr_work.get_system(), init_guess,
+					{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
+					R(0.1), use_reparametrization, use_inversion, derivative_threshold,
+					R(20), R(1e-4),
+					std::nullopt, //"swap" map
+					std::nullopt //"flip" map
+				);
+
+				auxutils::SaveToTextFile(init_guess, (std::string("D:\\Development\\SandBox\\solution_") + std::to_string((int)l) + std::string(".txt")).c_str());
+			}
+		}
+
+		///Below you can fing a functionality that was used to generate results of numerical experiments in arXiv:2106.09928
+
+		/// <summary>
+		/// Describes 4 modes the trapezoidal scheme can be used for the case of Troesch's problem
+		/// </summary>
+		enum TrapezoidalMode
+		{
+			/// <summary>
+			/// Regular trapezoidal scheme on an uniform mesh
+			/// </summary>
+			Regular_uniform,
+			/// <summary>
+			/// Regular trapezoidal scheme on a non-uniform mesh
+			/// </summary>
+			Regular_nonuniform,
+			/// <summary>
+			/// I-SP_1FP_2 transformation strategy (see arXiv:2106.09928)
+			/// </summary>
+			I_SP1FP2,
+			/// <summary>
+			/// I-SP_2-SP_1FP_2 transformation strategy (see arXiv:2106.09928)
+			/// </summary>
+			I_SP2_SP1FP2,
+		};
+
+		/// <summary>
+		/// Converts trapezoidal mode into a string
+		/// </summary>
+		std::string ModeToString(const TrapezoidalMode& mode)
+		{
+			switch (mode)
+			{
+			case Regular_uniform: return "Regular_uniform";
+			case Regular_nonuniform: return "Regular_nonuniform";
+			case I_SP1FP2: return "I_SP1FP2";
+			case I_SP2_SP1FP2: return "I_SP2_SP1FP2";
+			default: throw std::exception("Unknown mode");
+			}
+		}
+
+		/// <summary>
+		/// This method was used to generate numerical data published in arXiv:2106.09928
+		/// </summary>
+		/// <param name="mode"> Mode of the Trapezoidal solved we want to use </param>
+		/// <param name="M"> "M" parameter of the mesh refinement procedure (see arXiv:2106.09928), ignored if `mode` == `Regular_uniform`</param>
+		/// <param name="h_min">h_{min} parameter of the mesh refinement procedure (see arXiv:2106.09928), ignored if `mode` == `Regular_uniform`</param>
+		/// <param name="h_max">h_{max} parameter of the mesh refinement procedure (see arXiv:2106.09928), ignored if `mode` == `Regular_uniform`</param>
+		template <class R>
+		void arXiv_2106_09928_experiment_data_generator(const TrapezoidalMode& mode, const R& M, const R& h_min, const R& h_max, const std::string folder)
+		{
+			TroeschReferences reference; //access to the reference data for the Troesch's problem
+
+			//Check the machine epsilon for the current floating point type
+			Logger::WriteMessage((auxutils::ToString(auxutils::estimate_epsilon<R>()) + "\n").c_str());
+
+			const bool use_reparametrization = ((mode == TrapezoidalMode::I_SP1FP2) || (mode == TrapezoidalMode::I_SP2_SP1FP2));
+			const bool use_inversion = use_reparametrization;
+			const int discretization = auxutils::ToDouble(R(1) / h_max);
+
+			auto init_guess = GenerateInitialGuess<R, 3>(R(0.0), R(1.0), [](const auto& t)
+				{
+					return mesh_point<R, 3>{ t, 1, t };
+				}, discretization);
+
+			trapezoidal_solver<R> solver{};
+			solver.DoMeshRefinement = mode != TrapezoidalMode::Regular_uniform;
+			solver.set_max_iterations(30);
+			solver.RefinementRemoveFactor = R(0.01);
+
+			trapezoidal_solver<R, ts_experimental_troesch> solver_I_SP2_SP1FP2{};
+			solver_I_SP2_SP1FP2.DoMeshRefinement = false;
+			solver_I_SP2_SP1FP2.set_max_iterations(30);
+			solver_I_SP2_SP1FP2.RefinementRemoveFactor = R(0.0001);
+
+			auto file_name_base = std::string("Report_") + ModeToString(mode);
+
+			if (mode != TrapezoidalMode::Regular_uniform)
+				file_name_base += std::string("_M_") + auxutils::ToString(auxutils::ToDouble(M)) +
+				std::string("_h_min_") + auxutils::ToString(auxutils::ToDouble(h_min)) + std::string("_h_max_") + auxutils::ToString(auxutils::ToDouble(h_max));
+
+			const auto path_base = folder + file_name_base;
+
+			table_logger<10> logger(path_base + std::string(".txt"), { "Lambda", "Tangent left", "Tangent right", "Value right", "Final correction", "Points count",
+				"Left rel. diff (Maple)", "Right rel. diff (Maple)", "Left rel. diff (Vazquez)", "Right rel. diff (Vazquez)" });
+
+			for (int l = 2; l < 501; l += 1)
+			{
+				const auto sys = bvp_sys_factory<R>::Troesch(l).get_system();
+
+				init_guess = solver.solve(sys, init_guess,
+					{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
+					h_max, use_reparametrization, use_inversion, R(1), M, h_min);
+
+				const auto final_correction = solver.get_correcion_magnitudes()[solver.get_correcion_magnitudes().size() - 1].CorrectionMagnitude;
+
+				const auto left_tangent = init_guess[0][1];
+				const auto right_tangent = init_guess[init_guess.size() - 1][1];
+				const auto value_right = init_guess[init_guess.size() - 1][0];
+
+				const auto rel_diff_maple = reference.get_rel_diff(l, auxutils::ToDouble(left_tangent), auxutils::ToDouble(right_tangent), true /*Maple*/);
+				const auto rel_diff_Vazquez = reference.get_rel_diff(l, auxutils::ToDouble(left_tangent), auxutils::ToDouble(right_tangent), false /*Maple*/);
+
+				logger.write_line<R>({ R(l), left_tangent, right_tangent, value_right, final_correction, R(init_guess.size()),
+					rel_diff_maple.LeftPointTangent, rel_diff_maple.RightPointTangent, rel_diff_Vazquez.LeftPointTangent, rel_diff_Vazquez.RightPointTangent });
+
+				Logger::WriteMessage((std::string("Lambda = ") + std::to_string(l) + std::string("\n")).c_str());
+				Logger::WriteMessage((std::string("Tangent left = ") + auxutils::ToString(init_guess[0][1]) + std::string("\n")).c_str());
+				Logger::WriteMessage((std::string("Tangent right = ") + auxutils::ToString(init_guess[init_guess.size() - 1][1]) + std::string("\n")).c_str());
+				Logger::WriteMessage((std::string("Value right = ") + auxutils::ToString(init_guess[init_guess.size() - 1][0]) + std::string("\n")).c_str());
+				Logger::WriteMessage((std::string("Argument right = ") + auxutils::ToString(init_guess[init_guess.size() - 1][2]) + std::string("\n")).c_str());
+				Logger::WriteMessage((std::string("Points count = ") + std::to_string(init_guess.size()) + std::string("\n")).c_str());
+				Logger::WriteMessage((std::string("final_correction = ") + auxutils::ToString(final_correction) + std::string("\n")).c_str());
+				Logger::WriteMessage((std::string("Total iterations = ") + auxutils::ToString(solver.get_correcion_magnitudes().size()) + std::string("\n")).c_str());
+				Logger::WriteMessage("\n");
+
+				if (l > 5 && (mode == TrapezoidalMode::I_SP2_SP1FP2))
+				{
+					const auto init_guess_I_SP2_SP1FP2 = solver_I_SP2_SP1FP2.solve(sys, init_guess,
+						{ {true, false},{ true, false} }, 1000 * std::numeric_limits<R>::epsilon(),
+						h_max, use_reparametrization, use_inversion, R(1), M, h_min);
+
+					const auto final_correction = solver_I_SP2_SP1FP2.get_correcion_magnitudes()[solver_I_SP2_SP1FP2.get_correcion_magnitudes().size() - 1].CorrectionMagnitude;
+
+					const auto left_tangent = init_guess_I_SP2_SP1FP2[0][1];
+					const auto right_tangent = init_guess_I_SP2_SP1FP2[init_guess_I_SP2_SP1FP2.size() - 1][1];
+					const auto value_right = init_guess_I_SP2_SP1FP2[init_guess_I_SP2_SP1FP2.size() - 1][0];
+
+					const auto rel_diff_maple = reference.get_rel_diff(l, auxutils::ToDouble(left_tangent), auxutils::ToDouble(right_tangent), true /*Maple*/);
+					const auto rel_diff_Vazquez = reference.get_rel_diff(l, auxutils::ToDouble(left_tangent), auxutils::ToDouble(right_tangent), false /*Maple*/);
+
+					logger.write_line<R>({ R(l), left_tangent, right_tangent, value_right, final_correction, R(init_guess_I_SP2_SP1FP2.size()),
+						rel_diff_maple.LeftPointTangent, rel_diff_maple.RightPointTangent, rel_diff_Vazquez.LeftPointTangent, rel_diff_Vazquez.RightPointTangent });
+				}
+
+				Assert::IsTrue(final_correction < R(1));
+				init_guess[init_guess.size() - 1][0] = bvp_sys_factory<R>::Troesch(l).get_bc().right.u;
+				Assert::IsTrue(solver.success(), L"Failed to achieve desired precision or iteration procedure is divergent.");
+			}
+		}
+
+		TEST_METHOD(arXiv_2106_09928_Troesch_regular_uniform_experiments)
+		{
+			return; // remove to enable
+			arXiv_2106_09928_experiment_data_generator<double>(TrapezoidalMode::Regular_uniform, 0.1, 1e-3, 1e-2, "D:\\Development\\SandBox\\Test_0\\");
+		}
+		TEST_METHOD(arXiv_2106_09928_Troesch_regular_nonuniform_experiments)
+		{
+			return; // remove to enable
+			arXiv_2106_09928_experiment_data_generator<double>(TrapezoidalMode::Regular_nonuniform, 0.1, 1e-3, 1e-2, "D:\\Development\\SandBox\\Test_1\\");
+		}
+
+		TEST_METHOD(arXiv_2106_09928_Troesch_I_SP1FP2_experiments)
+		{
+			return; // remove to enable
+			arXiv_2106_09928_experiment_data_generator<double>(TrapezoidalMode::I_SP1FP2, 0.1, 1e-3, 1e-2, "D:\\Development\\SandBox\\Test_2\\");
+		}
+
+		TEST_METHOD(arXiv_2106_09928_Troesch_I_SP2_SP1FP2_experiments)
+		{
+			return; // remove to enable
+			arXiv_2106_09928_experiment_data_generator<double>(TrapezoidalMode::I_SP2_SP1FP2, 0.1, 1e-3, 1e-2, "D:\\Development\\SandBox\\Test_3\\");
+		}
+
+		TEST_METHOD(arXiv_2106_09928_Troesch_I_SP2_SP1FP2_multiprecision_experiments)
+		{
+			return; // remove to enable
+			arXiv_2106_09928_experiment_data_generator<number<cpp_dec_float<110>, et_off>>(TrapezoidalMode::I_SP2_SP1FP2, 0.1, 1e-3, 1e-2, "D:\\Development\\SandBox\\Test_4\\");
 		}
 	};
 }

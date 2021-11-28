@@ -130,3 +130,30 @@ public:
 	}
 };
 
+/// <summary>
+/// A transformation strategy designed specifically for the systems of 2 ODEs that represents a second order ordinary differential equaion³ 
+/// (under some additional assumptions)
+/// This strategy is the one that is referred to as "I-SP_2-SP_1FP_2" in this paper arXiv:2106.09928
+/// </summary>
+class ts_experimental_troesch
+{
+public:
+	/// <summary>
+	/// Returns the transformation marker for the given result of evaluatioin of the right hand side of the given system
+	/// </summary>
+	template <class R, class V, int eqCnt>
+	static transformation_maker<eqCnt> get_transform_marker(const typename ode_system<R, eqCnt>::template eval_result_base<V>& res, const transform_restrictions<R, eqCnt>& trans_restrict)
+	{
+		static_assert(eqCnt == 2, "Unexpected number of equations");
+
+		const auto& pt = res.pt;
+
+		if (auxutils::Abs(pt[1]) > R(1) && auxutils::Abs(pt[1] * pt[1] * pt[1]) > auxutils::Abs(res[1].v))
+			return { 0, {false, true} };
+
+		if (auxutils::Abs(res[1].v) > R(1))
+			return { 1, {false, false} };
+
+		return { 2, {false, false} };
+	}
+};

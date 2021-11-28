@@ -638,7 +638,7 @@ class trapezoidal_solver
 		std::vector<correction> result(n_steps + 1);
 
 		copy(result[0], u_0, gradient_matrix[0].trans_marker);
-		//const auto check = gradient_matrix[n - 1].m * u_0 + gradient_matrix[n - 1].b;
+		//const auto check = gradient_matrix[n_steps - 1].m * u_0 + gradient_matrix[n_steps - 1].b;
 		copy(result[n_steps], u_n, gradient_matrix[n_steps - 1].trans_marker);
 
 		for (auto block_id = 0; block_id < n_steps - 1; block_id++) //skip the first and the last correctioins since they were taken into account above
