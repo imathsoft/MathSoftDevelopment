@@ -92,7 +92,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -108,7 +108,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;x64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -126,7 +126,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <CompileAsManaged>
@@ -148,7 +148,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;$(VCInstallDir)UnitTest\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;x64;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <CompileAsManaged>
@@ -168,7 +168,7 @@
     <ClInclude Include="UnitTestAux.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\BVP\Utils\AuxUtils.cpp" />
+    <ClCompile Include="..\Shared\Utils\Utils.cpp" />
     <ClCompile Include="AuxUtilitiesTest.cpp" />
     <ClCompile Include="bvp_t_21_test.cpp" />
     <ClCompile Include="bvp_t_30_test.cpp" />

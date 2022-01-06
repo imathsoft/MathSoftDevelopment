@@ -1,6 +1,6 @@
 #include "CppUnitTest.h"
 #include "../BVP/Utils/AuxUtils.h"
-#include "../BVP/FunctionApproximation/DerivativeEvaluator/Dual.h"
+#include <Dual.h>
 #include <functional>
 #include <random>
 #include <ctime>

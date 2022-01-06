@@ -1,6 +1,6 @@
 
 #include "CppUnitTest.h"
-#include "../BVP/LinearAlgebra/Matrix.h"
+#include <Matrix.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace LinAlg;

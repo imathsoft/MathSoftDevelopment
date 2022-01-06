@@ -3,7 +3,7 @@
 #include "UnitTestAux.h"
 #include "../BVP/Utils/AuxUtils.h"
 #include <functional>
-#include "../BVP/FunctionApproximation/DerivativeEvaluator/DifferentiableFunction.h"
+#include <DifferentiableFunction.h>
 #include <algorithm>
 #include <numeric>
 

@@ -4,7 +4,7 @@
 #include <exception>
 #include <algorithm>
 #include "../ode_system.h"
-#include "../../LinearAlgebra/Matrix.h"
+#include <Matrix.h>
 #include "../../Utils/AuxUtils.h"
 #include "transformation_strategy.h"
 #include "ts_diagnostics.h"

@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include "../../Utils/AuxUtils.h"
+#include "../Utils/Utils.h"
 
 using namespace auxutils;
 

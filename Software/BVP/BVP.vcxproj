@@ -105,7 +105,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -132,7 +132,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -156,7 +156,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
@@ -184,7 +184,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Shared\Utils;..\Shared\LinearAlgebra;..\Shared\DerivativeEvaluator;C:\local\boost_1_75_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <OpenMP>GenerateParallelCode</OpenMP>
@@ -204,24 +204,19 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Shared\Utils\Utils.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h" />
-    <ClCompile Include="Systems\poly_function.h" />
-    <ClCompile Include="Utils\AuxUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cannon\HybridCannon.h" />
     <ClInclude Include="Cannon\XCannon.h" />
     <ClInclude Include="Cannon\XCannonAbstract.h" />
     <ClInclude Include="Cannon\XCannonInverse.h" />
-    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\DifferentiableFunction.h" />
-    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\Dual.h" />
-    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\JordanBlock.h" />
     <ClInclude Include="FunctionApproximation\GradientVector.h" />
     <ClInclude Include="FunctionApproximation\InitialCondition.h" />
     <ClInclude Include="FunctionApproximation\PointSimple.h" />
     <ClInclude Include="FunctionApproximation\X_Function.h" />
-    <ClInclude Include="LinearAlgebra\Matrix.h" />
     <ClInclude Include="MultipleShooting\FourDiagonalSweepMethodStruct.h" />
     <ClInclude Include="Problems\AutonomousGeneralDiagnosticsProblem.h" />
     <ClInclude Include="Problems\AutonomousNonUniformProblem.h" />

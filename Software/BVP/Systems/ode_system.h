@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "poly_function.h"
+#include <poly_function.h>
 
 
 /// <summary>

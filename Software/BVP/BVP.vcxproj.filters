@@ -43,17 +43,11 @@
     <Filter Include="Header Files\SpecialFunctions">
       <UniqueIdentifier>{640e3ee3-311f-4080-a95d-5728db040ff9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\FunctionApproximation\DerivativeEvaluator">
-      <UniqueIdentifier>{bf16bb53-6446-4647-85f3-d67d6ca80591}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Systems">
       <UniqueIdentifier>{61109be8-8b72-45c8-95f3-94aff4743295}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Systems\FiniteDifferenceSolver">
       <UniqueIdentifier>{88c276c1-30eb-49b2-b85f-d8abbe367552}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\LinearAlgebra">
-      <UniqueIdentifier>{f5c52374-22d5-418a-bce9-a2e0a702bd6e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Problems\References">
       <UniqueIdentifier>{07fe5f09-cec0-4184-8f4d-b748262d0182}</UniqueIdentifier>
@@ -63,14 +57,11 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\AuxUtils.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="MultipleShooting\HybridMultipleShootingComponent.h">
       <Filter>Header Files\MultipleShooting</Filter>
     </ClCompile>
-    <ClCompile Include="Systems\poly_function.h">
-      <Filter>Header Files\Systems</Filter>
+    <ClCompile Include="..\Shared\Utils\Utils.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,12 +140,6 @@
     <ClInclude Include="Problems\NonAutonomousNonUniformProblem.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
-    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\JordanBlock.h">
-      <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
-    </ClInclude>
-    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\DifferentiableFunction.h">
-      <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
-    </ClInclude>
     <ClInclude Include="Problems\bvp_t_30.h">
       <Filter>Header Files\Problems</Filter>
     </ClInclude>
@@ -176,9 +161,6 @@
     <ClInclude Include="Utils\SolutionUtils.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="FunctionApproximation\DerivativeEvaluator\Dual.h">
-      <Filter>Header Files\FunctionApproximation\DerivativeEvaluator</Filter>
-    </ClInclude>
     <ClInclude Include="Systems\bvp_sys_factory.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
@@ -190,9 +172,6 @@
     </ClInclude>
     <ClInclude Include="Systems\ode_system.h">
       <Filter>Header Files\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="LinearAlgebra\Matrix.h">
-      <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
     <ClInclude Include="Systems\FiniteDifferenceSolver\transformation_strategy.h">
       <Filter>Header Files\Systems\FiniteDifferenceSolver</Filter>

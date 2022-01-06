@@ -21,26 +21,6 @@ namespace GeneralTest
 	TEST_CLASS(NonAutonomousProblemsTest)
 	{
 	public:
-		
-		//TEST_METHOD(NonAutonomousTroeschProblemDoubleMultimpeShooting)
-		//{
-		//	NonAutonomousTroeschProblem<numType> tpf(20);
-		//	PointSimple<numType> ptLeft;
-		//	ptLeft.Argument  = 0;
-		//	ptLeft.Value  = 0;
-
-		//	PointSimple<numType> ptRight;
-		//	ptRight.Argument  = 1;
-		//	ptRight.Value  = 1;
-
-		//	HybridMultipleShootingComponent<numType> HMSComp(tpf);
-
-		//	bool succeeded;
-		//	std::vector<InitCondition<numType>> solution = HMSComp.Run(ptLeft, ptRight, 0.0001, succeeded, 0.1);
-
-		//	auxutils::SaveToMapleFile(solution, "f:\\NonAutoTroeschProblem.txt", true);
-
-		//}
 
 		TEST_METHOD(StandardNonAutonomousOscilatingProblemMultimpeShootingDouble)
 		{

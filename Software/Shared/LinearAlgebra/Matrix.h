@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <limits>
-#include "../Utils/AuxUtils.h"
+#include "../Utils/Utils.h"
 
 namespace LinAlg
 {

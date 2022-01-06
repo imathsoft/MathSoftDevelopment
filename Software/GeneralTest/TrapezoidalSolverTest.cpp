@@ -3,7 +3,7 @@
 #include <string>
 #include <exception>
 #include <numeric>
-#include "../BVP/LinearAlgebra/Matrix.h"
+#include <Matrix.h>
 #include "../BVP/Systems/bvp_sys_factory.h"
 #include "../BVP/Problems/References/TroeschReferences.h"
 #include "../BVP/Systems/FiniteDifferenceSolver/trapezoidal_solver.h"

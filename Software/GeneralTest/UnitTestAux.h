@@ -6,7 +6,7 @@
 #include <vector>
 #include "../BVP/FunctionApproximation/InitialCondition.h"
 #include "../BVP/Problems/ProblemAbstract.h"
-#include "../BVP/LinearAlgebra/Matrix.h"
+#include <Matrix.h>
 #include <stdlib.h>
 
 namespace UnitTestAux

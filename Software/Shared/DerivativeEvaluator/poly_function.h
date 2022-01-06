@@ -1,6 +1,6 @@
 #pragma once
 #include <functional>
-#include "../FunctionApproximation/DerivativeEvaluator/Dual.h"
+#include "Dual.h"
 
 /// <summary>
 /// A "poly-function" implementation
